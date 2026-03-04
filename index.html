@@ -209,13 +209,19 @@ async function loadSample(note) {
   return buf;
 }
 
+// Guitar Pro samples are recorded 2 semitones higher than their filename suggests
+const SAMPLE_OFFSET = 2;
+
+// Guitar Pro samples are tuned 2 semitones higher than their filename indicates
+const SAMPLE_OFFSET = 2;
+
 async function playNote(midi, startTime, masterGain) {
   const ctx = getCtx();
   const sampleNote = nearestSample(midi);
   const buf = await loadSample(sampleNote);
   const src = ctx.createBufferSource();
   src.buffer = buf;
-  src.playbackRate.value = midiToFreq(midi) / midiToFreq(sampleNote);
+  src.playbackRate.value = midiToFreq(midi) / midiToFreq(sampleNote + SAMPLE_OFFSET);
   const g = ctx.createGain();
   g.gain.setValueAtTime(0, startTime);
   g.gain.linearRampToValueAtTime(0.8 / state.chord.midi.length, startTime + 0.01);

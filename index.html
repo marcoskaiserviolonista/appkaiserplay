@@ -238,8 +238,13 @@ body{background:#111;color:#f0f0f0;font-family:'Poppins',sans-serif;min-height:1
 <div class="app" id="app">
   <div class="header">
     <div class="logo-wrap">
-      <div class="logo-icon">▶</div>
-      <div class="logo-text"><span class="kaiser">Kaiser</span><span class="play">Play</span></div>
+      <img src="LOGO_1.png" alt="KaiserPlay" style="height:34px;object-fit:contain"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+      />
+      <div style="display:none;align-items:center;gap:.5rem">
+        <div class="logo-icon">▶</div>
+        <div class="logo-text"><span class="kaiser">Kaiser</span><span class="play">Play</span></div>
+      </div>
     </div>
     <div class="header-tabs">
       <button class="tab active" id="tab-treino" onclick="playClickSfx('soft');setTab('game')">Treino</button>
@@ -461,6 +466,41 @@ function playClickSfx(type){
     }
   }catch(e){}
 }
+function playBuySfx(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const t=ctx.currentTime;
+    // acorde maior ascendente — sensação de "comprado!"
+    [[523,0,'sine',.12],[659,.06,'sine',.1],[784,.12,'triangle',.09],[1047,.18,'triangle',.12],[1319,.26,'sine',.08]].forEach(([f,d,tp,v])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=tp;o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.015);
+      g.gain.exponentialRampToValueAtTime(.001,t+d+.35);
+      o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.4);
+    });
+    // shimmer final
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.type='sine';o.frequency.setValueAtTime(2093,t+.3);o.frequency.exponentialRampToValueAtTime(2637,t+.45);
+    g.gain.setValueAtTime(.06,t+.3);g.gain.exponentialRampToValueAtTime(.001,t+.5);
+    o.connect(g);g.connect(ctx.destination);o.start(t+.3);o.stop(t+.55);
+  }catch(e){}
+}
+
+function playDiamondExchangeSfx(){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const t=ctx.currentTime;
+    // cascata cristalina descendente — diferente da moeda
+    [[2637,0,'sine',.15],[2093,.07,'sine',.13],[1568,.14,'sine',.11],[1319,.21,'sine',.1],[1047,.28,'sine',.14],[784,.35,'triangle',.12]].forEach(([f,d,tp,v])=>{
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type=tp;o.frequency.value=f;
+      g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.01);
+      g.gain.exponentialRampToValueAtTime(.001,t+d+.4);
+      o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.45);
+    });
+  }catch(e){}
+}
+
 function playCoinSfx(){
   const ctx=new(window.AudioContext||window.webkitAudioContext)();
   const t=ctx.currentTime;
@@ -616,7 +656,8 @@ function handleAnswer(choiceId,btnEl){
     else if(ns>=3){bonus=5;msg=`Sequência ×${ns}!`;playSfx('combo3');}
     else{playSfx('correct');}
     if(!state.isBonus)gain+=bonus;
-    state.score+=gain;state.xp+=gain;state.pontos+=gain;
+    state.score+=gain;state.xp+=gain;
+    if(!state.isBonus)state.pontos+=gain; // diamante só dá XP, não pontos
     const lvlBefore=getLvlIdx(state.xp-gain);
     if(getLvlIdx(state.xp)>lvlBefore)state.lvlUpPending=true;
 
@@ -645,8 +686,7 @@ function handleAnswer(choiceId,btnEl){
       playSfx('xpbar');
     },220);
   }else{
-    // -1 XP no erro
-    state.xp=Math.max(0,state.xp-1);
+    // -1 Ponto no erro (XP nunca regride)
     state.pontos=Math.max(0,state.pontos-1);
     gain=-1;
     playSfx('wrong');
@@ -660,6 +700,21 @@ function handleAnswer(choiceId,btnEl){
   state.phase='answered';
   render();
   autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1200);
+}
+
+function exchangeDiamonds(btnEl){
+  if(state.diamantes<1)return;
+  const gained=state.diamantes*10;
+  state.diamantes=0;
+  state.moedas+=gained;
+  playDiamondExchangeSfx();
+  const rect=btnEl.getBoundingClientRect();
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const cl=(window.innerWidth-520)/2;
+  particles.push(...makeCoinParticles(cx-cl,cy));
+  spawnCoinFloats(cx,cy,Math.min(gained,8));
+  spawnFloat(cx,cy-60,`+${gained} moedas`,true);
+  render();
 }
 
 function exchangePoints(btnEl){
@@ -733,7 +788,7 @@ function renderStart(){
     </div>
     <div class="section-title">Suas Estatísticas</div>
     <div class="user-stats">
-      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.xp}</div><div class="us-lbl">Pontos</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.xp}</div><div class="us-lbl">XP Total</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">Taxa de Acerto</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Acertos Consecutivos</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">#${myPos}</div><div class="us-lbl">Colocação</div></div></div>
@@ -800,7 +855,7 @@ function renderGame(){
     <div class="play-area">
       <div class="label-sm">Ouça o acorde</div>
       <button class="play-btn ${state.playing?'playing':''}" onclick="playClickSfx('soft');playChord(state.chord)">
-        ${state.playing?'♪  Tocando...':'▶  Ouvir Acorde'}
+        ${state.playing?'♪ Tocando...':'Ouvir Acorde'}
       </button>
       <div class="label-sm mt">Qual é este acorde?</div>
       <div class="choices">
@@ -864,12 +919,12 @@ function renderDesempenho(){
     </div>
     <div class="section-title">Visão Geral</div>
     <div class="user-stats">
-      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.xp}</div><div class="us-lbl">Pontos</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.xp}</div><div class="us-lbl">XP Total</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">Taxa de Acerto</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🎵</span><div><div class="us-val">${state.stats.t}</div><div class="us-lbl">Acordes Ouvidos</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">✅</span><div><div class="us-val">${state.stats.c}</div><div class="us-lbl">Acordes Certos</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">❌</span><div><div class="us-val">${state.stats.t-state.stats.c}</div><div class="us-lbl">Acordes Errados</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Acertos Consecutivos</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🏅</span><div><div class="us-val">${state.pontos}</div><div class="us-lbl">Pontos</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🪙</span><div><div class="us-val">${state.moedas}</div><div class="us-lbl">Moedas</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">💎</span><div><div class="us-val">${state.diamantes}</div><div class="us-lbl">Diamantes</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Sequência Máx.</div></div></div>
     </div>
 
     ${maiorErro?`
@@ -917,16 +972,21 @@ function renderLoja(){
       </div>
     </div>
 
-    <div class="wallet-grid">
+    <div class="wallet-grid" style="grid-template-columns:1fr 1fr 1fr">
       <div class="wallet-card">
         <div class="wallet-lbl">Pontos</div>
         <div class="wallet-val" style="color:#f0f0f0">${state.pontos}</div>
-        <div class="wallet-sub">acumulados</div>
+        <div class="wallet-sub">para trocar</div>
       </div>
       <div class="wallet-card">
         <div class="wallet-lbl">Moedas</div>
-        <div class="wallet-val" style="color:#F5A623;display:flex;align-items:center;justify-content:center;gap:.35rem"><img src='bolsa.png' style='width:32px;height:32px;object-fit:contain'> ${state.moedas}</div>
+        <div class="wallet-val" style="color:#F5A623">🪙 ${state.moedas}</div>
         <div class="wallet-sub">em carteira</div>
+      </div>
+      <div class="wallet-card">
+        <div class="wallet-lbl">Diamantes</div>
+        <div class="wallet-val" style="color:#60dcff">💎 ${state.diamantes}</div>
+        <div class="wallet-sub">para trocar</div>
       </div>
     </div>
 
@@ -934,8 +994,17 @@ function renderLoja(){
       <div class="exchange-title">⚡ Trocar Pontos por Moedas</div>
       <div class="exchange-sub">
         ${podeConverter
-          ? `100 pontos = <img src='moeda.png' style='width:14px;height:14px;vertical-align:middle'> 10 moedas · Você receberá <img src='moeda.png' style='width:14px;height:14px;vertical-align:middle'> ${ganharei}`
+          ? `100 pontos = 🪙 10 moedas · Você receberá 🪙 ${ganharei}`
           : `Você precisa de pelo menos 100 pontos para trocar`}
+      </div>
+    </button>
+
+    <button class="exchange-btn" onclick="exchangeDiamonds(this)" ${state.diamantes<1?'disabled':''} style="background:linear-gradient(135deg,#0a1a2e,#0d2a3d);border-color:#60dcff;${state.diamantes<1?'opacity:.4;cursor:not-allowed':''}">
+      <div class="exchange-title" style="color:#60dcff">💎 Trocar Diamantes por Moedas</div>
+      <div class="exchange-sub" style="color:#a0d8ef">
+        ${state.diamantes>=1
+          ? `1 💎 = 🪙 10 moedas · Você receberá 🪙 ${state.diamantes*10}`
+          : `Você não tem diamantes para trocar`}
       </div>
     </button>
 

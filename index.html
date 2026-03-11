@@ -17,6 +17,7 @@
 @keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
 @keyframes bonusBurst{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
 @keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes comboSlideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
 @keyframes xpPop{0%{transform:scale(0) rotate(-10deg);opacity:0}50%{transform:scale(1.3) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
 @keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 @keyframes autoProgress{from{width:100%}to{width:0%}}
@@ -69,7 +70,7 @@ body{background:#111;color:#f0f0f0;font-family:'Poppins',sans-serif;min-height:1
 .xp-fill--animating{animation:xpGlow .5s ease-in-out infinite;filter:brightness(1.3) saturate(1.4)}
 
 /* ── Combo ── */
-.combo-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;border-radius:16px 16px 0 0;box-shadow:0 -4px 0 #1a1a1a;padding:.65rem 1rem;display:flex;align-items:center;gap:.6rem;animation:slideUp .2s ease;transition:background .25s,border-color .25s;z-index:500}
+.combo-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;border-radius:16px 16px 0 0;box-shadow:0 -4px 0 #1a1a1a;padding:.65rem 1rem;display:flex;align-items:center;gap:.6rem;animation:comboSlideUp .25s ease forwards;transition:background .3s,border-color .3s;z-index:500}
 .combo-bar.mult1{background:#0d1f10;border:3px solid #22c55e;border-bottom:none}
 .combo-bar.mult2{background:#1a1200;border:3px solid #F5A623;border-bottom:none}
 .combo-bar.mult3{background:#1f0d1a;border:3px solid #f472b6;border-bottom:none}
@@ -651,7 +652,7 @@ function _poolForLvl(n){
 // XP por nível n = 6 acertos × 10 XP × n = 60n
 const LEVELS = Array.from({length:100},(_,i)=>{
   const n=i+1;
-  return{n,title:_titleForLvl(n),xpToNext:n===100?999999:60*n,pool:_poolForLvl(n)};
+  return{n,title:_titleForLvl(n),xpToNext:n===100?999999:400*n,pool:_poolForLvl(n)};
 });
 
 const MOCK_RANKING = [
@@ -1209,8 +1210,9 @@ function handleAnswer(choiceId,btnEl){
     if(state.isBonus){
       const diamGain=violaoAtual.doubleDiamonds?2:1;
       diamondGained=diamGain;state.diamantes+=diamGain;
-      gain=50+violaoBonus+cordasBonus;
-      msg=violaoAtual.doubleDiamonds?'💎💎 Diamante Duplo!':'💎 Diamante!';
+      const baseCombo=comboPoints(ns);
+      gain=(baseCombo*2)+violaoBonus+cordasBonus;
+      msg=violaoAtual.doubleDiamonds?'💎💎 Diamante Duplo! ×2':'💎 ×2 no Combo!';
       playSfx('diamond');
     } else {
       gain=comboPoints(ns)+violaoBonus+cordasBonus;
@@ -1222,6 +1224,7 @@ function handleAnswer(choiceId,btnEl){
       else{playSfx('correct');}
       state.pontos+=gain;
     }
+    if(state.isBonus) state.pontos+=gain; // diamante também soma pontos
     const xpBefore=state.xp;
     state.score+=gain;state.xp+=gain;
     state.xpDisplay=xpBefore;
@@ -1247,9 +1250,9 @@ function handleAnswer(choiceId,btnEl){
       const overlay=document.createElement('div');
       const mc=comboColor(newMult);
       overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;`;
-      overlay.innerHTML=`<div style="font-size:2.8rem;font-weight:900;color:${mc};text-shadow:0 0 40px ${mc},0 0 80px ${mc}88;animation:lvlupEntrance .5s ease;letter-spacing:-.03em">×${newMult} MULTIPLICADOR!</div>`;
+      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} Multiplicador!</div>`;
       const ring=document.createElement('div');
-      ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 6px ${mc}99;animation:xpBarFlash .4s ease;border-radius:0;`;
+      ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;border-radius:0;`;
       document.body.appendChild(ring);
       document.body.appendChild(overlay);
       setTimeout(()=>{overlay.remove();ring.remove();},900);
@@ -1333,9 +1336,9 @@ function handleQualityAnswer(quality, btnEl){
       const overlay=document.createElement('div');
       const mc=comboColor(newMult);
       overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;`;
-      overlay.innerHTML=`<div style="font-size:2.8rem;font-weight:900;color:${mc};text-shadow:0 0 40px ${mc},0 0 80px ${mc}88;animation:lvlupEntrance .5s ease;letter-spacing:-.03em">×${newMult} MULTIPLICADOR!</div>`;
+      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} Multiplicador!</div>`;
       const ring=document.createElement('div');
-      ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 6px ${mc}99;animation:xpBarFlash .4s ease;`;
+      ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;`;
       document.body.appendChild(ring);
       document.body.appendChild(overlay);
       setTimeout(()=>{overlay.remove();ring.remove();},900);
@@ -1780,20 +1783,18 @@ function renderLevelUp(){
   return `
     <div class="lvlup-wrap" style="padding:0;overflow:hidden;background:#0e0e0e;border-color:${cor}55">
       <!-- imagem do card do nível -->
-      <div style="width:100%;background:radial-gradient(ellipse at 50% 45%,#1e1a10 0%,#080808 100%);display:flex;align-items:center;justify-content:center;padding:2rem 0 1.5rem;border-bottom:2px solid ${cor}33;position:relative">
-        <div style="position:absolute;top:.7rem;left:50%;transform:translateX(-50%);background:${cor};border:2.5px solid #1a1a1a;color:#111;font-size:.65rem;font-weight:900;letter-spacing:.1em;text-transform:uppercase;padding:.3rem .9rem;border-radius:99px;box-shadow:3px 3px 0 #1a1a1a;white-space:nowrap">
-          ⬆ Level Up!
-        </div>
+      <div style="width:100%;background:radial-gradient(ellipse at 50% 45%,#1e1a10 0%,#080808 100%);display:flex;align-items:center;justify-content:center;padding:2.5rem 0 2rem;border-bottom:2px solid ${cor}33;position:relative">
         <img src="${img}"
-          style="height:38vh;width:auto;max-width:85%;object-fit:contain;filter:drop-shadow(0 12px 40px rgba(0,0,0,1)) drop-shadow(0 0 30px ${cor}44)"
+          style="height:52vh;width:auto;max-width:88%;object-fit:contain;filter:drop-shadow(0 12px 40px rgba(0,0,0,1)) drop-shadow(0 0 40px ${cor}55)"
           onerror="this.style.display='none'">
       </div>
 
       <!-- info -->
       <div style="padding:1.5rem 1.5rem 2rem;text-align:center">
         <div style="font-size:2rem;font-weight:900;letter-spacing:-.03em;margin-bottom:.25rem;color:#f0f0f0">Nível ${lvl.n}</div>
-        <div style="font-size:1.1rem;font-weight:800;color:${cor};margin-bottom:.5rem">${lvl.title}</div>
-        ${isNewGroup?`<div style="display:inline-block;font-size:.78rem;color:${cor};background:${cor}18;border:2px solid ${cor}44;border-radius:10px;padding:.4rem .9rem;margin-bottom:1.2rem;font-weight:700">✨ Nova etapa desbloqueada: ${grupo.title}</div>`:`<div style="font-size:.8rem;color:#666;margin-bottom:1.2rem">Níveis ${grupo.range[0]} – ${grupo.range[1]}</div>`}
+        <div style="font-size:1.1rem;font-weight:800;color:${cor};margin-bottom:.75rem">${lvl.title}</div>
+        <div style="font-size:.88rem;color:#bbb;font-style:italic;line-height:1.55;margin-bottom:1.3rem;padding:0 .5rem">"${grupo.desc}"</div>
+        ${isNewGroup?`<div style="display:inline-block;font-size:.78rem;color:${cor};background:${cor}18;border:2px solid ${cor}44;border-radius:10px;padding:.4rem .9rem;margin-bottom:1.2rem;font-weight:700">✨ Nova etapa: ${grupo.title}</div><br>`:``}
         <button class="cta-btn" onclick="afterLvlUp()">Continuar Treino</button>
       </div>
     </div>`;

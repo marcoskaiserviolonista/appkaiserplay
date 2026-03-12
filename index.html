@@ -1812,9 +1812,11 @@ function renderLevelUp(){
 
   // Subiu de nível dentro da mesma categoria: janela simples
   return `
-    <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:2.5rem 1.5rem;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
-      <div style="font-size:3.5rem;margin-bottom:.5rem;animation:lvlupEntrance .5s ease">⬆</div>
-      <div style="font-size:.75rem;font-weight:800;color:${cor};letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem">Level Up!</div>
+    <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:2rem 1.5rem;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
+      <img src="up.png"
+        style="height:120px;width:auto;object-fit:contain;margin-bottom:.75rem;filter:drop-shadow(0 0 20px ${cor}88)"
+        onerror="this.style.display='none'">
+      <div style="font-size:.75rem;font-weight:800;color:${cor};letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem">Level Up!</div>
       <div style="font-size:3rem;font-weight:900;letter-spacing:-.04em;color:#f0f0f0;margin-bottom:.2rem">${lvl.n}</div>
       <div style="font-size:.95rem;font-weight:700;color:${cor};margin-bottom:1.5rem">${lvl.title}</div>
       <button class="cta-btn" onclick="afterLvlUp()">Continuar Treino</button>
@@ -2322,6 +2324,14 @@ function startGame(){
     Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,pontos:1000,moedas:1000,inventario:[],violoesComprados:['violao_basico'],cordasCompradas:['cordas_basicas'],violaoEquipado:'violao_basico',cordasEquipadas:'cordas_basicas',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false});
+  }
+  // Primeira vez: mostra card inicial antes de gerar pergunta
+  if(!state.firstCardSeen){
+    state.firstCardSeen=true;
+    state.lvlUpIsNewGroup=true;
+    state.phase='levelup';
+    render();
+    return;
   }
   genQ();state.phase='question';render();
 }

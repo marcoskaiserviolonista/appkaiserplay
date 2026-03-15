@@ -1064,6 +1064,7 @@ function drawParticles(){
     ctx2d.restore();
   });
   particles=particles.map(p=>({...p,x:p.x+p.vx,y:p.y+p.vy,vy:p.vy+.5,life:p.life-p.decay})).filter(p=>p.life>0);
+  if(particles.length>120)particles.splice(0,particles.length-120);
   requestAnimationFrame(drawParticles);
 }
 drawParticles();

@@ -1116,7 +1116,7 @@ const state={
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
   chordStats:{},
-  playing:false,lvlUpPending:false,
+  playing:false,lvlUpPending:false,lvlUpFromFocused:false,
   notas:500,moedas:500,diamantes:0, // VERSÃO DE TESTE
   inventario:[],
   violaoEquipado:'violao_basico',
@@ -1211,7 +1211,9 @@ function genQ(){
       } else {
         pool=pair.ids.map(i=>CHORDS[i]).filter(Boolean);
       }
-      const chord=pool[Math.floor(Math.random()*pool.length)];
+      const _prevId=state.chord?.id;
+      let chord=pool[Math.floor(Math.random()*pool.length)];
+      if(pool.length>1&&_prevId!=null&&chord.id===_prevId){const _alt=pool.filter(c=>c.id!==_prevId);if(_alt.length>0)chord=_alt[Math.floor(Math.random()*_alt.length)];}
       state.chord=chord;
       state.isQuality=true;
       state.qualityAnswer=chord.quality;
@@ -1229,7 +1231,9 @@ function genQ(){
     const lvlPool=LEVELS[lIdx].pool;
     pool=lvlPool==='ALL'?[...CHORDS,...CHORDS_DIAMOND]:lvlPool.map(i=>CHORDS[i]);
   }
-  const ans=pool[Math.floor(Math.random()*pool.length)];
+  const _prevIdN=state.chord?.id;
+  let ans=pool[Math.floor(Math.random()*pool.length)];
+  if(pool.length>1&&_prevIdN!=null&&ans.id===_prevIdN){const _altN=pool.filter(c=>c.id!==_prevIdN);if(_altN.length>0)ans=_altN[Math.floor(Math.random()*_altN.length)];}
   const wrong=_pickWrong(ans,pool);
   state.chord=ans;
   state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
@@ -1898,6 +1902,7 @@ function handleFocusedQualityAnswer(quality, btnEl){
     state.focusedSessionScore+=pontos;
     state.focusedSessionCorrect++;
     state.focusedSessionTotal++;
+    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)) state.lvlUpPending=true;
 
     const color=getFocusedColor(state.focusedStreak);
     playSfx(getFocusedSound(state.focusedStreak));
@@ -1946,6 +1951,18 @@ function handleFocusedQualityAnswer(quality, btnEl){
   render();
   autoTimer=setTimeout(()=>{
     if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+    if(state.lvlUpPending){
+      const lvlNow=LEVELS[getLvlIdx(state.xp)];
+      const grupoNow=NIVEL_GROUPS.find(g=>lvlNow.n>=g.range[0]&&lvlNow.n<=g.range[1])||NIVEL_GROUPS[0];
+      const isNewGroup=lvlNow.n===grupoNow.range[0];
+      state.lvlUpIsNewGroup=isNewGroup;
+      state.firstCardSeen=true;
+      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+      else{playSfx('correct2');}
+      state.lvlUpPending=false;
+      state.lvlUpFromFocused=true;
+      state.phase='levelup';render();return;
+    }
     genFocusedQ();
     state.phase='treino_focado_question';
     render();
@@ -1975,6 +1992,7 @@ function handleFocusedAnswer(choiceId,btnEl){
     state.focusedSessionScore+=pontos;
     state.focusedSessionCorrect++;
     state.focusedSessionTotal++;
+    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)) state.lvlUpPending=true;
 
     const color=getFocusedColor(state.focusedStreak);
     playSfx(getFocusedSound(state.focusedStreak));
@@ -2032,6 +2050,18 @@ function handleFocusedAnswer(choiceId,btnEl){
   render();
   autoTimer=setTimeout(()=>{
     if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+    if(state.lvlUpPending){
+      const lvlNow=LEVELS[getLvlIdx(state.xp)];
+      const grupoNow=NIVEL_GROUPS.find(g=>lvlNow.n>=g.range[0]&&lvlNow.n<=g.range[1])||NIVEL_GROUPS[0];
+      const isNewGroup=lvlNow.n===grupoNow.range[0];
+      state.lvlUpIsNewGroup=isNewGroup;
+      state.firstCardSeen=true;
+      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+      else{playSfx('correct2');}
+      state.lvlUpPending=false;
+      state.lvlUpFromFocused=true;
+      state.phase='levelup';render();return;
+    }
     genFocusedQ();
     state.phase='treino_focado_question';
     render();
@@ -2443,7 +2473,7 @@ function renderLevelUp(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
-        <div style="height:220px;max-height:36dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0">
+        <div style="height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0">
           <img src="up.png"
             style="max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 30px ${cor}99)"
             onerror="this.style.display='none'">
@@ -2904,9 +2934,9 @@ function renderRanking(){
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
-    Object.assign(state,{score:0,result:null,lvlUpPending:false});
+    Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }
   // Primeira vez: mostra card inicial antes de gerar pergunta
   if(!state.firstCardSeen){
@@ -2969,6 +2999,13 @@ function nextQ(){
 }
 
 function afterLvlUp(){
+  if(state.lvlUpFromFocused){
+    state.lvlUpFromFocused=false;
+    genFocusedQ();
+    state.phase='treino_focado_question';render();
+    setTimeout(()=>playChord(state.chord),300);
+    return;
+  }
   genQ();state.phase='question';render();
   setTimeout(()=>playChord(state.chord),300);
   if(state.isBonus){

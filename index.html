@@ -1171,7 +1171,7 @@ function _qualityChance(lvlN){
 
 function genQ(){
   state.questionCount++;
-  const threshold=Math.floor(Math.random()*5)+6;
+  const threshold=1;
   state.isBonus=(state.questionCount%threshold===0);
   state.isQuality=false;
   state.qualityAnswer=null;

@@ -788,7 +788,9 @@ function playChord(chord){
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
 
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
-  state.playing=true; render();
+  state.playing=true;
+  const _pbtn=document.querySelector('.play-btn');
+  if(_pbtn){_pbtn.textContent='♪ Tocando...';_pbtn.classList.add('playing');}
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -797,7 +799,11 @@ function playChord(chord){
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
     },i*110);
   });
-  _playTimer=setTimeout(()=>{_playTimer=null;state.playing=false;if(state.phase!=='answered')render();},chord.midi.length*110+3000);
+  _playTimer=setTimeout(()=>{
+    _playTimer=null;state.playing=false;
+    const _pbtn2=document.querySelector('.play-btn');
+    if(_pbtn2){_pbtn2.textContent='Ouvir Acorde';_pbtn2.classList.remove('playing');}
+  },chord.midi.length*110+3000);
 }
 
 function playSfx(type){
@@ -1167,8 +1173,6 @@ function comboEmoji(streak){
 }
 function getAcc(){return state.stats.t>0?Math.round(state.stats.c/state.stats.t*100):0;}
 
-// Pool de acordes para perguntas de qualidade (maior/menor)
-const QUALITY_POOL = [0,1,2,3,4,5,6,7,8,9,10,11,12,13]; // ids 0-13
 
 function _qualityChance(lvlN){
   const cat=Math.ceil(lvlN/10); // categoria 1-10

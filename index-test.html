@@ -2986,6 +2986,10 @@ function renderRanking(){
   const lvlIdx=getLvlIdx(state.xp);
   const data=[...MOCK_RANKING,{name:'Você',xp:state.xp,lvl:lvlIdx+1,isMe:true}].sort((a,b)=>b.xp-a.xp);
   return `
+    <div class="back-row">
+      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">← Voltar</button>
+      <span class="page-title">Ranking</span>
+    </div>
     <div class="section-title">Classificação Global</div>
     <div class="rank-card">
       ${data.map((p,i)=>`

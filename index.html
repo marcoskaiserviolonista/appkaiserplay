@@ -389,7 +389,7 @@ content:'';
 position:absolute;
 bottom:0;left:0;right:0;
 height:50px;
-background:linear-gradient(to bottom,transparent,#0e0e0e);
+background:#0e0e0e;
 pointer-events:none;
 z-index:1;
 }
@@ -543,7 +543,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
     </div>
     <div class="header-tabs">
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
-      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()">Perfil</button>
+      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()">⚙️</button>
     </div>
   </div>
   <div id="content"></div>
@@ -764,21 +764,20 @@ const MOCK_RANKING = [
 
 // ── Itens educacionais (mundo real) ──────────────────────────
 const LOJA_ITEMS = [
-  {id:0,img:'livro_arte_auditiva.png', icon:'📖',nome:'A Arte Auditiva do Violão',    desc:'Como tirar músicas de ouvido',    preco:350},
-  {id:1,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Greensleeves',    desc:'Partitura completa + tab',         preco:120},
-  {id:2,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Romance de Amor', desc:'Partitura completa + tab',         preco:120},
-  {id:3,img:'app_dicionario.png',      icon:'📚',nome:'Dicionário de Acordes',        desc:'Mais de 200 acordes ilustrados',   preco:280},
-  {id:4,img:'livro_arte_harmonica.png',icon:'📖',nome:'A Arte Harmônica do Violão',   desc:'Teoria harmônica aplicada',        preco:350},
-  {id:5,img:'cupom.png',               icon:'🏷️',nome:'CUPOM 20% off — Plano Vitalício',desc:'Desconto exclusivo KaiserPlay', preco:500},
+  {id:0,img:'livro_arte_auditiva.png', icon:'📖',nome:'A Arte Auditiva do Violão',    desc:'Como tirar músicas de ouvido',    preco:22000},
+  {id:1,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Greensleeves',    desc:'Partitura completa + tab',         preco:160},
+  {id:2,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Romance de Amor', desc:'Partitura completa + tab',         preco:160},
+  {id:4,img:'livro_arte_harmonica.png',icon:'📖',nome:'A Arte Harmônica do Violão',   desc:'Teoria harmônica aplicada',        preco:22000},
+  {id:5,img:'cupom.png',               icon:'🏷️',nome:'CUPOM 20% off — Plano Vitalício',desc:'Desconto exclusivo KaiserPlay', preco:1600},
 ];
 
 // ── Violões (itens do jogo) ───────────────────────────────────
 const VIOLOES = [
   {id:'violao_basico',   img:'violao_basico.png',   nome:'Violão Básico',      desc:'Violão padrão',           pct:0,    preco:0,     cor:'#888'},
-  {id:'violao_bom',      img:'violao_bom.png',      nome:'Violão Bom',         desc:'+10% de Pontos por acerto',   pct:0.10, preco:600,   cor:'#4ade80'},
-  {id:'violao_luthier',  img:'violao_luthier.png',  nome:'Violão de Luthier',  desc:'+25% de Pontos por acerto',   pct:0.25, preco:3500,  cor:'#60dcff'},
-  {id:'violao_ouro',     img:'violao_ouro.png',     nome:'Violão de Ouro',     desc:'+50% de Pontos por acerto',   pct:0.50, preco:15000, cor:'#F5A623'},
-  {id:'violao_diamante', img:'violao_diamante.png', nome:'Violão de Diamante', desc:'+100% de Pontos por acerto',  pct:1.00, preco:60000, cor:'#b060ff', doubleDiamonds:true},
+  {id:'violao_bom',      img:'violao_bom.png',      nome:'Violão Bom',         desc:'+10% de Pontos por acerto',   pct:0.10, preco:400,   cor:'#4ade80'},
+  {id:'violao_luthier',  img:'violao_luthier.png',  nome:'Violão de Luthier',  desc:'+25% de Pontos por acerto',   pct:0.25, preco:1200,  cor:'#60dcff'},
+  {id:'violao_ouro',     img:'violao_ouro.png',     nome:'Violão de Ouro',     desc:'+50% de Pontos por acerto',   pct:0.50, preco:3000,  cor:'#F5A623'},
+  {id:'violao_diamante', img:'violao_diamante.png', nome:'Violão de Diamante', desc:'+100% de Pontos por acerto',  pct:1.00, preco:13000, cor:'#b060ff', doubleDiamonds:true},
 ];
 
 // ── Cordas (itens do jogo) ────────────────────────────────────
@@ -1167,7 +1166,7 @@ const state={
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false},
-  focusedPool:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
+  focusedPool:[],isSmartSession:false,focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   fullAccess:false,
   rankingData:[],
 };
@@ -1600,7 +1599,7 @@ function comprarViolao(id){
 
 function exchangeDiamonds(btnEl){
   if(state.diamantes<1)return;
-  const gained=state.diamantes*50;
+  const gained=state.diamantes*10; // 1 diamante = 10 moedas
   state.diamantes=0;
   state.moedas+=gained;
   playDiamondExchangeSfx();
@@ -1615,9 +1614,9 @@ function exchangeDiamonds(btnEl){
 }
 
 function exchangePoints(btnEl){
-  if(state.notas<10)return;
-  const gained=Math.floor(state.notas/10);
-  state.notas=state.notas%10;
+  if(state.notas<100)return;
+  const gained=Math.floor(state.notas/100);
+  state.notas=state.notas%100;
   state.moedas+=gained;
   playCoinSfx();
   const rect=btnEl.getBoundingClientRect();
@@ -1837,6 +1836,7 @@ function toggleFocusedSwitch(key){
 function startFocusedSession(){
   if(!hasFocusedSwitch()) return;
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.isSmartSession=false;
   state.focusedPool=buildFocusedPool();
   state.focusedStreak=0;
   state.focusedSessionScore=0;
@@ -1850,9 +1850,49 @@ function startFocusedSession(){
   render();
 }
 
+function startSmartSession(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  const allChords=[...CHORDS,...CHORDS_DIAMOND];
+  const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
+  // Top 5 acordes mais errados
+  const specificWeak=Object.entries(state.chordStats)
+    .filter(([,v])=>v.e>0).sort((a,b)=>b[1].e-a[1].e).slice(0,5)
+    .map(([id])=>chordMap[parseInt(id)]).filter(Boolean);
+  // Top 2 categorias com mais erros (somente switches de tipo, não qualidade)
+  const catErrors={};
+  for(const[idStr,stats] of Object.entries(state.chordStats)){
+    const id=parseInt(idStr);const chord=chordMap[id];
+    if(!chord||stats.e===0)continue;
+    for(const key of Object.keys(FOCUSED_SWITCH_POOLS)){
+      if(isQualitySwitch(key))continue;
+      if(FOCUSED_SWITCH_POOLS[key]().some(c=>c.id===id))catErrors[key]=(catErrors[key]||0)+stats.e;
+    }
+  }
+  const weakCatKeys=Object.entries(catErrors).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k);
+  // Monta pool: acordes específicos + acordes das categorias fracas
+  const seen=new Set();const pool=[];
+  for(const c of specificWeak){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}
+  for(const key of weakCatKeys){for(const c of FOCUSED_SWITCH_POOLS[key]()){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
+  // Garante mínimo de 4 acordes
+  if(pool.length<4){for(const c of allChords){if(pool.length>=4)break;if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
+  state.focusedPool=pool;state.isSmartSession=true;
+  state.focusedStreak=0;state.focusedSessionScore=0;state.focusedSessionTotal=0;state.focusedSessionCorrect=0;
+  state.result=null;state.selected=null;state.qualitySelected=null;
+  genFocusedQ();state.phase='treino_focado_question';render();
+}
+
 function genFocusedQ(){
   const pool=state.focusedPool;
   if(!pool||pool.length<2) return;
+
+  if(state.isSmartSession){
+    const ans=pool[Math.floor(Math.random()*pool.length)];
+    const wrong=_pickWrong(ans,pool);
+    state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
+    state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
+    state.selected=null;state.qualitySelected=null;state.result=null;
+    setTimeout(()=>playChord(state.chord),120);return;
+  }
 
   // Verificar se todos os switches ativos são de qualidade
   const activeKeys=Object.entries(state.focusedSwitches).filter(([,v])=>v).map(([k])=>k);
@@ -2121,6 +2161,21 @@ function renderTreinoFocadoMenu(){
         .map(([id])=>chordMap[parseInt(id)])
         .filter(Boolean)
     : [];
+  // Categorias de acordes com mais erros
+  const catErrors={};
+  if(hasHistory){
+    for(const[idStr,stats] of Object.entries(state.chordStats)){
+      const id=parseInt(idStr);const chord=chordMap[id];
+      if(!chord||stats.e===0)continue;
+      for(const key of Object.keys(FOCUSED_SWITCH_POOLS)){
+        if(isQualitySwitch(key))continue;
+        if(FOCUSED_SWITCH_POOLS[key]().some(c=>c.id===id))catErrors[key]=(catErrors[key]||0)+stats.e;
+      }
+    }
+  }
+  const weakCatLabels=Object.entries(catErrors).sort((a,b)=>b[1]-a[1]).slice(0,2)
+    .map(([key,errors])=>({label:FOCUSED_SWITCH_LABELS[key],errors}));
+  const hasSmartData=topErrors.length>0||weakCatLabels.length>0;
 
   const section1=[
     {key:'maior_menor'},
@@ -2159,18 +2214,29 @@ function renderTreinoFocadoMenu(){
       <div style="font-size:.85rem;color:#60dcff;font-weight:900;letter-spacing:.12em;margin-bottom:.35rem">EVOLUA MAIS RÁPIDO.</div>
       <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">Escolha os acordes e monte o seu treino.</div>
     </div>
-    ${hasHistory&&topErrors.length>0?`
-    <div class="section-title" style="--sc:##60dcff">Sugestão de treino</div>
+    ${hasHistory&&hasSmartData?`
+    <div class="section-title" style="--sc:#60dcff">Sugestão de treino</div>
     <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">Esses são os acordes que você mais erra:</div>
-      <div style="display:flex;gap:.65rem;justify-content:flex-start">
+      <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">Acordes e tipos que você mais erra:</div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
         ${topErrors.map(c=>`
-          <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.6rem .9rem;text-align:center;min-width:72px">
-            <div style="font-size:1.15rem;font-weight:900;color:#f0f0f0;line-height:1">${c.cifra}</div>
-            <div style="font-size:.58rem;color:#F5A623;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?state.chordStats[c.id].e:0} erros</div>
+          <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
+            <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1">${c.cifra}</div>
+            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} erros</div>
+          </div>
+        `).join('')}
+        ${weakCatLabels.map(cat=>`
+          <div style="background:#1a0e0e;border:2px solid #4a2020;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
+            <div style="font-size:.78rem;font-weight:900;color:#ffbbbb;line-height:1.2">${cat.label}</div>
+            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${cat.errors} erros</div>
           </div>
         `).join('')}
       </div>
+      <button
+        style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff44"
+        onclick="startSmartSession()">
+        <span style="font-size:1.2rem">🎯</span> Treinar pontos fracos
+      </button>
     </div>`:''}
     <div class="section-title">Treine por qualidade</div>
     ${section1.map(makeSwitch).join('')}
@@ -2370,9 +2436,8 @@ function renderStart(){
           alt="${lvl.title}"/>
       </div>
       <div class="profile-info">
-        <div class="profile-name">${userName}</div>
+        <div class="profile-name">${userName}${myPos?` — Rank #${myPos}`:''}</div>
         <div class="profile-title">${lvl.title}</div>
-        ${myPos?`<div style="font-size:.6rem;color:#F5A623;font-weight:700;margin-top:.1rem">Rank: ${myPos}</div>`:''}
         <div class="profile-xp-track"><div class="profile-xp-fill" style="width:${prog}%"></div></div>
         <div class="profile-xp-label">${state.xp-lvlStart} / ${lvl.xpToNext} XP</div>
       </div>
@@ -2624,8 +2689,8 @@ function renderDesempenho(){
 
 // ── Render: Loja ──────────────────────────────────────────────
 function renderLoja(){
-  const podeConverter=state.notas>=10;
-  const ganharei=Math.floor(state.notas/10);
+  const podeConverter=state.notas>=100;
+  const ganharei=Math.floor(state.notas/100);
   const violaoEq=VIOLOES.find(v=>v.id===state.violaoEquipado)||VIOLOES[0];
 
   return `
@@ -2655,11 +2720,11 @@ function renderLoja(){
 
     <button class="exchange-btn" onclick="exchangePoints(this)" ${!podeConverter?'disabled':''} style="margin-bottom:.4rem">
       <div class="exchange-title">Trocar Pontos por Moedas</div>
-      <div class="exchange-sub">${podeConverter?`A cada 10 notas você ganha <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> 1 moeda`:`Precisa de pelo menos 10 notas`}</div>
+      <div class="exchange-sub">${podeConverter?`A cada 100 Pontos você ganha <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> 1 moeda`:`Precisa de pelo menos 100 Pontos`}</div>
     </button>
     <button class="exchange-btn" onclick="exchangeDiamonds(this)" ${state.diamantes<1?'disabled':''} style="background:linear-gradient(180deg,#0d2a3d,#0a1a2e);border-color:#60dcff;margin-bottom:.9rem;${state.diamantes<1?'opacity:.4;cursor:not-allowed':''}">
       <div class="exchange-title" style="color:#60dcff">💎 Trocar Diamantes por Moedas</div>
-      <div class="exchange-sub" style="color:#a0d8ef">${state.diamantes>=1?`<span style="display:inline-flex;align-items:center;gap:.3rem">💎 ${state.diamantes} → <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${state.diamantes*50}</span>`:`Você não tem diamantes`}</div>
+      <div class="exchange-sub" style="color:#a0d8ef">${state.diamantes>=1?`<span style="display:inline-flex;align-items:center;gap:.3rem">💎 ${state.diamantes} → <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${state.diamantes*10}</span>`:`Você não tem diamantes`}</div>
     </button>
 
     ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).length>0?`

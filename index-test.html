@@ -484,18 +484,22 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .lvlup-sub{font-size:.9rem;color:#bbb;margin-bottom:.6rem}
 .lvlup-unlock{display:inline-block;font-size:.8rem;color:#F5A623;background:#252525;border:2.5px solid #F5A623;border-radius:10px;padding:.45rem .9rem;margin-bottom:1.75rem;font-weight:700;box-shadow:3px 3px 0 #1a1a1a}
 
-/* ── Ranking ── */
-.rank-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:5px 5px 0 #151515;width:100%;max-width:520px}
-.rank-row{display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;border-bottom:2px solid #252525}
+/* ── Ranking Retrô ── */
+.rank-arcade{width:100%;max-width:520px;background:#000;border:3px solid #F5A623;border-radius:4px;box-shadow:0 0 24px #F5A62344, 5px 5px 0 #111;overflow:hidden;margin-bottom:1rem}
+.rank-arcade-header{background:#0a0800;border-bottom:2px solid #F5A62355;padding:.7rem 1rem;text-align:center}
+.rank-arcade-title{font-family:'VT323',monospace;font-size:1.6rem;color:#F5A623;letter-spacing:.15em;text-shadow:0 0 10px #F5A62388}
+.rank-arcade-sub{font-family:'VT323',monospace;font-size:.95rem;color:#666;letter-spacing:.1em}
+.rank-row{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-bottom:1px solid #1a1500}
 .rank-row:last-child{border-bottom:none}
-.rank-row.me{background:#1f1a00;border-left:4px solid #F5A623}
-.rank-pos{font-size:.85rem;font-weight:900;color:#444;width:22px;text-align:center}
-.rank-pos.top{color:#F5A623}
-.rank-avatar{width:36px;height:36px;border-radius:50%;background:#252525;border:2.5px solid #333;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:800;color:#bbb;flex-shrink:0}
-.rank-info{flex:1}
-.rank-name{font-size:.88rem;font-weight:700;color:#e8e8e8}
-.rank-lvl{font-size:.68rem;color:#bbb;margin-top:.1rem}
-.rank-xp{font-size:.85rem;font-weight:800;color:#F5A623}
+.rank-row.me{background:#0f0a00;border-left:3px solid #F5A623}
+.rank-row.rank-1{background:#0d0900}
+.rank-pos{font-family:'VT323',monospace;font-size:1.3rem;color:#444;width:28px;text-align:center;flex-shrink:0}
+.rank-pos.gold{color:#ffd700;text-shadow:0 0 8px #ffd70099}
+.rank-pos.silver{color:#c0c0c0;text-shadow:0 0 6px #c0c0c066}
+.rank-pos.bronze{color:#cd7f32;text-shadow:0 0 6px #cd7f3266}
+.rank-name-arcade{font-family:'VT323',monospace;font-size:1.25rem;color:#e8e8e8;flex:1;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-name-arcade.me{color:#F5A623;text-shadow:0 0 8px #F5A62366}
+.rank-xp-arcade{font-family:'VT323',monospace;font-size:1.2rem;color:#F5A623;flex-shrink:0;letter-spacing:.03em}
 
 /* ── Particles / Floats ── */
 #pcanvas{position:fixed;top:0;left:50%;transform:translateX(-50%);pointer-events:none;z-index:999;width:520px;height:700px}
@@ -1165,6 +1169,7 @@ const state={
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false},
   focusedPool:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   fullAccess:true,
+  rankingData:[],
 };
 
 let autoTimer=null;
@@ -1708,7 +1713,12 @@ function goToTraining(){
   setTimeout(()=>playChord(state.chord),300);
 }
 
-function setTab(t){state.tab=t;render();}
+function setTab(t){
+  if(t==='ranking') startRankingListener();
+  else stopRankingListener();
+  state.tab=t;
+  render();
+}
 
 // ── 7. FUNÇÕES DE RENDERIZAÇÃO (UI) ──────────────────────────
 // ── TREINO FOCADO: Constantes ─────────────────────────────────
@@ -2980,28 +2990,51 @@ function closeNivelModal(){
   if(nivelModal){nivelModal.remove();nivelModal=null;}
 }
 
-// ── Render: Ranking ───────────────────────────────────────────
+// ── Ranking real-time ─────────────────────────────────────────
+let rankingUnsubscribe=null;
+function startRankingListener(){
+  if(rankingUnsubscribe)return;
+  rankingUnsubscribe=db.collection('players')
+    .orderBy('xp','desc')
+    .limit(10)
+    .onSnapshot(snap=>{
+      state.rankingData=snap.docs.map(d=>({uid:d.id,...d.data()}));
+      if(state.tab==='ranking')render();
+    },e=>console.error('ranking listener:',e));
+}
+function stopRankingListener(){
+  if(rankingUnsubscribe){rankingUnsubscribe();rankingUnsubscribe=null;}
+}
+
 // ── 8. RANKING ────────────────────────────────────────────────
 function renderRanking(){
-  const lvlIdx=getLvlIdx(state.xp);
-  const data=[...MOCK_RANKING,{name:'Você',xp:state.xp,lvl:lvlIdx+1,isMe:true}].sort((a,b)=>b.xp-a.xp);
+  const myUid=state.user?.uid;
+  const data=state.rankingData;
+  const posClass=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
+  const posSymbol=i=>i===0?'1ST':i===1?'2ND':i===2?'3RD':`${i+1}`;
+  const rows=data.length===0
+    ?`<div style="font-family:'VT323',monospace;font-size:1.2rem;color:#555;text-align:center;padding:2rem;letter-spacing:.1em">CARREGANDO...</div>`
+    :data.map((p,i)=>{
+      const isMe=p.uid===myUid;
+      const nome=(p.displayName||'???').toUpperCase().slice(0,18);
+      return `
+        <div class="rank-row${isMe?' me':''}${i===0?' rank-1':''}">
+          <span class="rank-pos ${posClass(i)}">${posSymbol(i)}</span>
+          <span class="rank-name-arcade${isMe?' me':''}">${isMe?'▶ '+nome:nome}</span>
+          <span class="rank-xp-arcade">${p.xp.toLocaleString()} XP</span>
+        </div>`;
+    }).join('');
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">← Voltar</button>
+      <button class="back-btn" onclick="playClickSfx('back');stopRankingListener();state.tab='game';state.phase='start';render()">← Voltar</button>
       <span class="page-title">Ranking</span>
     </div>
-    <div class="section-title">Classificação Global</div>
-    <div class="rank-card">
-      ${data.map((p,i)=>`
-        <div class="rank-row ${p.isMe?'me':''}">
-          <span class="rank-pos ${i<3?'top':''}">${i+1}</span>
-          <div class="rank-avatar">${p.name[0]}</div>
-          <div class="rank-info">
-            <div class="rank-name">${p.isMe?'Você':p.name}</div>
-            <div class="rank-lvl">Nível ${p.lvl||lvlIdx+1} — ${LEVELS[Math.min((p.lvl||lvlIdx+1)-1,99)].title}</div>
-          </div>
-          <span class="rank-xp"><span style="color:#e03030">XP</span> ${p.xp}</span>
-        </div>`).join('')}
+    <div class="rank-arcade">
+      <div class="rank-arcade-header">
+        <div class="rank-arcade-title">🕹 HALL DA FAMA 🕹</div>
+        <div class="rank-arcade-sub">— TOP 10 • AO VIVO —</div>
+      </div>
+      ${rows}
     </div>
   `;
 }
@@ -3249,6 +3282,7 @@ function closeShopModal(){
 // ── Perfil ────────────────────────────────────────────────────
 function goToPerfil(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  stopRankingListener();
   state.tab='game';
   state.phase='perfil';
   render();
@@ -3429,6 +3463,7 @@ function signupUser(){
 }
 function logoutUser(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  stopRankingListener();
   auth.signOut();
 }
 function _authError(code){

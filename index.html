@@ -1605,6 +1605,7 @@ function exchangeDiamonds(btnEl){
   particles.push(...makeCoinParticles(cx-cl,cy));
   spawnCoinFloats(cx,cy,Math.min(gained,8));
   spawnFloat(cx,cy-60,`+${gained} moedas`,true);
+  saveProgress();
   render();
 }
 
@@ -1620,6 +1621,7 @@ function exchangePoints(btnEl){
   particles.push(...makeCoinParticles(cx-cl,cy));
   spawnCoinFloats(cx,cy,gained>0?6:3);
   spawnFloat(cx,cy-60,`+${gained} moedas`,true);
+  saveProgress();
   render();
 }
 
@@ -3179,6 +3181,7 @@ function comprarItem(id){
 function saveStreak(){
   try{localStorage.setItem('kp_streak',state.streak);
       localStorage.setItem('kp_bestStreak',state.bestStreak);}catch(e){}
+  saveProgress();
 }
 function loadStreak(){
   try{

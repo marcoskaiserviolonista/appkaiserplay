@@ -484,22 +484,21 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .lvlup-sub{font-size:.9rem;color:#bbb;margin-bottom:.6rem}
 .lvlup-unlock{display:inline-block;font-size:.8rem;color:#F5A623;background:#252525;border:2.5px solid #F5A623;border-radius:10px;padding:.45rem .9rem;margin-bottom:1.75rem;font-weight:700;box-shadow:3px 3px 0 #1a1a1a}
 
-/* ── Ranking Retrô ── */
-.rank-arcade{width:100%;max-width:520px;background:#000;border:3px solid #F5A623;border-radius:4px;box-shadow:0 0 24px #F5A62344, 5px 5px 0 #111;overflow:hidden;margin-bottom:1rem}
-.rank-arcade-header{background:#0a0800;border-bottom:2px solid #F5A62355;padding:.7rem 1rem;text-align:center}
-.rank-arcade-title{font-family:'VT323',monospace;font-size:1.6rem;color:#F5A623;letter-spacing:.15em;text-shadow:0 0 10px #F5A62388}
-.rank-arcade-sub{font-family:'VT323',monospace;font-size:.95rem;color:#666;letter-spacing:.1em}
-.rank-row{display:flex;align-items:center;gap:.75rem;padding:.6rem 1rem;border-bottom:1px solid #1a1500}
+/* ── Ranking ── */
+.rank-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:5px 5px 0 #151515;width:100%;max-width:520px}
+.rank-arcade-header{background:#161616;border-bottom:2px solid #2a2a2a;padding:.65rem 1rem;text-align:center}
+.rank-arcade-title{font-family:'VT323',monospace;font-size:2rem;color:#F5A623;letter-spacing:.2em;line-height:1}
+.rank-arcade-sub{font-size:.6rem;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:.15em;margin-top:.2rem}
+.rank-row{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;border-bottom:2px solid #252525}
 .rank-row:last-child{border-bottom:none}
-.rank-row.me{background:#0f0a00;border-left:3px solid #F5A623}
-.rank-row.rank-1{background:#0d0900}
-.rank-pos{font-family:'VT323',monospace;font-size:1.3rem;color:#444;width:28px;text-align:center;flex-shrink:0}
-.rank-pos.gold{color:#ffd700;text-shadow:0 0 8px #ffd70099}
-.rank-pos.silver{color:#c0c0c0;text-shadow:0 0 6px #c0c0c066}
-.rank-pos.bronze{color:#cd7f32;text-shadow:0 0 6px #cd7f3266}
-.rank-name-arcade{font-family:'VT323',monospace;font-size:1.25rem;color:#e8e8e8;flex:1;letter-spacing:.05em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rank-name-arcade.me{color:#F5A623;text-shadow:0 0 8px #F5A62366}
-.rank-xp-arcade{font-family:'VT323',monospace;font-size:1.2rem;color:#F5A623;flex-shrink:0;letter-spacing:.03em}
+.rank-row.me{background:#1f1a00;border-left:4px solid #F5A623}
+.rank-pos{font-family:'VT323',monospace;font-size:1.4rem;color:#555;width:26px;text-align:center;flex-shrink:0}
+.rank-pos.top{color:#F5A623}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:.88rem;font-weight:700;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:.62rem;color:#666;margin-top:.1rem}
+.rank-xp-col{text-align:right;flex-shrink:0}
+.rank-xp{font-size:.85rem;font-weight:800;color:#e03030}
 
 /* ── Particles / Floats ── */
 #pcanvas{position:fixed;top:0;left:50%;transform:translateX(-50%);pointer-events:none;z-index:999;width:520px;height:700px}
@@ -1713,12 +1712,7 @@ function goToTraining(){
   setTimeout(()=>playChord(state.chord),300);
 }
 
-function setTab(t){
-  if(t==='ranking') startRankingListener();
-  else stopRankingListener();
-  state.tab=t;
-  render();
-}
+function setTab(t){state.tab=t;render();}
 
 // ── 7. FUNÇÕES DE RENDERIZAÇÃO (UI) ──────────────────────────
 // ── TREINO FOCADO: Constantes ─────────────────────────────────
@@ -2357,8 +2351,9 @@ function render(){
 // ── Render: Start ─────────────────────────────────────────────
 function renderStart(){
   const acc=getAcc();
-  const rankData=[...MOCK_RANKING,{name:'Você',xp:state.xp,isMe:true}].sort((a,b)=>b.xp-a.xp);
-  const myPos=rankData.findIndex(p=>p.isMe)+1;
+  const myRankIdx=state.rankingData.findIndex(p=>p.uid===state.user?.uid);
+  const myPos=myRankIdx>=0?myRankIdx+1:null;
+  const rankDisplay=myPos?`#${myPos}`:'--';
   const lIdx=getLvlIdx(state.xp);
   const lvl=LEVELS[lIdx];
   const lvlStart=getLvlStartXP(lIdx);
@@ -2375,7 +2370,7 @@ function renderStart(){
       </div>
       <div class="profile-info">
         <div class="profile-name">${userName}</div>
-        <div class="profile-title">${lvl.title}</div>
+        <div class="profile-title">${lvl.title} <span style="font-size:.62rem;color:#F5A623;font-weight:800">${rankDisplay}</span></div>
         <div class="profile-xp-track"><div class="profile-xp-fill" style="width:${prog}%"></div></div>
         <div class="profile-xp-label">${state.xp-lvlStart} / ${lvl.xpToNext} XP</div>
       </div>
@@ -2405,7 +2400,7 @@ function renderStart(){
       <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">XP Total</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">Taxa de Acerto</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Melhor Sequência</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">#${myPos}</div><div class="us-lbl">Colocação</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">${rankDisplay}</div><div class="us-lbl">Colocação</div></div></div>
     </div>
     <div class="nav-grid" style="margin-top:.75rem">
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">Níveis</span></button>
@@ -3010,29 +3005,34 @@ function stopRankingListener(){
 function renderRanking(){
   const myUid=state.user?.uid;
   const data=state.rankingData;
-  const posClass=i=>i===0?'gold':i===1?'silver':i===2?'bronze':'';
-  const posSymbol=i=>i===0?'1ST':i===1?'2ND':i===2?'3RD':`${i+1}`;
   const rows=data.length===0
-    ?`<div style="font-family:'VT323',monospace;font-size:1.2rem;color:#555;text-align:center;padding:2rem;letter-spacing:.1em">CARREGANDO...</div>`
+    ?`<div style="color:#555;text-align:center;padding:2rem;font-size:.85rem">Carregando...</div>`
     :data.map((p,i)=>{
       const isMe=p.uid===myUid;
-      const nome=(p.displayName||'???').toUpperCase().slice(0,18);
+      const nome=p.displayName||'Jogador';
+      const lvlIdx=getLvlIdx(p.xp||0);
+      const lvl=LEVELS[lvlIdx];
       return `
-        <div class="rank-row${isMe?' me':''}${i===0?' rank-1':''}">
-          <span class="rank-pos ${posClass(i)}">${posSymbol(i)}</span>
-          <span class="rank-name-arcade${isMe?' me':''}">${isMe?'▶ '+nome:nome}</span>
-          <span class="rank-xp-arcade">${p.xp.toLocaleString()} XP</span>
+        <div class="rank-row${isMe?' me':''}">
+          <span class="rank-pos${i<3?' top':''}">${i+1}</span>
+          <div class="rank-info">
+            <div class="rank-name">${nome}</div>
+            <div class="rank-meta">Nível ${lvl.n} • ${lvl.title}</div>
+          </div>
+          <div class="rank-xp-col">
+            <div class="rank-xp">${(p.xp||0).toLocaleString()} <span style="font-size:.72rem">XP</span></div>
+          </div>
         </div>`;
     }).join('');
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');stopRankingListener();state.tab='game';state.phase='start';render()">← Voltar</button>
+      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">← Voltar</button>
       <span class="page-title">Ranking</span>
     </div>
-    <div class="rank-arcade">
+    <div class="rank-card">
       <div class="rank-arcade-header">
-        <div class="rank-arcade-title">🕹 HALL DA FAMA 🕹</div>
-        <div class="rank-arcade-sub">— TOP 10 • AO VIVO —</div>
+        <div class="rank-arcade-title">RANKING</div>
+        <div class="rank-arcade-sub">Top 10</div>
       </div>
       ${rows}
     </div>
@@ -3282,7 +3282,6 @@ function closeShopModal(){
 // ── Perfil ────────────────────────────────────────────────────
 function goToPerfil(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
-  stopRankingListener();
   state.tab='game';
   state.phase='perfil';
   render();
@@ -3484,8 +3483,11 @@ auth.onAuthStateChanged(async user=>{
   state.user=user||null;
   if(user){
     await loadProgress(user.uid);
+    startRankingListener();
     if(state.phase==='login')state.phase='start';
   } else {
+    stopRankingListener();
+    state.rankingData=[];
     state.phase='login';
   }
   try{render();}catch(e){console.error('render error:',e);}

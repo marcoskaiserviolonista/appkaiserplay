@@ -39,13 +39,6 @@
 @keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 @keyframes autoProgress{from{width:100%}to{width:0%}}
 @keyframes lvlupEntrance{0%{opacity:0;transform:scale(.85) translateY(24px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes lvlupBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-8px) scale(1.03)}60%{transform:translateY(-3px) scale(1.01)}}
-@keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 16px #F5A62388) brightness(1)}50%{filter:drop-shadow(0 0 32px #F5A623ff) brightness(1.14)}}
-@keyframes arrowUp{0%{transform:translateY(0);opacity:1}33%{transform:translateY(-5px);opacity:1}66%{transform:translateY(-10px);opacity:0}67%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
-@keyframes sparkOn{0%,100%{opacity:1;transform:scale(1) rotate(0deg)}25%{opacity:0;transform:scale(.4) rotate(45deg)}50%{opacity:1;transform:scale(1.2) rotate(0deg)}75%{opacity:.3;transform:scale(.7) rotate(-30deg)}}
-.lvlup-arrow{position:absolute;font-family:'VT323',monospace;font-size:2rem;color:#4ade80;text-shadow:0 0 6px #4ade80cc,2px 2px 0 #1a5c1a;animation:arrowUp .55s steps(4) infinite;pointer-events:none;image-rendering:pixelated}
-.lvlup-spark{position:absolute;font-family:'VT323',monospace;color:#F5A623;text-shadow:0 0 6px #F5A623cc;animation:sparkOn .7s steps(3) infinite;pointer-events:none}
-.lvlup-frame{position:relative;height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0}
 @keyframes scoreCount{0%{transform:scale(2);color:#F5A623}100%{transform:scale(1)}}
 @keyframes pulse{from{opacity:.8}to{opacity:1;text-shadow:0 0 18px rgba(245,166,35,.9)}}
 @keyframes walletPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
@@ -305,6 +298,7 @@ gap:.75rem;
 width:100%;
 max-width:520px;
 margin-bottom:.5rem;
+overflow:hidden;
 }
 .shop-card{
 position:relative;
@@ -377,6 +371,7 @@ align-items:center;
 justify-content:center;
 background:radial-gradient(ellipse at 50% 60%,#1e1e1e 0%,#0a0a0a 100%);
 padding:.5rem .5rem 0;
+overflow:hidden;
 }
 .shop-card-img{
 width:auto;
@@ -754,7 +749,7 @@ const STRINGS = {
     max_category:'✓ Categoria máxima', max_badge:'👑 Máximo',
     current_category:'Categoria Atual', next_category:'Próxima',
     here_badge:'Você está aqui', done_badge:'✓ Concluído',
-    in_progress_badge:'▶ Em progresso',
+    in_progress_badge:'Em progresso',
     step_done:'✓ Etapa Concluída', step_current:'▶ Etapa Atual',
     step_locked:'🔒 Bloqueado · Alcance o nível',
     step_progress:'Progresso nesta etapa',
@@ -930,7 +925,7 @@ const STRINGS = {
     max_category:'✓ Max category', max_badge:'👑 Maximum',
     current_category:'Current Category', next_category:'Next',
     here_badge:'You are here', done_badge:'✓ Completed',
-    in_progress_badge:'▶ In progress',
+    in_progress_badge:'In progress',
     step_done:'✓ Stage Completed', step_current:'▶ Current Stage',
     step_locked:'🔒 Locked · Reach level',
     step_progress:'Progress in this stage',
@@ -2289,32 +2284,16 @@ function startSmartSession(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   const allChords=[...CHORDS,...CHORDS_DIAMOND];
   const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
-  // Top 5 acordes específicos mais errados
   const specificWeak=Object.entries(state.chordStats)
     .filter(([,v])=>v.e>0).sort((a,b)=>b[1].e-a[1].e).slice(0,5)
     .map(([id])=>chordMap[parseInt(id)]).filter(Boolean);
-  // Agrupa erros por QUALIDADE do acorde (maior, menor, diminuto, etc.)
-  const qualityErrors={};
-  for(const[idStr,stats] of Object.entries(state.chordStats)){
-    const id=parseInt(idStr);const chord=chordMap[id];
-    if(!chord||stats.e===0)continue;
-    let quality=chord.quality||null;
-    if(!quality&&[125,126,127,128,145].includes(id))quality='meio-diminuto';
-    if(quality)qualityErrors[quality]=(qualityErrors[quality]||0)+stats.e;
-  }
-  // Top 2 qualidades com mais erros
-  const weakQualities=Object.entries(qualityErrors).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([q])=>q);
-  // Mapeamento qualidade → switch de qualidade
-  const qualityToPair={'maior':'maior_menor','menor':'maior_menor','diminuto':'menor_diminuto','meio-diminuto':'diminuto_meio_diminuto','aumentado':'diminuto_aumentado'};
-  const activePairs=[...new Set(weakQualities.map(q=>qualityToPair[q]).filter(Boolean))];
-  state.smartWeakQualities=weakQualities;
-  state.smartActivePairs=activePairs;
-  // Pool: acordes específicos fracos + acordes dos pares de qualidade
   const seen=new Set();const pool=[];
   for(const c of specificWeak){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}
-  for(const key of activePairs){for(const c of FOCUSED_SWITCH_POOLS[key]()){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
   if(pool.length<4){for(const c of allChords){if(pool.length>=4)break;if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
-  state.focusedPool=pool;state.isSmartSession=true;
+  state.focusedPool=pool;
+  state.isSmartSession=true;
+  state.smartActivePairs=[];
+  state.smartWeakQualities=[];
   state.focusedStreak=0;state.focusedSessionScore=0;state.focusedSessionTotal=0;state.focusedSessionCorrect=0;
   state.result=null;state.selected=null;state.qualitySelected=null;
   genFocusedQ();state.phase='treino_focado_question';render();
@@ -2326,22 +2305,11 @@ function genFocusedQ(){
 
   if(state.isSmartSession){
     // 50% qualidade (2 botões) se tiver pares ativos, 50% acorde específico (4 botões)
-    if(state.smartActivePairs?.length>0&&Math.random()<0.5){
-      const pairKey=state.smartActivePairs[Math.floor(Math.random()*state.smartActivePairs.length)];
-      const pair=FOCUSED_QUALITY_PAIRS[pairKey];
-      const keyPool=FOCUSED_SWITCH_POOLS[pairKey]();
-      const chord=keyPool[Math.floor(Math.random()*keyPool.length)];
-      state.chord=chord;state.isQuality=true;
-      state.qualityAnswer=getFocusedQualityForChord(chord,pairKey);
-      state.qualityPair=pair;state.choices=[];
-      state.selected=null;state.qualitySelected=null;state.result=null;
-    } else {
       const ans=pool[Math.floor(Math.random()*pool.length)];
       const wrong=_pickWrong(ans,pool);
       state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
       state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
       state.selected=null;state.qualitySelected=null;state.result=null;
-    }
     setTimeout(()=>playChord(state.chord),120);return;
   }
 
@@ -2612,21 +2580,7 @@ function renderTreinoFocadoMenu(){
         .map(([id])=>chordMap[parseInt(id)])
         .filter(Boolean)
     : [];
-  // Categorias de acordes com mais erros
-  const QUALITY_LABELS={'maior':'Acordes Maiores','menor':'Acordes Menores','diminuto':'Acordes Diminutos','meio-diminuto':'Acordes Meio Diminutos','aumentado':'Acordes Aumentados'};
-  const qualityErrors={};
-  if(hasHistory){
-    for(const[idStr,stats] of Object.entries(state.chordStats)){
-      const id=parseInt(idStr);const chord=chordMap[id];
-      if(!chord||stats.e===0)continue;
-      let quality=chord.quality||null;
-      if(!quality&&[125,126,127,128,145].includes(id))quality='meio-diminuto';
-      if(quality)qualityErrors[quality]=(qualityErrors[quality]||0)+stats.e;
-    }
-  }
-  const weakQualityLabels=Object.entries(qualityErrors).sort((a,b)=>b[1]-a[1]).slice(0,2)
-    .map(([q,errors])=>({label:QUALITY_LABELS[q]||q,errors}));
-  const hasSmartData=topErrors.length>0||weakQualityLabels.length>0;
+  const hasSmartData=topErrors.length>0;
 
   const section1=[
     {key:'maior_menor'},
@@ -2666,29 +2620,23 @@ function renderTreinoFocadoMenu(){
       <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">${t('choose_chords')}</div>
     </div>
     ${hasHistory&&hasSmartData?`
-    <div class="section-title" style="--sc:#60dcff">${t('training_suggestion')}</div>
-    <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">${t('most_missed_chords')}</div>
-      <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
-        ${topErrors.map(c=>`
-          <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
-            <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1">${c.cifra}</div>
-            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
-          </div>
-        `).join('')}
-        ${weakQualityLabels.map(cat=>`
-          <div style="background:#1a0e0e;border:2px solid #4a2020;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
-            <div style="font-size:.78rem;font-weight:900;color:#ffbbbb;line-height:1.2">${cat.label}</div>
-            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${cat.errors} ${t('wrong_answers').toLowerCase()}</div>
-          </div>
-        `).join('')}
+<div class="section-title" style="--sc:#60dcff">${t('training_suggestion')}</div>
+<div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+  <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">${t('most_missed_chords')}</div>
+  <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
+    ${topErrors.map(c=>`
+      <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:72px">
+        <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1">${c.cifra}</div>
+        <div style="font-size:.6rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
       </div>
-      <button
-        style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff44"
-        onclick="startSmartSession()">
-        <span style="font-size:1.2rem">🎯</span> ${t('train_weak_points')}
-      </button>
-    </div>`:''}
+    `).join('')}
+  </div>
+  <button
+    style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff44"
+    onclick="startSmartSession()">
+    <span style="font-size:1.2rem">🎯</span> ${t('train_weak_points')}
+  </button>
+</div>`:''}
     <div class="section-title">${t('train_by_quality')}</div>
     ${section1.map(makeSwitch).join('')}
     <div class="section-title">${t('train_by_type')}</div>
@@ -2847,9 +2795,9 @@ function render(){
     tRanking.className='tab';
   }
   if(state.phase==='perfil'){
-    tPerfil.className='tab active';
+    tPerfil.style.opacity='1';tPerfil.style.filter='brightness(1.2)';
   } else {
-    tPerfil.className='tab';
+    tPerfil.style.opacity='';tPerfil.style.filter='';
   }
   const c=document.getElementById('content');
   // toggle bottom padding when combo bar is visible
@@ -2864,7 +2812,7 @@ function render(){
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
-  if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
+  if(state.phase==='levelup'){c.innerHTML=renderLevelUp();requestAnimationFrame(()=>initLevelUpCanvas('lvlup-canvas'));return;}
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
   if(state.phase==='inventario'){c.innerHTML=renderInventario();return;}
@@ -3162,6 +3110,95 @@ function renderGame(){
   `;
 }
 
+function initLevelUpCanvas(id){
+  const cv=document.getElementById(id);
+  if(!cv||cv._anim)return;
+  cv._anim=true;
+  const cx=cv.getContext('2d');
+  const W=cv.width,H=cv.height;
+  const U=3;
+  let t=0,raf=null;
+
+  function px(x,y,w,h,c){cx.fillStyle=c;cx.fillRect(x*U,y*U,w*U,h*U);}
+
+  const BX=8,BY=10,BW=77,BH=25;
+
+  function drawBanner(glow){
+    cx.save();
+    cx.shadowBlur=16+glow*20;cx.shadowColor='#F5A623';cx.globalAlpha=.2+glow*.2;
+    cx.fillStyle='#F5A623';cx.fillRect((BX+2)*U,(BY+2)*U,(BW-4)*U,(BH-4)*U);
+    cx.restore();
+    px(BX,BY,BW,BH,'#110800');
+    px(BX+1,BY+1,BW-2,BH-2,'#1c0e00');
+    px(BX+2,BY+2,BW-4,BH-4,'#F5A623');
+    px(BX+2,BY+2,BW-4,1,'#FFD880');
+    px(BX+2,BY+2,1,BH-4,'#FFD880');
+    px(BX+2,BY+BH-3,BW-4,1,'#B06000');
+    px(BX+BW-3,BY+2,1,BH-4,'#B06000');
+    px(BX+3,BY+3,BW-6,1,'#FFE0A0');
+    px(BX+3,BY+3,1,BH-6,'#FFE0A0');
+    px(BX+3,BY+BH-4,BW-6,1,'#C07800');
+    px(BX+BW-4,BY+3,1,BH-6,'#C07800');
+  }
+
+  function drawText(){
+    cx.save();
+    cx.font=`${7*U}px 'VT323',monospace`;
+    cx.textAlign='center';cx.textBaseline='middle';
+    const tx=W/2,ty=(BY+BH/2)*U;
+    cx.fillStyle='rgba(60,25,0,.6)';cx.fillText('LEVEL UP',tx+2,ty+2);
+    cx.fillStyle='#fff';cx.fillText('LEVEL UP',tx,ty);
+    cx.restore();
+  }
+
+  const ARR=[[2,0],[1,1],[2,1],[3,1],[0,2],[1,2],[2,2],[3,2],[4,2],[2,3],[2,4],[2,5],[2,6]];
+  function drawArrow(ax,ay,col,alpha){
+    cx.globalAlpha=alpha;cx.fillStyle=col;
+    ARR.forEach(([dx,dy])=>cx.fillRect((ax+dx)*U,(ay+dy)*U,U,U));
+    cx.globalAlpha=1;
+  }
+
+  const SP_S=[[1,0],[0,1],[1,1],[2,1],[1,2]];
+  const SP_L=[[2,0],[1,1],[2,1],[3,1],[0,2],[1,2],[2,2],[3,2],[4,2],[1,3],[2,3],[3,3],[2,4]];
+  function drawSpark(sx,sy,big,col){
+    cx.fillStyle=col;
+    (big?SP_L:SP_S).forEach(([dx,dy])=>cx.fillRect((sx+dx)*U,(sy+dy)*U,U,U));
+  }
+
+  const SPARKS=[
+    {x:1,y:1,big:true,ph:0},{x:83,y:1,big:true,ph:6},
+    {x:0,y:19,big:false,ph:3},{x:88,y:18,big:false,ph:9},
+    {x:29,y:38,big:false,ph:2},{x:55,y:39,big:false,ph:5},
+    {x:19,y:0,big:false,ph:4},{x:67,y:0,big:false,ph:7},
+  ];
+  const SCOLS=['#FFD047','#F5A623','#FFE880'];
+
+  function frame(){
+    cx.clearRect(0,0,W,H);
+    const glow=(Math.sin(t*0.08)+1)/2;
+    drawBanner(glow);
+    drawText();
+    const astep=Math.floor(t/4)%12;
+    const aVisible=astep<8;
+    const ay=BY-2-astep;
+    const aAlpha=aVisible?(astep>=5?(8-astep)/3:1):0;
+    const aCol=glow>0.5?'#4ade80':'#22c55e';
+    if(aAlpha>0.05){
+      drawArrow(BX-1,ay,aCol,aAlpha);
+      drawArrow(BX+BW-4,ay,aCol,aAlpha);
+    }
+    for(const s of SPARKS){
+      const ph=(t*0.7+s.ph*3.7)%14;
+      if(ph<9)drawSpark(s.x,s.y,s.big,SCOLS[Math.floor((t+s.ph*2)/5)%3]);
+    }
+    t++;
+    if(state.phase==='levelup')raf=requestAnimationFrame(frame);
+    else cancelAnimationFrame(raf);
+  }
+
+  document.fonts.ready.then(()=>{raf=requestAnimationFrame(frame);});
+}
+
 function renderLevelUp(){
   const lvl=LEVELS[getLvlIdx(state.xp)];
   const grupo=NIVEL_GROUPS.find(g=>lvl.n>=g.range[0]&&lvl.n<=g.range[1])||NIVEL_GROUPS[0];
@@ -3191,20 +3228,7 @@ function renderLevelUp(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:12dvh;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
-        <div class="lvlup-frame">
-          <img src="up.png"
-            style="max-height:100%;max-width:100%;object-fit:contain;animation:lvlupBounce .9s ease-in-out infinite,lvlupGlow 1.1s ease-in-out infinite;position:relative;z-index:1"
-            onerror="this.style.display='none'">
-          <!-- pixel arrows -->
-          <span class="lvlup-arrow" style="left:18%;top:2%;font-size:1.9rem;animation-delay:0s">▲</span>
-          <span class="lvlup-arrow" style="right:18%;top:2%;font-size:1.9rem;animation-delay:.18s">▲</span>
-          <!-- sparkles - corners and sides -->
-          <span class="lvlup-spark" style="left:6%;top:18%;font-size:1.2rem;animation-delay:0s">✦</span>
-          <span class="lvlup-spark" style="right:4%;top:22%;font-size:.9rem;animation-delay:.23s">✦</span>
-          <span class="lvlup-spark" style="left:28%;bottom:8%;font-size:.85rem;animation-delay:.41s">+</span>
-          <span class="lvlup-spark" style="right:24%;bottom:5%;font-size:1rem;animation-delay:.15s">+</span>
-          <span class="lvlup-spark" style="left:50%;top:5%;font-size:.8rem;animation-delay:.35s;transform:translateX(-50%)">✦</span>
-        </div>
+        <canvas id="lvlup-canvas" width="280" height="165" style="display:block;max-width:100%;max-height:31dvh;image-rendering:pixelated;image-rendering:crisp-edges"></canvas>
         <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">${t('new_level')}</div>
         <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;text-shadow:4px 4px 0 ${cor}99,0 0 30px ${cor}55;line-height:1;margin-bottom:.9rem">${lvl.n}</div>
         <button class="cta-btn" onclick="afterLvlUp()">${t('continue_journey')}</button>

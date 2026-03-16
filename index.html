@@ -812,19 +812,20 @@ function playChord(chord){
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent='♪ Tocando...';_pbtn.classList.add('playing');}
+  const noteDelay=chord.midi.length>1?Math.round(550/(chord.midi.length-1)):110;
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
       const id=howls[sn].play();
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
-    },i*110);
+    },i*noteDelay);
   });
   _playTimer=setTimeout(()=>{
     _playTimer=null;state.playing=false;
     const _pbtn2=document.querySelector('.play-btn');
     if(_pbtn2){_pbtn2.textContent='Ouvir Acorde';_pbtn2.classList.remove('playing');}
-  },chord.midi.length*110+3000);
+  },(chord.midi.length-1)*noteDelay+3000);
 }
 
 function playSfx(type){
@@ -2550,7 +2551,7 @@ function renderLevelUp(){
 
   // Subiu de nível dentro da mesma categoria: janela simples
   return `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:18dvh;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:12dvh;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
         <div style="height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0">
           <img src="up.png"

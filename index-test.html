@@ -2399,7 +2399,7 @@ function render(){
     _saveTimer=setTimeout(saveProgress,4000);
   }
   const header=document.querySelector('.header');
-  if(header)header.style.display=(state.phase==='login'||state.phase==='signup'||state.phase==='set_display_name')?'none':'';
+  if(header)header.style.display=(state.phase==='login'||state.phase==='signup'||state.phase==='set_display_name'||state.phase==='forgot_password')?'none':'';
   const tRanking=document.getElementById('tab-ranking');
   const tPerfil=document.getElementById('tab-perfil');
   if(state.tab==='ranking'){
@@ -2418,6 +2418,7 @@ function render(){
   if(appEl){appEl.classList.toggle('has-combo',state.streak>=1&&state.tab==='game'&&['question','answered'].includes(state.phase));}
   if(state.phase==='login'){c.innerHTML=renderLogin();return;}
   if(state.phase==='signup'){c.innerHTML=renderSignup();return;}
+  if(state.phase==='forgot_password'){c.innerHTML=renderForgotPassword();return;}
   if(state.phase==='set_display_name'){c.innerHTML=renderSetDisplayName();return;}
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
@@ -2506,7 +2507,7 @@ function renderLogin(){
         <input id="login-password" type="password" placeholder="Senha" autocomplete="current-password"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.4rem;outline:none;box-sizing:border-box">
         <div style="text-align:right;margin-bottom:.75rem">
-          <span onclick="forgotPassword()" style="font-size:.78rem;color:#888;font-weight:600;text-decoration:underline;cursor:pointer">Esqueci minha senha</span>
+          <span onclick="state.phase='forgot_password';render()" style="font-size:.78rem;color:#888;font-weight:600;text-decoration:underline;cursor:pointer">Esqueci minha senha</span>
         </div>
         <div id="login-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="loginUser()"
@@ -2545,6 +2546,30 @@ function renderSignup(){
         <button onclick="state.phase='login';render()"
           style="width:100%;padding:.65rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
           ← Já tenho conta
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderForgotPassword(){
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
+      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
+        <div style="font-size:1.35rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:.75rem;text-align:center">Recuperar minha senha</div>
+        <div style="font-size:.85rem;color:#aaa;line-height:1.55;margin-bottom:1.2rem;text-align:center">Preencha abaixo seu endereço de email para receber as instruções necessárias e criar uma nova senha.</div>
+        <input id="forgot-email" type="email" placeholder="E-mail" autocomplete="email"
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
+        <div id="forgot-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
+        <button onclick="forgotPassword()"
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:1rem">
+          Enviar instruções
+        </button>
+        <button onclick="state.phase='login';render()"
+          style="width:100%;padding:.65rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
+          ← Voltar ao login
         </button>
       </div>
     </div>
@@ -3598,12 +3623,12 @@ function loginUser(){
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
 function forgotPassword(){
-  const email=document.getElementById('login-email').value.trim();
-  const errEl=document.getElementById('login-error');
+  const email=document.getElementById('forgot-email').value.trim();
+  const errEl=document.getElementById('forgot-error');
   errEl.style.color='';
   if(!email){errEl.textContent='Digite seu e-mail primeiro.';return;}
   auth.sendPasswordResetEmail(email)
-    .then(()=>{errEl.style.color='#4ade80';errEl.textContent='E-mail de recuperação enviado!'})
+    .then(()=>{errEl.style.color='#4ade80';errEl.textContent='E-mail de recuperação enviado! Verifique sua caixa de entrada.'})
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
 function signupUser(){

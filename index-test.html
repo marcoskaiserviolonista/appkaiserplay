@@ -1526,10 +1526,10 @@ function getLvlIdx(xp){
 function getLvlStartXP(idx){return LEVEL_XP_START[idx]||0;}
 
 const state={
-  tab:'game',phase:'login',
+  tab:'game',phase:'start',
   user:null,
   lang:null,
-  isGuest:false,guestExerciseCount:0,guestNextPrompt:1,showGuestPopup:false,
+  isGuest:true,guestExerciseCount:0,guestNextPrompt:1,showGuestPopup:false,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},

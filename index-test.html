@@ -2370,7 +2370,8 @@ function renderStart(){
       </div>
       <div class="profile-info">
         <div class="profile-name">${userName}</div>
-        <div class="profile-title">${lvl.title} <span style="font-size:.62rem;color:#F5A623;font-weight:800">${rankDisplay}</span></div>
+        <div class="profile-title">${lvl.title}</div>
+        ${myPos?`<div style="font-size:.6rem;color:#F5A623;font-weight:700;margin-top:.1rem">Rank: ${myPos}</div>`:''}
         <div class="profile-xp-track"><div class="profile-xp-fill" style="width:${prog}%"></div></div>
         <div class="profile-xp-label">${state.xp-lvlStart} / ${lvl.xpToNext} XP</div>
       </div>
@@ -2549,7 +2550,7 @@ function renderLevelUp(){
 
   // Subiu de nível dentro da mesma categoria: janela simples
   return `
-    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:18dvh;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
         <div style="height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0">
           <img src="up.png"

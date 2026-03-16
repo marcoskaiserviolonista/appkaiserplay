@@ -751,7 +751,7 @@ function _poolForLvl(n){
 // XP por nível n = 6 acertos × 10 XP × n = 60n
 const LEVELS = Array.from({length:100},(_,i)=>{
   const n=i+1;
-  return{n,title:_titleForLvl(n),xpToNext:n===100?999999:n===99?400*99*3:400*n,pool:_poolForLvl(n)};
+  return{n,title:_titleForLvl(n),xpToNext:n===100?999999:n===99?400*99*3:n>=50?Math.round(400*n*(1+(n-50)*0.08)):400*n,pool:_poolForLvl(n)};
 });
 
 const MOCK_RANKING = [

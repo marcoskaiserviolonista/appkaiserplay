@@ -543,7 +543,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
     </div>
     <div class="header-tabs">
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
-      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()">⚙️</button>
+      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="display:flex;align-items:center;justify-content:center;padding:.35rem .55rem"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
     </div>
   </div>
   <div id="content"></div>
@@ -1166,7 +1166,8 @@ const state={
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false},
-  focusedPool:[],isSmartSession:false,focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
+  focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
+  _pendingDisplayName:false,
   fullAccess:true,
   rankingData:[],
 };
@@ -1854,22 +1855,30 @@ function startSmartSession(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   const allChords=[...CHORDS,...CHORDS_DIAMOND];
   const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
+  // Top 5 acordes específicos mais errados
   const specificWeak=Object.entries(state.chordStats)
     .filter(([,v])=>v.e>0).sort((a,b)=>b[1].e-a[1].e).slice(0,5)
     .map(([id])=>chordMap[parseInt(id)]).filter(Boolean);
-  const catErrors={};
+  // Agrupa erros por QUALIDADE do acorde (maior, menor, diminuto, etc.)
+  const qualityErrors={};
   for(const[idStr,stats] of Object.entries(state.chordStats)){
     const id=parseInt(idStr);const chord=chordMap[id];
     if(!chord||stats.e===0)continue;
-    for(const key of Object.keys(FOCUSED_SWITCH_POOLS)){
-      if(isQualitySwitch(key))continue;
-      if(FOCUSED_SWITCH_POOLS[key]().some(c=>c.id===id))catErrors[key]=(catErrors[key]||0)+stats.e;
-    }
+    let quality=chord.quality||null;
+    if(!quality&&[125,126,127,128,145].includes(id))quality='meio-diminuto';
+    if(quality)qualityErrors[quality]=(qualityErrors[quality]||0)+stats.e;
   }
-  const weakCatKeys=Object.entries(catErrors).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([k])=>k);
+  // Top 2 qualidades com mais erros
+  const weakQualities=Object.entries(qualityErrors).sort((a,b)=>b[1]-a[1]).slice(0,2).map(([q])=>q);
+  // Mapeamento qualidade → switch de qualidade
+  const qualityToPair={'maior':'maior_menor','menor':'maior_menor','diminuto':'menor_diminuto','meio-diminuto':'diminuto_meio_diminuto','aumentado':'diminuto_aumentado'};
+  const activePairs=[...new Set(weakQualities.map(q=>qualityToPair[q]).filter(Boolean))];
+  state.smartWeakQualities=weakQualities;
+  state.smartActivePairs=activePairs;
+  // Pool: acordes específicos fracos + acordes dos pares de qualidade
   const seen=new Set();const pool=[];
   for(const c of specificWeak){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}
-  for(const key of weakCatKeys){for(const c of FOCUSED_SWITCH_POOLS[key]()){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
+  for(const key of activePairs){for(const c of FOCUSED_SWITCH_POOLS[key]()){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
   if(pool.length<4){for(const c of allChords){if(pool.length>=4)break;if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
   state.focusedPool=pool;state.isSmartSession=true;
   state.focusedStreak=0;state.focusedSessionScore=0;state.focusedSessionTotal=0;state.focusedSessionCorrect=0;
@@ -1882,11 +1891,23 @@ function genFocusedQ(){
   if(!pool||pool.length<2) return;
 
   if(state.isSmartSession){
-    const ans=pool[Math.floor(Math.random()*pool.length)];
-    const wrong=_pickWrong(ans,pool);
-    state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
-    state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
-    state.selected=null;state.qualitySelected=null;state.result=null;
+    // 50% qualidade (2 botões) se tiver pares ativos, 50% acorde específico (4 botões)
+    if(state.smartActivePairs?.length>0&&Math.random()<0.5){
+      const pairKey=state.smartActivePairs[Math.floor(Math.random()*state.smartActivePairs.length)];
+      const pair=FOCUSED_QUALITY_PAIRS[pairKey];
+      const keyPool=FOCUSED_SWITCH_POOLS[pairKey]();
+      const chord=keyPool[Math.floor(Math.random()*keyPool.length)];
+      state.chord=chord;state.isQuality=true;
+      state.qualityAnswer=getFocusedQualityForChord(chord,pairKey);
+      state.qualityPair=pair;state.choices=[];
+      state.selected=null;state.qualitySelected=null;state.result=null;
+    } else {
+      const ans=pool[Math.floor(Math.random()*pool.length)];
+      const wrong=_pickWrong(ans,pool);
+      state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
+      state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
+      state.selected=null;state.qualitySelected=null;state.result=null;
+    }
     setTimeout(()=>playChord(state.chord),120);return;
   }
 
@@ -2157,20 +2178,20 @@ function renderTreinoFocadoMenu(){
         .map(([id])=>chordMap[parseInt(id)])
         .filter(Boolean)
     : [];
-  const catErrors={};
+  const QUALITY_LABELS={'maior':'Acordes Maiores','menor':'Acordes Menores','diminuto':'Acordes Diminutos','meio-diminuto':'Acordes Meio Diminutos','aumentado':'Acordes Aumentados'};
+  const qualityErrors={};
   if(hasHistory){
     for(const[idStr,stats] of Object.entries(state.chordStats)){
       const id=parseInt(idStr);const chord=chordMap[id];
       if(!chord||stats.e===0)continue;
-      for(const key of Object.keys(FOCUSED_SWITCH_POOLS)){
-        if(isQualitySwitch(key))continue;
-        if(FOCUSED_SWITCH_POOLS[key]().some(c=>c.id===id))catErrors[key]=(catErrors[key]||0)+stats.e;
-      }
+      let quality=chord.quality||null;
+      if(!quality&&[125,126,127,128,145].includes(id))quality='meio-diminuto';
+      if(quality)qualityErrors[quality]=(qualityErrors[quality]||0)+stats.e;
     }
   }
-  const weakCatLabels=Object.entries(catErrors).sort((a,b)=>b[1]-a[1]).slice(0,2)
-    .map(([key,errors])=>({label:FOCUSED_SWITCH_LABELS[key],errors}));
-  const hasSmartData=topErrors.length>0||weakCatLabels.length>0;
+  const weakQualityLabels=Object.entries(qualityErrors).sort((a,b)=>b[1]-a[1]).slice(0,2)
+    .map(([q,errors])=>({label:QUALITY_LABELS[q]||q,errors}));
+  const hasSmartData=topErrors.length>0||weakQualityLabels.length>0;
 
   const section1=[
     {key:'maior_menor'},
@@ -2220,7 +2241,7 @@ function renderTreinoFocadoMenu(){
             <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} erros</div>
           </div>
         `).join('')}
-        ${weakCatLabels.map(cat=>`
+        ${weakQualityLabels.map(cat=>`
           <div style="background:#1a0e0e;border:2px solid #4a2020;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
             <div style="font-size:.78rem;font-weight:900;color:#ffbbbb;line-height:1.2">${cat.label}</div>
             <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${cat.errors} erros</div>
@@ -2378,7 +2399,7 @@ function render(){
     _saveTimer=setTimeout(saveProgress,4000);
   }
   const header=document.querySelector('.header');
-  if(header)header.style.display=state.phase==='login'?'none':'';
+  if(header)header.style.display=(state.phase==='login'||state.phase==='set_display_name')?'none':'';
   const tRanking=document.getElementById('tab-ranking');
   const tPerfil=document.getElementById('tab-perfil');
   if(state.tab==='ranking'){
@@ -2396,6 +2417,7 @@ function render(){
   const appEl=document.getElementById('app');
   if(appEl){appEl.classList.toggle('has-combo',state.streak>=1&&state.tab==='game'&&['question','answered'].includes(state.phase));}
   if(state.phase==='login'){c.innerHTML=renderLogin();return;}
+  if(state.phase==='set_display_name'){c.innerHTML=renderSetDisplayName();return;}
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
@@ -2481,15 +2503,39 @@ function renderLogin(){
         <input id="login-email" type="email" placeholder="E-mail" autocomplete="email"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
         <input id="login-password" type="password" placeholder="Senha" autocomplete="current-password"
-          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.4rem;outline:none;box-sizing:border-box">
+        <div style="text-align:right;margin-bottom:.75rem">
+          <span onclick="forgotPassword()" style="font-size:.78rem;color:#888;font-weight:600;text-decoration:underline;cursor:pointer">Esqueci minha senha</span>
+        </div>
         <div id="login-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="loginUser()"
-          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem">
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:1rem">
           Entrar
         </button>
+        <div style="text-align:center;font-size:.82rem;color:#666;font-weight:600;margin-bottom:.6rem">Não tem conta?</div>
         <button onclick="signupUser()"
           style="width:100%;padding:.75rem;background:#1e1e1e;border:2px solid #333;border-radius:14px;color:#aaa;font-size:.9rem;font-weight:700;font-family:var(--font-body);cursor:pointer">
           Criar conta
+        </button>
+      </div>
+    </div>
+  `;
+}
+
+function renderSetDisplayName(){
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
+      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;text-align:center">Conta criada!</div>
+        <div style="font-size:.88rem;color:#ddd;font-weight:500;margin-bottom:1.2rem;text-align:center;line-height:1.5">Agora escolha o <strong style="color:#F5A623">nome de exibição</strong> que aparecerá no jogo.</div>
+        <input id="display-name-input" type="text" placeholder="Nome de exibição" maxlength="30" autocomplete="nickname"
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
+        <div id="display-name-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
+        <button onclick="saveDisplayName()"
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4)">
+          Salvar e entrar
         </button>
       </div>
     </div>
@@ -3362,12 +3408,12 @@ function renderPerfil(){
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title">Perfil</span>
+      <span class="page-title">Configurações</span>
     </div>
     <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;padding-bottom:2rem">
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Nome de exibição</div>
+        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar nome de exibição</div>
         ${field('Nome no ranking','perfil-nome','text','Seu nome',displayName)}
         <button onclick="perfilSalvarNome()"
           style="width:100%;padding:.7rem;background:linear-gradient(180deg,#a78bfa,#7c3aed);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
@@ -3377,7 +3423,8 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar e-mail</div>
+        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">Trocar e-mail</div>
+        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">Opcional — preencha só se quiser alterar</div>
         ${field('Novo e-mail','perfil-email','email','Novo e-mail','')}
         ${field('Senha atual','perfil-email-senha','password','Senha atual','')}
         <button onclick="perfilTrocarEmail()"
@@ -3388,7 +3435,8 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar senha</div>
+        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">Trocar senha</div>
+        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">Opcional — preencha só se quiser alterar</div>
         ${field('Senha atual','perfil-senha-atual','password','Senha atual','')}
         ${field('Nova senha','perfil-senha-nova','password','Mínimo 6 caracteres','')}
         <button onclick="perfilTrocarSenha()"
@@ -3413,6 +3461,14 @@ function renderPerfil(){
 
     </div>
   `;
+}
+function saveDisplayName(){
+  const name=document.getElementById('display-name-input').value.trim();
+  const errEl=document.getElementById('display-name-error');
+  if(!name){errEl.textContent='Escolha um nome.';return;}
+  auth.currentUser.updateProfile({displayName:name})
+    .then(()=>{state.user=auth.currentUser;state.phase='start';render();})
+    .catch(()=>{errEl.textContent='Erro ao salvar. Tente novamente.';});
 }
 function perfilSalvarNome(){
   const nome=document.getElementById('perfil-nome').value.trim();
@@ -3512,14 +3568,24 @@ function loginUser(){
   auth.signInWithEmailAndPassword(email,password)
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
+function forgotPassword(){
+  const email=document.getElementById('login-email').value.trim();
+  const errEl=document.getElementById('login-error');
+  errEl.style.color='';
+  if(!email){errEl.textContent='Digite seu e-mail primeiro.';return;}
+  auth.sendPasswordResetEmail(email)
+    .then(()=>{errEl.style.color='#4ade80';errEl.textContent='E-mail de recuperação enviado!'})
+    .catch(e=>{errEl.textContent=_authError(e.code);});
+}
 function signupUser(){
   const email=document.getElementById('login-email').value.trim();
   const password=document.getElementById('login-password').value;
   const errEl=document.getElementById('login-error');
   errEl.textContent='';
   if(!email||!password){errEl.textContent='Preencha e-mail e senha.';return;}
+  state._pendingDisplayName=true;
   auth.createUserWithEmailAndPassword(email,password)
-    .catch(e=>{errEl.textContent=_authError(e.code);});
+    .catch(e=>{state._pendingDisplayName=false;errEl.textContent=_authError(e.code);});
 }
 function logoutUser(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
@@ -3545,7 +3611,10 @@ auth.onAuthStateChanged(async user=>{
   if(user){
     await loadProgress(user.uid);
     startRankingListener();
-    if(state.phase==='login')state.phase='start';
+    if(state.phase==='login'||state.phase==='set_display_name'){
+      if(state._pendingDisplayName){state.phase='set_display_name';state._pendingDisplayName=false;}
+      else{state.phase='start';}
+    }
   } else {
     stopRankingListener();
     state.rankingData=[];

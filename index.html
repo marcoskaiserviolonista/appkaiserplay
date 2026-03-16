@@ -576,6 +576,363 @@ const db=firebase.firestore();
 // 9. INICIALIZAÇÃO
 // ======================================================
 
+// ── STRINGS: dicionário i18n ──────────────────────────────────
+const STRINGS = {
+  pt: {
+    // Navegação
+    journey:'Jornada', ranking:'Ranking', shop:'Loja', settings:'Configurações', focused_training:'Treino Focado',
+    // Auth - Login
+    sign_in:'Entrar', create_account:'Criar conta', forgot_password:'Esqueci minha senha',
+    email:'E-mail', password:'Senha', play_as_guest:'Jogar sem conta',
+    already_have_account:'← Já tenho conta', back_to_signin:'← Voltar ao login',
+    // Auth - Signup
+    signup_title:'Criar conta', display_name:'Nome de exibição',
+    display_name_hint:'Este nome aparecerá no jogo e no ranking.',
+    password_min:'Senha (mínimo 6 caracteres)', signup_button:'Criar conta',
+    // Auth - Forgot
+    recover_password_title:'Recuperar minha senha',
+    recover_password_desc:'Preencha abaixo seu endereço de email para receber as instruções necessárias e criar uma nova senha. O email pode demorar até 10 minutos para chegar.',
+    send_instructions:'Enviar instruções',
+    reset_email_sent:'E-mail de recuperação enviado! Verifique sua caixa de entrada.',
+    enter_email_first:'Digite seu e-mail primeiro.',
+    // Auth - Set display name
+    account_created:'Conta criada!',
+    choose_display_name:'Agora escolha o <strong style="color:#F5A623">nome de exibição</strong> que aparecerá no jogo.',
+    save_and_enter:'Salvar e entrar',
+    // Auth errors
+    auth_invalid_email:'E-mail inválido.',
+    auth_user_disabled:'Conta desativada.',
+    auth_user_not_found:'Usuário não encontrado.',
+    auth_wrong_password:'Senha incorreta.',
+    auth_email_in_use:'Este e-mail já está cadastrado.',
+    auth_weak_password:'A senha é muito fraca.',
+    auth_too_many_requests:'Muitas tentativas. Tente mais tarde.',
+    auth_network_error:'Erro de conexão. Verifique sua internet.',
+    auth_generic_error:'Erro ao autenticar. Tente novamente.',
+    // Validation
+    fill_all_fields:'Preencha todos os campos.',
+    password_too_short:'A senha deve ter pelo menos 6 caracteres.',
+    enter_display_name:'Digite um nome de exibição.',
+    // Settings
+    settings_title:'Configurações', change_display_name:'Trocar nome de exibição',
+    save:'Salvar', sign_out:'Sair da conta', registered_email:'E-mail cadastrado',
+    optional:'Opcional', change_email:'Trocar e-mail', change_password:'Trocar senha',
+    new_email:'Novo e-mail', new_password:'Nova senha', current_password:'Senha atual',
+    choose_language:'Escolha seu idioma',
+    display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
+    // Game - General
+    play:'Jogar', next:'Próxima', confirm:'Confirmar', back:'Voltar',
+    level:'Nível', xp:'XP', points:'Pontos', coins:'Moedas', diamonds:'Diamantes',
+    score:'Pontuação', correct_answers:'Acertos', wrong_answers:'Erros',
+    streak:'Sequência', best_streak:'Melhor sequência',
+    // Game - Questions
+    which_chord:'Qual acorde você ouviu?',
+    quality_question_major_minor:'Maior ou Menor?',
+    quality_question_minor_dim:'Menor ou Diminuto?',
+    quality_question_dim_halfdim:'Diminuto ou Meio Dim.?',
+    quality_question_dim_aug:'Diminuto ou Aumentado?',
+    diamond_question:'Pergunta Diamante',
+    // Game - Results
+    correct:'Correto!', wrong:'Errou!', answer_was:'A resposta era',
+    // Combo
+    combo_prefix:'🔥', combo_suffix:'combo!',
+    // Level Up
+    level_up:'Level Up!', new_level:'Nível',
+    // Journey
+    journey_title:'Jornada', start_playing:'Jogar', continue_playing:'Continuar', your_progress:'Seu progresso',
+    // Economy
+    exchange_points:'Trocar Pontos', exchange_diamonds:'Trocar Diamantes',
+    points_to_coins_rate:'100 pontos = 1 moeda', diamonds_to_coins_rate:'1 diamante = 10 moedas',
+    exchange_button:'Trocar', not_enough_points:'Pontos insuficientes.',
+    not_enough_diamonds:'Sem diamantes para trocar.', not_enough_coins:'Moedas insuficientes.',
+    // Shop
+    shop_title:'Loja', guitars:'Violões', educational_materials:'Materiais Didáticos',
+    buy:'Comprar', equipped:'Equipado', equip:'Equipar', already_owned:'Adquirido',
+    bonus_points:'+{n}% de bônus de pontos',
+    // Shop items
+    item_arte_auditiva_name:'A Arte Auditiva do Violão', item_arte_auditiva_desc:'Como tirar músicas de ouvido',
+    item_tab_greensleeves_name:'Tablatura de Greensleeves', item_tab_greensleeves_desc:'Partitura completa + tab',
+    item_tab_romance_name:'Tablatura de Romance de Amor', item_tab_romance_desc:'Partitura completa + tab',
+    item_arte_harmonica_name:'A Arte Harmônica do Violão', item_arte_harmonica_desc:'Teoria harmônica aplicada',
+    item_cupom_name:'CUPOM 20% off — Plano Vitalício', item_cupom_desc:'Desconto exclusivo KaiserPlay',
+    // Guitar names
+    guitar_basico_name:'Violão Básico',
+    guitar_bom_name:'Violão Bom', guitar_luthier_name:'Violão de Luthier',
+    guitar_ouro_name:'Violão de Ouro', guitar_diamante_name:'Violão de Diamante',
+    // Focused Training
+    focused_training_title:'Treino Focado', training_suggestion:'Sugestão de treino',
+    most_missed_chords:'Acordes mais errados:', most_missed_qualities:'Qualidades mais erradas:',
+    train_weak_points:'Treinar pontos fracos', no_weak_points:'Sem pontos fracos identificados ainda.',
+    locked:'Bloqueado', unlock:'Desbloquear', free:'Grátis',
+    // Quality pair labels
+    quality_major:'Maior', quality_minor:'Menor', quality_diminished:'Diminuto',
+    quality_half_dim:'Meio Dim.', quality_augmented:'Aumentado',
+    // Switch labels
+    switch_maior_menor:'Maior ou Menor', switch_menor_diminuto:'Menor ou Diminuto',
+    switch_triades_maiores:'Tríades Maiores', switch_tetrades_menores:'Tétrades Menores',
+    switch_dominantes:'Dominantes', switch_triades_menores:'Tríades Menores',
+    switch_tetrades_maiores:'Tétrades Maiores (7M)', switch_diminutos:'Diminutos',
+    switch_meio_diminutos:'Meio Diminutos', switch_aumentados:'Aumentados', switch_sus:'Sus',
+    switch_sextas:'Sextas', switch_extensoes:'Extensões', switch_inversoes:'Inversões',
+    switch_dissonantes:'Dissonantes',
+    switch_diminuto_meio_dim:'Diminuto ou Meio Diminuto', switch_diminuto_aumentado:'Diminuto ou Aumentado',
+    // Ranking
+    ranking_title:'Ranking', no_ranking_data:'Sem dados de ranking ainda.',
+    you:'Você', rank_position:'Posição', your_position:'Sua posição',
+    // Profile card
+    profile_rank:'Rank #', level_label:'Nível',
+    // Level titles
+    lvl_aprendiz:'Aprendiz', lvl_estudante:'Estudante', lvl_bardo:'Bardo',
+    lvl_trovador:'Trovador', lvl_virtuose:'Virtuose', lvl_alquimista:'Alquimista Harmônico',
+    lvl_mago:'Mago do Som', lvl_guardiao:'Guardião das Cordas',
+    lvl_arcanista:'Arcanista da Harmonia', lvl_lenda:'Lenda da Música', lvl_mestre:'Mestre Supremo',
+    // Guest popup
+    guest_popup_title:'Salve seu progresso!',
+    guest_popup_body:'Crie uma conta gratuita e:\n• Salve seu progresso no jogo\n• Acompanhe suas estatísticas\n• Veja quais acordes você mais erra\n• Acompanhe sua evolução de nível\n• Mantenha tudo salvo para sempre',
+    guest_popup_create:'Criar conta', guest_popup_later:'Deixar para depois',
+    // Misc
+    listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
+    what_quality:'Qual é a qualidade deste acorde?', back_btn:'← Voltar',
+    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada',
+    train_ear:'Treine seu Ouvido',
+    start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
+    your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
+    best_seq:'Melhor Sequência', placement:'Colocação',
+    inventory:'Inventário', levels:'Níveis', combo:'Combo',
+    // Shop / purchase
+    confirm_purchase:'Confirmar compra', purchase_value:'Valor da compra',
+    are_you_sure:'Tem certeza que deseja comprar este item?',
+    no_btn:'Não', yes_buy:'Sim, comprar',
+    not_enough_coins_detail:'Você precisa de 🪙 ', item_already_owned:'Item já adquirido',
+    check_inventory:'Confira no seu Inventário', item_added_inventory:'Item adicionado ao Inventário!',
+    guitar_equipped_toast:'Violão equipado!', no_bonus:' · sem bônus',
+    guitar_bought_toast:' equipado!', bonus_activated:'Bônus de +{n}% ativado automaticamente.',
+    insufficient_balance:'Saldo insuficiente', price_label:'Preço:',
+    coming_soon:'Em breve', coming_soon_body:'Sistema de compra em implementação.',
+    // Inventory
+    equipment_section:'Equipamento', equipped_guitar_label:'Violão Equipado',
+    swap_in_shop:'Trocar na Loja', available_guitars:'Violões disponíveis',
+    no_other_guitars:'Nenhum outro violão adquirido.', no_items_yet:'Nenhum item adquirido ainda.',
+    // Profile stats
+    most_missed_chord:'Acorde que mais errou', hits_and_misses:'Acertos e Erros por Acorde',
+    play_to_see_stats:'Jogue para ver suas estatísticas! 🎸',
+    // Focused Training menu
+    evolve_faster:'EVOLUA MAIS RÁPIDO.', choose_chords:'Escolha os acordes e monte o seu treino.',
+    train_by_quality:'Treine por qualidade', train_by_type:'Treine por tipo de acorde',
+    start_training:'Iniciar Treino', activate_one:'Ative ao menos um exercício',
+    // Paywall
+    unlock_all_trainings:'Desbloqueie todos os treinos',
+    unlock_all_desc:'Acesse todos os modos de Treino Focado — qualidade de acordes, tríades, tétrades, dissonantes, extensões e muito mais. Treine com foco total e evolua mais rápido no violão.',
+    unlock_btn:'🔓 Desbloquear Acesso',
+    payment_info:'Pagamento seguro via App Store / Google Play',
+    // Delete account
+    delete_account:'Excluir conta',
+    delete_account_confirm:'Tem certeza? Isso apaga sua conta e todo o progresso permanentemente.',
+    account_deleted_success:'Conta excluída com sucesso.',
+    delete_account_permanently:'Deletar conta permanentemente',
+    update_email:'Atualizar e-mail', update_password:'Atualizar senha',
+    account_section:'Conta', name_in_ranking:'Nome no ranking',
+    min_chars:'Mínimo 6 caracteres',
+    optional_fill_hint:'Opcional — preencha só se quiser alterar',
+    // Create account link for guests
+    create_account_link:'Criar conta gratuita',
+    guest_label:'Visitante', no_account:'Não tem conta?', player_default_pt:'Jogador',
+    my_performance:'Meu Desempenho', overview:'Visão Geral', multiplier:'Multiplicador',
+    need_100_points:'Precisa de pelo menos 100 Pontos',
+    focused_elogios:'Muito bem!|Excelente!|Incrível!|Fantástico!|Impressionante!|Espetacular!|Magnífico!|Extraordinário!|Lendário!',
+    // Levels/Niveis screen
+    categories:'Categorias', levels_range:'Níveis',
+    xp_in_category:'XP nesta categoria', missing_points:'faltam',
+    max_category:'✓ Categoria máxima', max_badge:'👑 Máximo',
+    current_category:'Categoria Atual', next_category:'Próxima',
+    here_badge:'Você está aqui', done_badge:'✓ Concluído',
+    in_progress_badge:'▶ Em progresso',
+    step_done:'✓ Etapa Concluída', step_current:'▶ Etapa Atual',
+    step_locked:'🔒 Bloqueado · Alcance o nível',
+    step_progress:'Progresso nesta etapa',
+    // renderComprar
+    comprar_title:'Plano Vitalício', comprar_desc:'Desbloqueie todos os modos de Treino Focado e aprimore seu ouvido ao máximo.',
+  },
+  en: {
+    // Navigation
+    journey:'Journey', ranking:'Ranking', shop:'Shop', settings:'Settings', focused_training:'Focused Training',
+    // Auth - Login
+    sign_in:'Sign In', create_account:'Create account', forgot_password:'Forgot my password',
+    email:'E-mail', password:'Password', play_as_guest:'Play as guest',
+    already_have_account:'← I already have an account', back_to_signin:'← Back to sign in',
+    // Auth - Signup
+    signup_title:'Create account', display_name:'Display name',
+    display_name_hint:'This name will appear in the game and in the ranking.',
+    password_min:'Password (minimum 6 characters)', signup_button:'Create account',
+    // Auth - Forgot
+    recover_password_title:'Recover my password',
+    recover_password_desc:'Enter your email address below to receive the instructions needed to create a new password. The email may take up to 10 minutes to arrive.',
+    send_instructions:'Send instructions',
+    reset_email_sent:'Recovery email sent! Check your inbox.',
+    enter_email_first:'Please enter your email first.',
+    // Auth - Set display name
+    account_created:'Account created!',
+    choose_display_name:'Now choose the <strong style="color:#F5A623">display name</strong> that will appear in the game.',
+    save_and_enter:'Save and enter',
+    // Auth errors
+    auth_invalid_email:'Invalid email address.',
+    auth_user_disabled:'Account disabled.',
+    auth_user_not_found:'User not found.',
+    auth_wrong_password:'Incorrect password.',
+    auth_email_in_use:'This email is already registered.',
+    auth_weak_password:'Password is too weak.',
+    auth_too_many_requests:'Too many attempts. Try again later.',
+    auth_network_error:'Connection error. Check your internet.',
+    auth_generic_error:'Authentication error. Please try again.',
+    // Validation
+    fill_all_fields:'Please fill in all fields.',
+    password_too_short:'Password must be at least 6 characters.',
+    enter_display_name:'Please enter a display name.',
+    // Settings
+    settings_title:'Settings', change_display_name:'Change display name',
+    save:'Save', sign_out:'Sign out', registered_email:'Registered email',
+    optional:'Optional', change_email:'Change email', change_password:'Change password',
+    new_email:'New email', new_password:'New password', current_password:'Current password',
+    choose_language:'Escolha seu idioma',
+    display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
+    // Game - General
+    play:'Play', next:'Next', confirm:'Confirm', back:'Back',
+    level:'Level', xp:'XP', points:'Points', coins:'Coins', diamonds:'Diamonds',
+    score:'Score', correct_answers:'Correct', wrong_answers:'Wrong',
+    streak:'Streak', best_streak:'Best streak',
+    // Game - Questions
+    which_chord:'Which chord did you hear?',
+    quality_question_major_minor:'Major or Minor?',
+    quality_question_minor_dim:'Minor or Diminished?',
+    quality_question_dim_halfdim:'Diminished or Half-Dim.?',
+    quality_question_dim_aug:'Diminished or Augmented?',
+    diamond_question:'Diamond Question',
+    // Game - Results
+    correct:'Correct!', wrong:'Wrong!', answer_was:'The answer was',
+    // Combo
+    combo_prefix:'🔥', combo_suffix:'combo!',
+    // Level Up
+    level_up:'Level Up!', new_level:'Level',
+    // Journey
+    journey_title:'Journey', start_playing:'Play', continue_playing:'Continue', your_progress:'Your progress',
+    // Economy
+    exchange_points:'Exchange Points', exchange_diamonds:'Exchange Diamonds',
+    points_to_coins_rate:'100 points = 1 coin', diamonds_to_coins_rate:'1 diamond = 10 coins',
+    exchange_button:'Exchange', not_enough_points:'Not enough points.',
+    not_enough_diamonds:'No diamonds to exchange.', not_enough_coins:'Not enough coins.',
+    // Shop
+    shop_title:'Shop', guitars:'Guitars', educational_materials:'Educational Materials',
+    buy:'Buy', equipped:'Equipped', equip:'Equip', already_owned:'Owned',
+    bonus_points:'+{n}% point bonus',
+    // Shop items
+    item_arte_auditiva_name:'The Auditory Art of Guitar', item_arte_auditiva_desc:'How to play music by ear',
+    item_tab_greensleeves_name:'Greensleeves Tablature', item_tab_greensleeves_desc:'Full score + tab',
+    item_tab_romance_name:'Romance de Amor Tablature', item_tab_romance_desc:'Full score + tab',
+    item_arte_harmonica_name:'The Harmonic Art of Guitar', item_arte_harmonica_desc:'Applied harmonic theory',
+    item_cupom_name:'COUPON 20% off — Lifetime Plan', item_cupom_desc:'Exclusive KaiserPlay discount',
+    // Guitar names
+    guitar_basico_name:'Basic Guitar',
+    guitar_bom_name:'Good Guitar', guitar_luthier_name:'Luthier Guitar',
+    guitar_ouro_name:'Gold Guitar', guitar_diamante_name:'Diamond Guitar',
+    // Focused Training
+    focused_training_title:'Focused Training', training_suggestion:'Training suggestion',
+    most_missed_chords:'Most missed chords:', most_missed_qualities:'Most missed qualities:',
+    train_weak_points:'Train weak points', no_weak_points:'No weak points identified yet.',
+    locked:'Locked', unlock:'Unlock', free:'Free',
+    // Quality pair labels
+    quality_major:'Major', quality_minor:'Minor', quality_diminished:'Diminished',
+    quality_half_dim:'Half-Dim.', quality_augmented:'Augmented',
+    // Switch labels
+    switch_maior_menor:'Major / Minor', switch_menor_diminuto:'Minor / Diminished',
+    switch_triades_maiores:'Major Triads', switch_tetrades_menores:'Minor Tetrads',
+    switch_dominantes:'Dominant Chords', switch_triades_menores:'Minor Triads',
+    switch_tetrades_maiores:'Major Tetrads (7M)', switch_diminutos:'Diminished Chords',
+    switch_meio_diminutos:'Half-Diminished', switch_aumentados:'Augmented Chords', switch_sus:'Sus',
+    switch_sextas:'Sixth Chords', switch_extensoes:'Extensions', switch_inversoes:'Inversions',
+    switch_dissonantes:'Dissonant Chords',
+    switch_diminuto_meio_dim:'Diminished / Half-Dim.', switch_diminuto_aumentado:'Diminished / Augmented',
+    // Ranking
+    ranking_title:'Ranking', no_ranking_data:'No ranking data yet.',
+    you:'You', rank_position:'Position', your_position:'Your position',
+    // Profile card
+    profile_rank:'Rank #', level_label:'Level',
+    // Level titles
+    lvl_aprendiz:'Apprentice', lvl_estudante:'Student', lvl_bardo:'Bard',
+    lvl_trovador:'Troubadour', lvl_virtuose:'Virtuoso', lvl_alquimista:'Harmonic Alchemist',
+    lvl_mago:'Sound Wizard', lvl_guardiao:'Guardian of Strings',
+    lvl_arcanista:'Harmony Arcanist', lvl_lenda:'Music Legend', lvl_mestre:'Supreme Master',
+    // Guest popup
+    guest_popup_title:'Save your progress!',
+    guest_popup_body:'Create a free account and:\n• Save your game progress\n• Track your performance stats\n• See which chords you miss the most\n• Follow your level progression\n• Keep everything saved forever',
+    guest_popup_create:'Create account', guest_popup_later:'Maybe later',
+    // Misc
+    listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
+    what_quality:'What is the quality of this chord?', back_btn:'← Back',
+    continue_journey:'Continue Journey', start_journey:'Start Journey',
+    train_ear:'Train your Ear',
+    start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
+    your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
+    best_seq:'Best Streak', placement:'Rank',
+    inventory:'Inventory', levels:'Levels', combo:'Combo',
+    // Shop / purchase
+    confirm_purchase:'Confirm purchase', purchase_value:'Purchase value',
+    are_you_sure:'Are you sure you want to buy this item?',
+    no_btn:'No', yes_buy:'Yes, buy',
+    not_enough_coins_detail:'You need 🪙 ', item_already_owned:'Item already owned',
+    check_inventory:'Check your Inventory', item_added_inventory:'Item added to Inventory!',
+    guitar_equipped_toast:'Guitar equipped!', no_bonus:' · no bonus',
+    guitar_bought_toast:' equipped!', bonus_activated:'+{n}% bonus activated automatically.',
+    insufficient_balance:'Insufficient balance', price_label:'Price:',
+    coming_soon:'Coming soon', coming_soon_body:'Purchase system coming soon.',
+    // Inventory
+    equipment_section:'Equipment', equipped_guitar_label:'Equipped Guitar',
+    swap_in_shop:'Swap in Shop', available_guitars:'Available Guitars',
+    no_other_guitars:'No other guitars owned.', no_items_yet:'No items purchased yet.',
+    // Profile stats
+    most_missed_chord:'Most missed chord', hits_and_misses:'Hits and Misses by Chord',
+    play_to_see_stats:'Play to see your stats! 🎸',
+    // Focused Training menu
+    evolve_faster:'EVOLVE FASTER.', choose_chords:'Choose chords and build your training.',
+    train_by_quality:'Train by quality', train_by_type:'Train by chord type',
+    start_training:'Start Training', activate_one:'Activate at least one exercise',
+    // Paywall
+    unlock_all_trainings:'Unlock all trainings',
+    unlock_all_desc:'Access all Focused Training modes — chord quality, triads, tetrads, dissonant, extensions and more. Train with full focus and evolve faster on guitar.',
+    unlock_btn:'🔓 Unlock Access',
+    payment_info:'Secure payment via App Store / Google Play',
+    // Delete account
+    delete_account:'Delete account',
+    delete_account_confirm:'Are you sure? This permanently deletes your account and all progress.',
+    account_deleted_success:'Account successfully deleted.',
+    delete_account_permanently:'Delete account permanently',
+    update_email:'Update email', update_password:'Update password',
+    account_section:'Account', name_in_ranking:'Name in ranking',
+    min_chars:'Minimum 6 characters',
+    optional_fill_hint:'Optional — fill only if you want to change',
+    // Create account link for guests
+    create_account_link:'Create free account',
+    guest_label:'Guest', no_account:'No account?', player_default_pt:'Player',
+    my_performance:'My Performance', overview:'Overview', multiplier:'Multiplier',
+    need_100_points:'Need at least 100 points',
+    focused_elogios:'Great!|Excellent!|Incredible!|Fantastic!|Impressive!|Spectacular!|Magnificent!|Extraordinary!|Legendary!',
+    // Levels/Niveis screen
+    categories:'Categories', levels_range:'Levels',
+    xp_in_category:'XP in this category', missing_points:'missing',
+    max_category:'✓ Max category', max_badge:'👑 Maximum',
+    current_category:'Current Category', next_category:'Next',
+    here_badge:'You are here', done_badge:'✓ Completed',
+    in_progress_badge:'▶ In progress',
+    step_done:'✓ Stage Completed', step_current:'▶ Current Stage',
+    step_locked:'🔒 Locked · Reach level',
+    step_progress:'Progress in this stage',
+    // renderComprar
+    comprar_title:'Lifetime Plan', comprar_desc:'Unlock all Focused Training modes and sharpen your ear to the fullest.',
+  }
+};
+function t(key){
+  return (STRINGS[state.lang]&&STRINGS[state.lang][key])||STRINGS['pt'][key]||key;
+}
+
 // ── 1. CONSTANTES E BANCO DE ACORDES ──────────────────
 // ── Acordes principais (progressão por nível) ──
 const CHORDS = [
@@ -703,6 +1060,20 @@ const CHORDS_DIAMOND = [
   {id:42, name:"D(#5)",   cifra:"D(#5)",   midi:[50,58,62,66], quality:'aumentado'},
 ];
 
+function _titleKeyForLvl(n){
+  if(n<=10)return'lvl_aprendiz';
+  if(n<=20)return'lvl_estudante';
+  if(n<=30)return'lvl_bardo';
+  if(n<=40)return'lvl_trovador';
+  if(n<=50)return'lvl_virtuose';
+  if(n<=60)return'lvl_alquimista';
+  if(n<=70)return'lvl_mago';
+  if(n<=80)return'lvl_guardiao';
+  if(n<=90)return'lvl_arcanista';
+  if(n<=99)return'lvl_lenda';
+  return'lvl_mestre';
+}
+// PT title used for image filename lookup (always Portuguese)
 function _titleForLvl(n){
   if(n<=10)return"Aprendiz";
   if(n<=20)return"Estudante";
@@ -751,8 +1122,18 @@ function _poolForLvl(n){
 // XP por nível n = 6 acertos × 10 XP × n = 60n
 const LEVELS = Array.from({length:100},(_,i)=>{
   const n=i+1;
-  return{n,title:_titleForLvl(n),xpToNext:n===100?999999:n===99?400*99*3:n>=50?Math.round(400*n*(1+(n-50)*0.08)):400*n,pool:_poolForLvl(n)};
+  return{n,title:_titleForLvl(n),titleKey:_titleKeyForLvl(n),xpToNext:n===100?999999:n===99?400*99*3:n>=50?Math.round(400*n*(1+(n-50)*0.08)):400*n,pool:_poolForLvl(n)};
 });
+
+// Returns the translated title for a level object
+function lvlTitle(lvl){ return t(lvl.titleKey)||lvl.title; }
+
+// Translated guitar and item names
+function guitarName(v){ const k='guitar_'+v.id.replace('violao_','')+'_name'; const r=t(k); return (r&&r!==k)?r:v.nome; }
+function guitarDesc(v){ if(v.pct>0)return`+${Math.round(v.pct*100)}% ${t('points')} ${state.lang==='en'?'per correct answer':'por acerto'}`; return state.lang==='en'?'Standard guitar':'Violão padrão'; }
+const _ITEM_KEYS={0:'arte_auditiva',1:'tab_greensleeves',2:'tab_romance',4:'arte_harmonica',5:'cupom'};
+function itemName(item){ const slug=_ITEM_KEYS[item.id]; if(!slug)return item.nome; const k='item_'+slug+'_name'; const r=t(k); return (r&&r!==k)?r:item.nome; }
+function itemDesc(item){ const slug=_ITEM_KEYS[item.id]; if(!slug)return item.desc; const k='item_'+slug+'_desc'; const r=t(k); return (r&&r!==k)?r:item.desc; }
 
 const MOCK_RANKING = [
   {name:"GuitarHero92",xp:4820,lvl:6},
@@ -810,7 +1191,7 @@ function playChord(chord){
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
-  if(_pbtn){_pbtn.textContent='♪ Tocando...';_pbtn.classList.add('playing');}
+  if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=chord.midi.length>1?110+Math.round(15*Math.max(0,6-chord.midi.length)):110;
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
@@ -823,7 +1204,7 @@ function playChord(chord){
   _playTimer=setTimeout(()=>{
     _playTimer=null;state.playing=false;
     const _pbtn2=document.querySelector('.play-btn');
-    if(_pbtn2){_pbtn2.textContent='Ouvir Acorde';_pbtn2.classList.remove('playing');}
+    if(_pbtn2){_pbtn2.textContent=t('listen_chord');_pbtn2.classList.remove('playing');}
   },(chord.midi.length-1)*noteDelay+3000);
 }
 
@@ -1147,6 +1528,8 @@ function getLvlStartXP(idx){return LEVEL_XP_START[idx]||0;}
 const state={
   tab:'game',phase:'login',
   user:null,
+  lang:null,
+  isGuest:false,guestExerciseCount:0,guestNextPrompt:1,showGuestPopup:false,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
@@ -1175,7 +1558,7 @@ const state={
 let autoTimer=null;
 
 function getFlames(s){if(s>=9)return'🔥🔥🔥';if(s>=6)return'🔥🔥';if(s>=3)return'🔥';return'';}
-function getBonusLabel(s){if(s>=9)return'+20 Pontos bônus';if(s>=6)return'+12 Pontos bônus';if(s>=3)return'+5 Pontos bônus';if(s>=2)return'+2 Pontos bônus';return '';}
+function getBonusLabel(s){const p=t('points');const b=state.lang==='en'?'bonus':'bônus';if(s>=9)return`+20 ${p} ${b}`;if(s>=6)return`+12 ${p} ${b}`;if(s>=3)return`+5 ${p} ${b}`;if(s>=2)return`+2 ${p} ${b}`;return '';}
 // ── Novo sistema de combo ─────────────────────────────────────
 function comboMultiplier(streak){return streak<1?1:Math.floor(streak/5)+1;}
 function comboPoints(streak){return 10*streak*comboMultiplier(streak);}
@@ -1359,11 +1742,11 @@ function handleAnswer(choiceId,btnEl){
       diamondGained=diamGain;state.diamantes+=diamGain;
       const baseCombo=comboPoints(ns);
       gain=Math.round((baseCombo*2)*(1+violaoPct));
-      msg=violaoAtual.doubleDiamonds?'💎💎 Diamante Duplo! ×2':'💎 ×2 no Combo!';
+      msg=violaoAtual.doubleDiamonds?`💎💎 ${state.lang==='en'?'Double Diamond! ×2':'Diamante Duplo! ×2'}`:`💎 ×2 ${state.lang==='en'?'in Combo!':'no Combo!'}`;
       playSfx('diamond');
     } else {
       gain=Math.round(comboPoints(ns)*(1+violaoPct));
-      if(multLevelUp){msg=`×${newMult} Multiplicador!`;playSfx('combo9');}
+      if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
       else if(ns>=10){playSfx('combo9');}
       else if(ns>=6){playSfx('combo6');}
       else if(ns>=3){playSfx('combo3');}
@@ -1397,7 +1780,7 @@ function handleAnswer(choiceId,btnEl){
       const overlay=document.createElement('div');
       const mc=comboColor(newMult);
       overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;`;
-      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} Multiplicador!</div>`;
+      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} ${t('multiplier')}!</div>`;
       const ring=document.createElement('div');
       ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;border-radius:0;`;
       document.body.appendChild(ring);
@@ -1406,7 +1789,7 @@ function handleAnswer(choiceId,btnEl){
     }
     const color=state.isBonus?'#60dcff':comboColor(newMult);
     const xpPopup=document.createElement('div');
-    const popLabel=state.isBonus?`💎 +${gain} Pontos`:`+${gain} Pontos`;
+    const popLabel=state.isBonus?`💎 +${gain} ${t('points')}`:`+${gain} ${t('points')}`;
     xpPopup.textContent=popLabel;
     xpPopup.style.cssText=`position:fixed;z-index:9999;left:${rect.left+rect.width/2}px;top:${rect.top}px;transform:translate(-50%,-100%);font-size:${isBig?'1.6rem':'1.25rem'};font-weight:900;color:${color};text-shadow:0 0 18px ${color},0 0 40px ${color}66;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(xpPopup);
@@ -1430,7 +1813,7 @@ function handleAnswer(choiceId,btnEl){
     const wrect=btnEl.getBoundingClientRect();
     const wx=wrect.left+wrect.width/2;
     const wrongXp=document.createElement('div');
-    wrongXp.textContent='-10 Pontos';
+    wrongXp.textContent=`-10 ${t('points')}`;
     wrongXp.style.cssText=`position:fixed;z-index:9999;left:${wx}px;top:${wrect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(wrongXp);
     const errAnim=[
@@ -1443,6 +1826,12 @@ function handleAnswer(choiceId,btnEl){
   }
   state.result={ok,gain,msg,chordName:state.chord.name,diamondGained,multLevelUp};
   state.phase='answered';
+  if(state.isGuest){
+    state.guestExerciseCount++;
+    if(state.guestExerciseCount===1||state.guestExerciseCount===state.guestNextPrompt){
+      state.showGuestPopup=true;
+    }
+  }
   try{render();}catch(e){console.error('render error:',e);}
   autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1200);
 }
@@ -1471,7 +1860,7 @@ function handleQualityAnswer(quality, btnEl){
   const multLevelUp=ok&&ns>1&&newMult>prevMult;
   let gain=ok?Math.round(comboPoints(ns)*(1+violaoPct)):0,msg=null;
   if(ok){
-    if(multLevelUp){msg=`×${newMult} Multiplicador!`;playSfx('combo9');}
+    if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
     else if(ns>=10){playSfx('combo9');}
     else if(ns>=6){playSfx('combo6');}
     else if(ns>=3){playSfx('combo3');}
@@ -1481,7 +1870,7 @@ function handleQualityAnswer(quality, btnEl){
       const overlay=document.createElement('div');
       const mc=comboColor(newMult);
       overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;`;
-      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} Multiplicador!</div>`;
+      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} ${t('multiplier')}!</div>`;
       const ring=document.createElement('div');
       ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;`;
       document.body.appendChild(ring);
@@ -1505,7 +1894,7 @@ function handleQualityAnswer(quality, btnEl){
     setTimeout(()=>app.classList.remove('flash-correct'),500);
     const qColor=comboColor(newMult);
     const xpPopup=document.createElement('div');
-    xpPopup.textContent='+'+gain+' Pontos';
+    xpPopup.textContent=`+${gain} ${t('points')}`;
     xpPopup.style.cssText=`position:fixed;z-index:9999;left:${rect.left+rect.width/2}px;top:${rect.top}px;transform:translate(-50%,-100%);font-size:${isBig?'1.6rem':'1.25rem'};font-weight:900;color:${qColor};text-shadow:0 0 18px ${qColor},0 0 40px ${qColor}66;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(xpPopup);
     xpPopup.animate([
@@ -1527,7 +1916,7 @@ function handleQualityAnswer(quality, btnEl){
     setTimeout(()=>document.querySelector('.play-area')?.classList.remove('shake'),400);
     const wrect=btnEl.getBoundingClientRect();
     const wrongXp=document.createElement('div');
-    wrongXp.textContent='-10 Pontos';
+    wrongXp.textContent=`-10 ${t('points')}`;
     wrongXp.style.cssText=`position:fixed;z-index:9999;left:${wrect.left+wrect.width/2}px;top:${wrect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(wrongXp);
     wrongXp.animate([
@@ -1539,6 +1928,12 @@ function handleQualityAnswer(quality, btnEl){
   }
   state.result={ok,gain,msg,chordName:state.chord.name,diamondGained:0};
   state.phase='answered';
+  if(state.isGuest){
+    state.guestExerciseCount++;
+    if(state.guestExerciseCount===1||state.guestExerciseCount===state.guestNextPrompt){
+      state.showGuestPopup=true;
+    }
+  }
   try{render();}catch(e){console.error('render error:',e);}
   autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1200);
 }
@@ -1572,7 +1967,7 @@ function equiparViolao(id){
   state.violaoEquipado=id;
   const v=VIOLOES.find(x=>x.id===id);
   playEquipSfx();
-  showToast('Violão equipado!',v.nome+(v.pct>0?' · +'+Math.round(v.pct*100)+'% Pontos':' · sem bônus'));
+  showToast(t('guitar_equipped_toast'),guitarName(v)+(v.pct>0?' · +'+Math.round(v.pct*100)+'% '+t('points'):t('no_bonus')));
   render();
 }
 
@@ -1580,18 +1975,18 @@ function comprarViolao(id){
   const v=VIOLOES.find(x=>x.id===id);
   if(!v)return;
   if(state.violoesComprados.includes(id)){equiparViolao(id);return;}
-  if(state.moedas<v.preco){showToast('Moedas insuficientes!','Você precisa de 🪙 '+v.preco);return;}
+  if(state.moedas<v.preco){showToast(t('not_enough_coins'),t('not_enough_coins_detail')+v.preco);return;}
   confirmarCompra({
-    nome: v.nome,
+    nome: guitarName(v),
     preco: v.preco,
     img: v.img,
     onConfirm: function(){
-      if(state.moedas<v.preco){showToast('Moedas insuficientes!','Você precisa de 🪙 '+v.preco);return;}
+      if(state.moedas<v.preco){showToast(t('not_enough_coins'),t('not_enough_coins_detail')+v.preco);return;}
       state.moedas-=v.preco;
       state.violoesComprados.push(id);
       state.violaoEquipado=id;
       playBuySfx();
-      showToast('✅ '+v.nome+' equipado!','Bônus de +'+Math.round((v.pct||0)*100)+'% ativado automaticamente.');
+      showToast('✅ '+guitarName(v)+t('guitar_bought_toast'),t('bonus_activated').replace('{n}',Math.round((v.pct||0)*100)));
       render();
     }
   });
@@ -1609,7 +2004,7 @@ function exchangeDiamonds(btnEl){
   const cl=(window.innerWidth-520)/2;
   particles.push(...makeCoinParticles(cx-cl,cy));
   spawnCoinFloats(cx,cy,Math.min(gained,8));
-  spawnFloat(cx,cy-60,`+${gained} moedas`,true);
+  spawnFloat(cx,cy-60,`+${gained} ${t('coins').toLowerCase()}`,true);
   saveProgress();
   render();
 }
@@ -1625,7 +2020,7 @@ function exchangePoints(btnEl){
   const cl=(window.innerWidth-520)/2;
   particles.push(...makeCoinParticles(cx-cl,cy));
   spawnCoinFloats(cx,cy,gained>0?6:3);
-  spawnFloat(cx,cy-60,`+${gained} moedas`,true);
+  spawnFloat(cx,cy-60,`+${gained} ${t('coins').toLowerCase()}`,true);
   saveProgress();
   render();
 }
@@ -1716,6 +2111,18 @@ function goToTraining(){
 function setTab(t){state.tab=t;render();}
 
 // ── 7. FUNÇÕES DE RENDERIZAÇÃO (UI) ──────────────────────────
+// Translates quality label based on current language
+function _translateQualityLabel(quality, fallbackLabel){
+  const map={
+    'maior':t('quality_major'), 'menor':t('quality_minor'),
+    'diminuto':t('quality_diminished'), 'meio-diminuto':t('quality_half_dim'),
+    'aumentado':t('quality_augmented'),
+    'Maior':t('quality_major'), 'Menor':t('quality_minor'),
+    'Diminuto':t('quality_diminished'), 'Meio Diminuto':t('quality_half_dim'),
+    'Aumentado':t('quality_augmented'),
+  };
+  return map[quality]||map[fallbackLabel]||fallbackLabel;
+}
 // ── TREINO FOCADO: Constantes ─────────────────────────────────
 const FOCUSED_ELOGIOS = [
   'Muito bem!','Excelente!','Incrível!','Fantástico!','Impressionante!',
@@ -1730,7 +2137,7 @@ const FOCUSED_COMBO_SOUNDS = ['correct','correct2','combo3','combo6','combo9'];
 
 function getFocusedStage(streak){return streak<1?0:Math.floor((streak-1)/3);}
 function getFocusedColor(streak){return FOCUSED_COMBO_COLORS[getFocusedStage(streak)%FOCUSED_COMBO_COLORS.length];}
-function getFocusedElogio(streak){const idx=Math.floor(streak/3)-1;return FOCUSED_ELOGIOS[Math.min(idx,FOCUSED_ELOGIOS.length-1)];}
+function getFocusedElogio(streak){const idx=Math.floor(streak/3)-1;const arr=t('focused_elogios').split('|');return arr[Math.min(idx,arr.length-1)];}
 function getFocusedSound(streak){const s=getFocusedStage(streak);return FOCUSED_COMBO_SOUNDS[Math.min(s,FOCUSED_COMBO_SOUNDS.length-1)];}
 
 // Definição dos pools dos switches
@@ -1768,6 +2175,24 @@ const FOCUSED_SWITCH_POOLS = {
   ],
 };
 
+// Switch labels are now resolved via t() at render time
+function getFocusedSwitchLabel(key){
+  const pt={
+    maior_menor:'Maior ou Menor', menor_diminuto:'Menor ou Diminuto',
+    diminuto_meio_diminuto:'Diminuto ou Meio Diminuto', diminuto_aumentado:'Diminuto ou Aumentado',
+    triades_maiores:'Tríades Maiores', triades_menores:'Tríades Menores',
+    tetrades_maiores:'Tétrades Maiores (7M)', tetrades_menores:'Tétrades Menores (m7)',
+    inversoes:'Inversões', dissonantes:'Dissonantes', extensoes:'Extensões',
+  };
+  const en={
+    maior_menor:'Major / Minor', menor_diminuto:'Minor / Diminished',
+    diminuto_meio_diminuto:'Diminished / Half-Dim.', diminuto_aumentado:'Diminished / Augmented',
+    triades_maiores:'Major Triads', triades_menores:'Minor Triads',
+    tetrades_maiores:'Major Tetrads (7M)', tetrades_menores:'Minor Tetrads (m7)',
+    inversoes:'Inversions', dissonantes:'Dissonant Chords', extensoes:'Extensions',
+  };
+  return (state.lang==='en'?en:pt)[key]||key;
+}
 const FOCUSED_SWITCH_LABELS = {
   maior_menor:'Maior ou Menor',
   menor_diminuto:'Menor ou Diminuto',
@@ -2008,7 +2433,7 @@ function handleFocusedQualityAnswer(quality, btnEl){
     const app=document.getElementById('app');
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
 
-    const pontosTxt=bonus===0?'+5 Pontos':`5 + ${bonus} Pontos`;
+    const pontosTxt=bonus===0?`+5 ${t('points')}`:`5 + ${bonus} ${t('points')}`;
     const elogio=state.focusedStreak%3===0?getFocusedElogio(state.focusedStreak):null;
     const xpPopup=document.createElement('div');
     xpPopup.innerHTML=`<div style="font-size:1.25rem;font-weight:900;line-height:1.2">${pontosTxt}</div>${elogio?`<div style="font-size:.95rem;font-weight:700;opacity:.92;margin-top:.15rem">${elogio}</div>`:''}`;
@@ -2101,7 +2526,7 @@ function handleFocusedAnswer(choiceId,btnEl){
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
 
     // Popup de pontos + elogio na mesma caixa
-    const pontosTxt=bonus===0?'+5 Pontos':`5 + ${bonus} Pontos`;
+    const pontosTxt=bonus===0?`+5 ${t('points')}`:`5 + ${bonus} ${t('points')}`;
     const elogio=state.focusedStreak%3===0?getFocusedElogio(state.focusedStreak):null;
     const xpPopup=document.createElement('div');
     xpPopup.innerHTML=`<div style="font-size:1.25rem;font-weight:900;line-height:1.2">${pontosTxt}</div>${elogio?`<div style="font-size:.95rem;font-weight:700;opacity:.92;margin-top:.15rem">${elogio}</div>`:''}`;
@@ -2212,7 +2637,7 @@ function renderTreinoFocadoMenu(){
     const on=state.focusedSwitches[key];
     const unlocked=isSwitchUnlocked(key);
     return `<div class="tf-switch-row${on?' active':''}" onclick="toggleFocusedSwitch('${key}')">
-      <span class="tf-switch-label">${FOCUSED_SWITCH_LABELS[key]}</span>
+      <span class="tf-switch-label">${getFocusedSwitchLabel(key)}</span>
       <span style="display:flex;align-items:center;flex-shrink:0">
         ${!unlocked
           ? `<span style="font-size:1.05rem;line-height:1">🔒</span>`
@@ -2224,40 +2649,40 @@ function renderTreinoFocadoMenu(){
   const paywall=!state.fullAccess;
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:1rem;gap:.75rem">
-      <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">← Voltar</button>
-      <span style="font-size:1.05rem;font-weight:900;color:#60dcff;letter-spacing:.01em">Treino Focado</span>
+      <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
+      <span style="font-size:1.05rem;font-weight:900;color:#60dcff;letter-spacing:.01em">${t('focused_training')}</span>
     </div>
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:1rem">
-      <div style="font-size:.85rem;color:#60dcff;font-weight:900;letter-spacing:.12em;margin-bottom:.35rem">EVOLUA MAIS RÁPIDO.</div>
-      <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">Escolha os acordes e monte o seu treino.</div>
+      <div style="font-size:.85rem;color:#60dcff;font-weight:900;letter-spacing:.12em;margin-bottom:.35rem">${t('evolve_faster')}</div>
+      <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">${t('choose_chords')}</div>
     </div>
     ${hasHistory&&hasSmartData?`
-    <div class="section-title" style="--sc:#60dcff">Sugestão de treino</div>
+    <div class="section-title" style="--sc:#60dcff">${t('training_suggestion')}</div>
     <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">Acordes e tipos que você mais erra:</div>
+      <div style="font-size:.78rem;color:#aaa;margin-bottom:.75rem">${t('most_missed_chords')}</div>
       <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
         ${topErrors.map(c=>`
           <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
             <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1">${c.cifra}</div>
-            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} erros</div>
+            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
           </div>
         `).join('')}
         ${weakQualityLabels.map(cat=>`
           <div style="background:#1a0e0e;border:2px solid #4a2020;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:68px">
             <div style="font-size:.78rem;font-weight:900;color:#ffbbbb;line-height:1.2">${cat.label}</div>
-            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${cat.errors} erros</div>
+            <div style="font-size:.58rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${cat.errors} ${t('wrong_answers').toLowerCase()}</div>
           </div>
         `).join('')}
       </div>
       <button
         style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff44"
         onclick="startSmartSession()">
-        <span style="font-size:1.2rem">🎯</span> Treinar pontos fracos
+        <span style="font-size:1.2rem">🎯</span> ${t('train_weak_points')}
       </button>
     </div>`:''}
-    <div class="section-title">Treine por qualidade</div>
+    <div class="section-title">${t('train_by_quality')}</div>
     ${section1.map(makeSwitch).join('')}
-    <div class="section-title">Treine por tipo de acorde</div>
+    <div class="section-title">${t('train_by_type')}</div>
     ${section2.map(makeSwitch).join('')}
     <button
       style="width:100%;max-width:520px;margin-top:1.25rem;
@@ -2266,20 +2691,20 @@ function renderTreinoFocadoMenu(){
           : 'padding:1rem;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:14px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#444;cursor:default;box-shadow:none;letter-spacing:.02em'}"
       ${enabled?'':'disabled'}
       onclick="startFocusedSession()">
-      ${enabled?'<span style="font-size:1.3rem">🎯</span> Iniciar Treino':'Ative ao menos um exercício'}
+      ${enabled?'<span style="font-size:1.3rem">🎯</span> '+t('start_training'):t('activate_one')}
     </button>
     ${paywall?`
     <div style="width:100%;max-width:520px;background:linear-gradient(160deg,#061208,#0d1f10);border:2px solid #22c55e55;border-radius:16px;padding:1.4rem 1.2rem;margin-top:1.5rem;text-align:center;box-shadow:0 0 16px #22c55e14">
-      <div style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.5rem;letter-spacing:.01em">Desbloqueie todos os treinos</div>
+      <div style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.5rem;letter-spacing:.01em">${t('unlock_all_trainings')}</div>
       <div style="font-size:.84rem;color:#e8f5e9;line-height:1.6;margin-bottom:1rem">
-        Acesse todos os modos de Treino Focado — qualidade de acordes, tríades, tétrades, dissonantes, extensões e muito mais. Treine com foco total e evolua mais rápido no violão.
+        ${t('unlock_all_desc')}
       </div>
       <div style="font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-.01em;margin-bottom:1.1rem;text-shadow:0 0 10px #22c55e44">R$ 49,90</div>
-      <button onclick="showToast('Em breve','Sistema de compra em implementação.')"
+      <button onclick="showToast(t('coming_soon'),t('coming_soon_body'))"
         style="width:100%;padding:.95rem;background:linear-gradient(135deg,#15803d,#166534);border:3px solid #111;border-radius:12px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:3px 3px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4)">
-        🔓 Desbloquear Acesso
+        ${t('unlock_btn')}
       </button>
-      <div style="font-size:.68rem;color:#b0c8b4;margin-top:.65rem">Pagamento seguro via App Store / Google Play</div>
+      <div style="font-size:.68rem;color:#b0c8b4;margin-top:.65rem">${t('payment_info')}</div>
     </div>`:''}
   `;
 }
@@ -2293,7 +2718,7 @@ function renderTreinoFocado(){
   const streakSize=state.focusedStreak>=10?'font-size:2.2rem':state.focusedStreak>=5?'font-size:2rem':'font-size:1.7rem';
   const answered=state.phase==='treino_focado_answered';
   const activeLabels=Object.entries(state.focusedSwitches)
-    .filter(([,v])=>v).map(([k])=>FOCUSED_SWITCH_LABELS[k]);
+    .filter(([,v])=>v).map(([k])=>getFocusedSwitchLabel(k));
 
   let choicesHtml;
   if(state.isQuality){
@@ -2308,7 +2733,7 @@ function renderTreinoFocado(){
           else cls+=' dim';
         }
         return `<button class="${cls}" style="flex:1;max-width:200px" onclick="handleFocusedQualityAnswer('${q}',this)">
-          <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${pair.labels[i]}</span>
+          <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${_translateQualityLabel(q,pair.labels[i])}</span>
         </button>`;
       }).join('') + `</div>`;
   } else {
@@ -2336,11 +2761,11 @@ function renderTreinoFocado(){
 
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:.75rem;gap:.75rem">
-      <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()">← Voltar</button>
+      <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()">${t('back_btn')}</button>
     </div>
     <div class="lvl-bar">
       <div class="lvl-row">
-        <span class="lvl-name">Nível ${lvl.n} · ${lvl.title}</span>
+        <span class="lvl-name">${t('level')} ${lvl.n} · ${lvlTitle(lvl)}</span>
         <span class="lvl-xp" id="xp-label">${dispXP-dispLvlStart} / ${dispLvl.xpToNext} XP</span>
       </div>
       <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:${prog}%"></div></div>
@@ -2349,22 +2774,22 @@ function renderTreinoFocado(){
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-val orange ${answered&&state.result?.ok?'anim':''}">${state.focusedSessionScore}</div>
-        <div class="stat-lbl">Pontos</div>
+        <div class="stat-lbl">${t('points')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" style="${streakColor};${streakSize}">${state.focusedStreak}</div>
-        <div class="stat-lbl" style="${state.focusedStreak>=1?'color:'+color+';font-weight:800':''}">Combo</div>
+        <div class="stat-lbl" style="${state.focusedStreak>=1?'color:'+color+';font-weight:800':''}">${t('combo')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val">${acc}%</div>
-        <div class="stat-lbl">Acertos</div>
+        <div class="stat-lbl">${t('correct_answers')}</div>
       </div>
     </div>
     <div class="play-area" ${answered?'onclick="if(state.phase===\'treino_focado_answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}genFocusedQ();state.phase=\'treino_focado_question\';render();playChord(state.chord);}"':''}>
       <button class="play-btn ${state.playing?'playing':''}" onclick="playClickSfx('soft');playChord(state.chord)">
-        ${state.playing?'♪ Tocando...':'Ouvir Acorde'}
+        ${state.playing?t('listening'):t('listen_chord')}
       </button>
-      <div class="label-sm mt">${state.isQuality?'Qual é a qualidade deste acorde?':'Qual é este acorde?'}</div>
+      <div class="label-sm mt">${state.isQuality?t('what_quality'):t('what_chord')}</div>
       ${choicesHtml}
     </div>
   `;
@@ -2375,19 +2800,19 @@ function renderTreinoFocado(){
 function renderComprar(){
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:1.5rem;gap:.75rem">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='treino_focado_menu';render()">← Voltar</button>
-      <span style="font-size:1.05rem;font-weight:900;color:#f0f0f0">Acesso Completo</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='treino_focado_menu';render()">${t('back_btn')}</button>
+      <span style="font-size:1.05rem;font-weight:900;color:#f0f0f0">${t('comprar_title')}</span>
     </div>
     <div style="width:100%;max-width:520px;text-align:center;padding:2rem 1rem">
       <div style="font-size:2.5rem;margin-bottom:1rem">🔓</div>
-      <div style="font-size:1.3rem;font-weight:900;color:#f0f0f0;margin-bottom:.6rem">Treino Focado Completo</div>
+      <div style="font-size:1.3rem;font-weight:900;color:#f0f0f0;margin-bottom:.6rem">${t('unlock_all_trainings')}</div>
       <div style="font-size:.88rem;color:#aaa;line-height:1.6;margin-bottom:2rem">
-        Desbloqueie todos os modos de treino e evolua mais rápido no reconhecimento de acordes.
+        ${t('comprar_desc')}
       </div>
-      <button class="cta-btn" style="margin-bottom:.75rem" onclick="showToast('Em breve','Sistema de compra em implementação.')">
-        Comprar Acesso Completo
+      <button class="cta-btn" style="margin-bottom:.75rem" onclick="showToast(t('coming_soon'),t('coming_soon_body'))">
+        ${t('unlock_btn')}
       </button>
-      <div style="font-size:.72rem;color:#555;margin-top:.5rem">Pagamento seguro via App Store / Google Play</div>
+      <div style="font-size:.72rem;color:#555;margin-top:.5rem">${t('payment_info')}</div>
     </div>
   `;
 }
@@ -2395,6 +2820,10 @@ function renderComprar(){
 
 let _saveTimer=null;
 function render(){
+  // Remove any leftover guest popup overlays
+  const oldOverlay=document.getElementById('guest-popup-overlay');
+  if(oldOverlay)oldOverlay.remove();
+
   if(state.user&&state.phase!=='login'){
     if(_saveTimer)clearTimeout(_saveTimer);
     _saveTimer=setTimeout(saveProgress,4000);
@@ -2421,6 +2850,8 @@ function render(){
   if(state.phase==='signup'){c.innerHTML=renderSignup();return;}
   if(state.phase==='forgot_password'){c.innerHTML=renderForgotPassword();return;}
   if(state.phase==='set_display_name'){c.innerHTML=renderSetDisplayName();return;}
+  // Block access unless user is logged in or guest
+  if(!state.user&&!state.isGuest){state.phase='login';c.innerHTML=renderLogin();return;}
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
@@ -2433,6 +2864,27 @@ function render(){
   if(state.phase==='comprar'){c.innerHTML=renderComprar();return;}
   if(state.phase==='treino_focado_question'||state.phase==='treino_focado_answered'){c.innerHTML=renderTreinoFocado();return;}
   c.innerHTML=renderGame();
+  // Show guest popup if triggered
+  if(state.showGuestPopup){
+    const overlay=document.createElement('div');
+    overlay.id='guest-popup-overlay';
+    overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
+    overlay.innerHTML=`
+      <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:20px;padding:1.75rem;max-width:340px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+        <div style="font-size:1.3rem;font-weight:900;color:#F5A623;font-family:var(--font-title);margin-bottom:.75rem">${t('guest_popup_title')}</div>
+        <div style="font-size:.85rem;color:#ccc;line-height:1.7;margin-bottom:1.25rem;white-space:pre-line;text-align:left">${t('guest_popup_body')}</div>
+        <button onclick="state.showGuestPopup=false;state.phase='signup';render()"
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.75rem">
+          ${t('guest_popup_create')}
+        </button>
+        <button onclick="state.showGuestPopup=false;state.guestNextPrompt=state.guestExerciseCount+3;render()"
+          style="width:100%;padding:.6rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
+          ${t('guest_popup_later')}
+        </button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+  }
 }
 
 // ── Render: Start ─────────────────────────────────────────────
@@ -2445,7 +2897,7 @@ function renderStart(){
   const lvl=LEVELS[lIdx];
   const lvlStart=getLvlStartXP(lIdx);
   const prog=Math.min((state.xp-lvlStart)/lvl.xpToNext,1)*100;
-  const userName=state.user?.displayName||state.user?.email?.split('@')[0]||'Jogador';
+  const userName=state.isGuest?t('guest_label'):(state.user?.displayName||state.user?.email?.split('@')[0]||t('player_default_pt'));
   const initials=userName[0].toUpperCase();
   return `
     <div class="profile-card">
@@ -2453,45 +2905,48 @@ function renderStart(){
         <img src="${_titleForLvl(lvl.n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_')}.png"
           style="width:100%;height:100%;object-fit:contain"
           onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=\'font-size:1.1rem;font-weight:900;color:#F5A623\'>${initials}</span>')"
-          alt="${lvl.title}"/>
+          alt="${lvlTitle(lvl)}"/>
       </div>
       <div class="profile-info">
-        <div class="profile-name">${userName}${myPos?` — Rank #${myPos}`:''}</div>
-        <div class="profile-title">${lvl.title}</div>
+        <div class="profile-name">${userName}${myPos?` — ${t('profile_rank')}${myPos}`:''}</div>
+        <div class="profile-title">${lvlTitle(lvl)}</div>
         <div class="profile-xp-track"><div class="profile-xp-fill" style="width:${prog}%"></div></div>
         <div class="profile-xp-label">${state.xp-lvlStart} / ${lvl.xpToNext} XP</div>
       </div>
       <div class="profile-lvl-badge">
         <div class="profile-lvl-num">${lvl.n}</div>
-        <div class="profile-lvl-lbl">nível</div>
+        <div class="profile-lvl-lbl">${t('level_label')}</div>
       </div>
     </div>
     <div class="start-hero">
-      <div class="start-title">Treine seu <span>Ouvido</span></div>
-      <div class="start-desc">Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.</div>
+      <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
+      <div class="start-desc">${t('start_desc')}</div>
       <button class="cta-btn" onclick="playClickSfx('nav');startGame()">
-        ${state.xp>0?'Continuar a Jornada':'Começar a Jornada'}
+        ${state.xp>0?t('continue_journey'):t('start_journey')}
       </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <span style="font-size:1.8rem;flex-shrink:0">🎯</span>
-        <div style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">Treino Focado</div>
+        <div style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
       </button>
     </div>
     <div class="nav-grid">
-      <button class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">Loja</span></button>
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">Inventário</span></button>
+      <button class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
+      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
-    <div class="section-title" style="margin-top:.5rem">Suas Estatísticas</div>
+    <div class="section-title" style="margin-top:.5rem">${t('your_stats')}</div>
     <div class="user-stats">
-      <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">XP Total</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">Taxa de Acerto</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Melhor Sequência</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">${rankDisplay}</div><div class="us-lbl">Colocação</div></div></div>
+      <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">${t('hit_rate')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">${t('best_seq')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">${rankDisplay}</div><div class="us-lbl">${t('placement')}</div></div></div>
     </div>
     <div class="nav-grid" style="margin-top:.75rem">
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">Níveis</span></button>
+      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
+    ${state.isGuest?`<div style="width:100%;max-width:520px;margin-top:.75rem;text-align:center">
+      <button onclick="state.phase='signup';render()" style="background:transparent;border:none;color:#F5A623;font-size:.82rem;font-weight:700;font-family:var(--font-body);cursor:pointer;text-decoration:underline">${t('guest_popup_create')}</button>
+    </div>`:''}
   `;
 }
 
@@ -2502,23 +2957,27 @@ function renderLogin(){
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
       <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">Entre na sua conta</div>
-        <input id="login-email" type="email" placeholder="E-mail" autocomplete="email"
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('sign_in')}</div>
+        <input id="login-email" type="email" placeholder="${t('email')}" autocomplete="email"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
-        <input id="login-password" type="password" placeholder="Senha" autocomplete="current-password"
+        <input id="login-password" type="password" placeholder="${t('password')}" autocomplete="current-password"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.4rem;outline:none;box-sizing:border-box">
         <div style="text-align:right;margin-bottom:.75rem">
-          <span onclick="state.phase='forgot_password';render()" style="font-size:.78rem;color:#888;font-weight:600;text-decoration:underline;cursor:pointer">Esqueci minha senha</span>
+          <span onclick="state.phase='forgot_password';render()" style="font-size:.78rem;color:#888;font-weight:600;text-decoration:underline;cursor:pointer">${t('forgot_password')}</span>
         </div>
         <div id="login-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="loginUser()"
           style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:1rem">
-          Entrar
+          ${t('sign_in')}
         </button>
-        <div style="text-align:center;font-size:.82rem;color:#666;font-weight:600;margin-bottom:.6rem">Não tem conta?</div>
+        <div style="text-align:center;font-size:.82rem;color:#666;font-weight:600;margin-bottom:.6rem">${t('no_account')}</div>
         <button onclick="state.phase='signup';render()"
           style="width:100%;padding:.75rem;background:#1e1e1e;border:2px solid #333;border-radius:14px;color:#aaa;font-size:.9rem;font-weight:700;font-family:var(--font-body);cursor:pointer">
-          Criar conta
+          ${t('create_account')}
+        </button>
+        <button onclick="state.isGuest=true;state.guestExerciseCount=0;state.guestNextPrompt=1;state.phase='start';render()"
+          style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.78rem;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-top:.25rem">
+          ${t('play_as_guest')}
         </button>
       </div>
     </div>
@@ -2531,22 +2990,22 @@ function renderSignup(){
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
       <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">Criar conta</div>
-        <input id="signup-email" type="email" placeholder="E-mail" autocomplete="email"
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('signup_title')}</div>
+        <input id="signup-email" type="email" placeholder="${t('email')}" autocomplete="email"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
-        <input id="signup-password" type="password" placeholder="Senha (mínimo 6 caracteres)" autocomplete="new-password"
+        <input id="signup-password" type="password" placeholder="${t('password_min')}" autocomplete="new-password"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
-        <input id="signup-name" type="text" placeholder="Nome de exibição" maxlength="30" autocomplete="nickname"
+        <input id="signup-name" type="text" placeholder="${t('display_name')}" maxlength="30" autocomplete="nickname"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
-        <div style="font-size:.7rem;color:#555;margin-bottom:.75rem;padding-left:.25rem">Este nome aparecerá no jogo e no ranking.</div>
+        <div style="font-size:.7rem;color:#555;margin-bottom:.75rem;padding-left:.25rem">${t('display_name_hint')}</div>
         <div id="signup-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="signupUser()"
           style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:1rem">
-          Criar conta
+          ${t('signup_button')}
         </button>
         <button onclick="state.phase='login';render()"
           style="width:100%;padding:.65rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
-          ← Já tenho conta
+          ${t('already_have_account')}
         </button>
       </div>
     </div>
@@ -2559,18 +3018,18 @@ function renderForgotPassword(){
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
       <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
-        <div style="font-size:1.35rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:.75rem;text-align:center">Recuperar minha senha</div>
-        <div style="font-size:.85rem;color:#aaa;line-height:1.55;margin-bottom:1.2rem;text-align:center">Preencha abaixo seu endereço de email para receber as instruções necessárias e criar uma nova senha. O email pode demorar até 10 minutos para chegar.</div>
-        <input id="forgot-email" type="email" placeholder="E-mail" autocomplete="email"
+        <div style="font-size:1.35rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:.75rem;text-align:center">${t('recover_password_title')}</div>
+        <div style="font-size:.85rem;color:#aaa;line-height:1.55;margin-bottom:1.2rem;text-align:center">${t('recover_password_desc')}</div>
+        <input id="forgot-email" type="email" placeholder="${t('email')}" autocomplete="email"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
         <div id="forgot-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="forgotPassword()"
           style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:1rem">
-          Enviar instruções
+          ${t('send_instructions')}
         </button>
         <button onclick="state.phase='login';render()"
           style="width:100%;padding:.65rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
-          ← Voltar ao login
+          ${t('back_to_signin')}
         </button>
       </div>
     </div>
@@ -2583,14 +3042,14 @@ function renderSetDisplayName(){
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
       <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;text-align:center">Conta criada!</div>
-        <div style="font-size:.88rem;color:#ddd;font-weight:500;margin-bottom:1.2rem;text-align:center;line-height:1.5">Agora escolha o <strong style="color:#F5A623">nome de exibição</strong> que aparecerá no jogo.</div>
-        <input id="display-name-input" type="text" placeholder="Nome de exibição" maxlength="30" autocomplete="nickname"
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;text-align:center">${t('account_created')}</div>
+        <div style="font-size:.88rem;color:#ddd;font-weight:500;margin-bottom:1.2rem;text-align:center;line-height:1.5">${t('choose_display_name')}</div>
+        <input id="display-name-input" type="text" placeholder="${t('display_name')}" maxlength="30" autocomplete="nickname"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
         <div id="display-name-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
         <button onclick="saveDisplayName()"
           style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4)">
-          Salvar e entrar
+          ${t('save_and_enter')}
         </button>
       </div>
     </div>
@@ -2615,12 +3074,12 @@ function renderGame(){
 
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:.75rem;gap:.75rem">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
       ${state.diamantes>0?`<span style="margin-left:auto;font-size:.85rem;font-weight:800;color:#60dcff;background:#0a1a2e;border:2px solid #60dcff;border-radius:10px;padding:.25rem .7rem">💎 ${state.diamantes}</span>`:''}
     </div>
     <div class="lvl-bar">
       <div class="lvl-row">
-        <span class="lvl-name">Nível ${lvl.n} · ${lvl.title}</span>
+        <span class="lvl-name">${t('level')} ${lvl.n} · ${lvlTitle(lvl)}</span>
         <span class="lvl-xp" id="xp-label">${dispXP-dispLvlStart} / ${dispLvl.xpToNext} XP</span>
       </div>
       <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:${prog}%"></div></div>
@@ -2630,15 +3089,15 @@ function renderGame(){
     <div class="stats-grid">
       <div class="stat-card">
         <div class="stat-val orange ${state.phase==='answered'&&state.result?.ok?'anim':''}">${state.xp}</div>
-        <div class="stat-lbl">Pontos</div>
+        <div class="stat-lbl">${t('points')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val" style="${streakColor};${streakSize};${streakAnim}">${state.streak}</div>
-        <div class="stat-lbl" style="${state.streak>=1?'color:'+comboColor(comboMultiplier(state.streak))+';font-weight:800':''}">${state.streak>=1?'Combo':'Combo'}</div>
+        <div class="stat-lbl" style="${state.streak>=1?'color:'+comboColor(comboMultiplier(state.streak))+';font-weight:800':''}">${t('combo')}</div>
       </div>
       <div class="stat-card">
         <div class="stat-val">${acc}%</div>
-        <div class="stat-lbl">Acertos</div>
+        <div class="stat-lbl">${t('correct_answers')}</div>
       </div>
     </div>
     <div class="play-area"
@@ -2647,13 +3106,13 @@ function renderGame(){
       <button class="play-btn ${state.playing?'playing':''}"
         style="${state.isBonus?'background:transparent;border:2px solid #60dcff;color:#60dcff;text-shadow:none;box-shadow:none;':''}"
         onclick="playClickSfx('soft');playChord(state.chord)">
-        ${state.playing?'♪ Tocando...':'Ouvir Acorde'}
+        ${state.playing?t('listening'):t('listen_chord')}
       </button>
-      <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isQuality?'Qual é a qualidade deste acorde?':'Qual é este acorde?'}</div>
+      <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isQuality?t('what_quality'):t('what_chord')}</div>
       <div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
         ${state.isQuality ? (() => {
           const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
-          const opts=pair.opts.map((q,i)=>({q,label:pair.labels[i]}));
+          const opts=pair.opts.map((q,i)=>({q,label:_translateQualityLabel(q,pair.labels[i])}));
           return opts.map(o=>{
             let cls='choice';
             if(state.phase==='answered'){
@@ -2701,10 +3160,10 @@ function renderLevelUp(){
           onerror="this.style.display='none'">
       </div>
       <div style="flex-shrink:0;padding:.9rem 1.5rem 1.2rem;text-align:center">
-        <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};margin-bottom:.15rem">Nível</div>
+        <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};margin-bottom:.15rem">${t('new_level')}</div>
         <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;letter-spacing:-.03em;margin-bottom:.45rem;text-shadow:4px 4px 0 ${cor}99;line-height:1">${lvl.n}</div>
         <div style="font-size:.82rem;color:#bbb;font-style:italic;line-height:1.5;margin-bottom:.75rem;padding:0 .25rem">"${grupo.desc}"</div>
-        <button class="cta-btn" onclick="afterLvlUp()">${lvl.n===1?'Iniciar Treino':'Continuar Treino'}</button>
+        <button class="cta-btn" onclick="afterLvlUp()">${lvl.n===1?t('start_journey'):t('continue_journey')}</button>
       </div>
     </div>`;
   }
@@ -2718,9 +3177,9 @@ function renderLevelUp(){
             style="max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 30px ${cor}99)"
             onerror="this.style.display='none'">
         </div>
-        <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">Nível</div>
+        <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">${t('new_level')}</div>
         <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;text-shadow:4px 4px 0 ${cor}99,0 0 30px ${cor}55;line-height:1;margin-bottom:.9rem">${lvl.n}</div>
-        <button class="cta-btn" onclick="afterLvlUp()">Continuar Treino</button>
+        <button class="cta-btn" onclick="afterLvlUp()">${t('continue_journey')}</button>
       </div>
     </div>`;
 }
@@ -2739,28 +3198,28 @@ function renderDesempenho(){
 
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title">Meu Desempenho</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title">${t('my_performance')}</span>
     </div>
-    <div class="section-title">Visão Geral</div>
+    <div class="section-title">${t('overview')}</div>
     <div class="user-stats">
-      <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">XP Total</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">Taxa de Acerto</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.notas}</div><div class="us-lbl">Pontos</div></div></div>
-      <div class="user-stat-card"><span class="us-icon"><img src="moeda.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle"></span><div><div class="us-val">${state.moedas}</div><div class="us-lbl">Moedas</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">💎</span><div><div class="us-val">${state.diamantes}</div><div class="us-lbl">Diamantes</div></div></div>
-      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">Melhor Sequência</div></div></div>
+      <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">${t('hit_rate')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">⭐</span><div><div class="us-val">${state.notas}</div><div class="us-lbl">${t('points')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon"><img src="moeda.png" style="width:28px;height:28px;object-fit:contain;vertical-align:middle"></span><div><div class="us-val">${state.moedas}</div><div class="us-lbl">${t('coins')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">💎</span><div><div class="us-val">${state.diamantes}</div><div class="us-lbl">${t('diamonds')}</div></div></div>
+      <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">${t('best_streak')}</div></div></div>
     </div>
 
     ${maiorErro?`
-    <div class="section-title">Acorde que mais errou</div>
+    <div class="section-title">${t('most_missed_chord')}</div>
     <div class="perf-card" style="background:#2a1010;border-color:#ef4444;margin-bottom:1rem">
       <div style="display:flex;align-items:center;justify-content:space-between">
         <div style="display:flex;align-items:center;gap:.75rem">
           <span style="font-size:1.5rem">😓</span>
           <div>
             <div style="font-size:1.1rem;font-weight:900;color:#f87171">${maiorErro.name}</div>
-            <div style="font-size:.72rem;color:#bbb">${maiorErro.e} erros · ${maiorErro.c} acertos</div>
+            <div style="font-size:.72rem;color:#bbb">${maiorErro.e} ${t('wrong_answers').toLowerCase()} · ${maiorErro.c} ${t('correct_answers').toLowerCase()}</div>
           </div>
         </div>
         <div style="font-size:1.6rem;font-weight:900;color:#ef4444">${maiorErro.e}×</div>
@@ -2768,7 +3227,7 @@ function renderDesempenho(){
     </div>`:''}
 
     ${chordList.length>0?`
-    <div class="section-title">Acertos e Erros por Acorde</div>
+    <div class="section-title">${t('hits_and_misses')}</div>
     <div class="perf-card">
       ${chordList.map((ch,i)=>{
         const pct=Math.round(ch.c/ch.total*100);
@@ -2779,7 +3238,7 @@ function renderDesempenho(){
           <span style="font-size:.78rem;font-weight:900;color:${pct>=70?'#F5A623':'#888'}">${pct}%</span>
         </div>`;
       }).join('')}
-    </div>`:'<div style="color:#555;text-align:center;padding:2rem 0;font-size:.9rem">Jogue para ver suas estatísticas! 🎸</div>'}
+    </div>`:`<div style="color:#555;text-align:center;padding:2rem 0;font-size:.9rem">${t('play_to_see_stats')}</div>`}
   `;
 }
 
@@ -2791,8 +3250,8 @@ function renderLoja(){
 
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title"><img src='moeda.png' style='width:22px;height:22px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> Loja</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title"><img src='moeda.png' style='width:22px;height:22px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> ${t('shop_title')}</span>
       <div style="display:flex;align-items:center;gap:.35rem;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:20px;padding:.3rem .7rem">
         <img src='moeda.png' style='width:18px;height:18px;object-fit:contain'>
         <span style="font-size:.9rem;font-weight:900;color:#F5A623">${state.moedas.toLocaleString()}</span>
@@ -2801,37 +3260,37 @@ function renderLoja(){
 
     <div style="display:flex;gap:.5rem;width:100%;max-width:520px;margin-bottom:.75rem">
       <div style="flex:1;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:12px;padding:.5rem .6rem;text-align:center">
-        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">Pontos</div>
+        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">${t('points')}</div>
         <div style="font-size:.88rem;font-weight:900;color:#f0f0f0">⭐ ${state.notas}</div>
       </div>
       <div style="flex:1;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:12px;padding:.5rem .6rem;text-align:center">
-        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">Moedas</div>
+        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">${t('coins')}</div>
         <div style="font-size:.88rem;font-weight:900;color:#F5A623"><img src='moeda.png' style='width:15px;height:15px;vertical-align:middle;object-fit:contain'> ${state.moedas}</div>
       </div>
       <div style="flex:1;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:12px;padding:.5rem .6rem;text-align:center">
-        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">Diamantes</div>
+        <div style="font-size:.6rem;color:#555;text-transform:uppercase;letter-spacing:.08em">${t('diamonds')}</div>
         <div style="font-size:.88rem;font-weight:900;color:#60dcff">💎 ${state.diamantes}</div>
       </div>
     </div>
 
     <button class="exchange-btn" onclick="exchangePoints(this)" ${!podeConverter?'disabled':''} style="margin-bottom:.4rem">
-      <div class="exchange-title">Trocar Pontos por Moedas</div>
-      <div class="exchange-sub">${podeConverter?`A cada 100 Pontos você ganha <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> 1 moeda`:`Precisa de pelo menos 100 Pontos`}</div>
+      <div class="exchange-title">${t('exchange_points')}</div>
+      <div class="exchange-sub">${podeConverter?`${t('points_to_coins_rate')} <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'>`:t('need_100_points')}</div>
     </button>
     <button class="exchange-btn" onclick="exchangeDiamonds(this)" ${state.diamantes<1?'disabled':''} style="background:linear-gradient(180deg,#0d2a3d,#0a1a2e);border-color:#60dcff;margin-bottom:.9rem;${state.diamantes<1?'opacity:.4;cursor:not-allowed':''}">
-      <div class="exchange-title" style="color:#60dcff">💎 Trocar Diamantes por Moedas</div>
-      <div class="exchange-sub" style="color:#a0d8ef">${state.diamantes>=1?`<span style="display:inline-flex;align-items:center;gap:.3rem">💎 ${state.diamantes} → <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${state.diamantes*10}</span>`:`Você não tem diamantes`}</div>
+      <div class="exchange-title" style="color:#60dcff">💎 ${t('exchange_diamonds')}</div>
+      <div class="exchange-sub" style="color:#a0d8ef">${state.diamantes>=1?`<span style="display:inline-flex;align-items:center;gap:.3rem">💎 ${state.diamantes} → <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${state.diamantes*10}</span>`:t('not_enough_diamonds')}</div>
     </button>
 
     ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).length>0?`
-    <div class="section-title">Materiais Didáticos</div>
-    <div class="loja-tip">Após a compra, o material ficará disponível no seu inventário para download.</div>
+    <div class="section-title">${t('educational_materials')}</div>
+    <div class="loja-tip">${state.lang==='en'?'After purchase, the material will be available in your inventory for download.':'Após a compra, o material ficará disponível no seu inventário para download.'}</div>
     ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).map(item=>`
       <div class="loja-item">
         <div class="item-icon"><img src="${item.img}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.outerHTML='<span>${item.icon}</span>'"></div>
         <div class="item-info">
-          <div class="item-name">${item.nome}</div>
-          <div class="item-desc">${item.desc}</div>
+          <div class="item-name">${itemName(item)}</div>
+          <div class="item-desc">${itemDesc(item)}</div>
         </div>
         <button class="item-buy" onclick="comprarItem(${item.id})" ${state.moedas<item.preco?'disabled':''} style="${state.moedas<item.preco?'background:#1a1a1a;color:#444;border-color:#2a2a2a;box-shadow:none;cursor:not-allowed':''}">
           <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${item.preco}
@@ -2840,8 +3299,8 @@ function renderLoja(){
     `).join('')}`:''
     }
 
-    <div class="section-title" style="margin-top:1rem">Violões e Acessórios</div>
-    <div class="loja-tip">Itens que vão te ajudar a evoluir mais rápido no jogo.</div>
+    <div class="section-title" style="margin-top:1rem">${t('guitars')}</div>
+    <div class="loja-tip">${state.lang==='en'?'Items that will help you progress faster in the game.':'Itens que vão te ajudar a evoluir mais rápido no jogo.'}</div>
 
     <div class="shop-cards-grid">
       ${VIOLOES.filter(v=>!state.violoesComprados.includes(v.id)).map(v=>{
@@ -2856,15 +3315,15 @@ function renderLoja(){
               <img src="${v.img}" class="shop-card-img" onerror="this.style.opacity='.3'">
             </div>
             <div class="shop-card-info">
-              <div class="shop-card-name" style="color:${v.cor}">${v.nome}</div>
-              ${v.pct>0?`<div class="shop-card-xp-mini" style="background:${v.cor}18;border-color:${v.cor}44;color:${v.cor}">⭐ +${Math.round(v.pct*100)}% Pontos</div>`:''}
+              <div class="shop-card-name" style="color:${v.cor}">${guitarName(v)}</div>
+              ${v.pct>0?`<div class="shop-card-xp-mini" style="background:${v.cor}18;border-color:${v.cor}44;color:${v.cor}">⭐ +${Math.round(v.pct*100)}% ${t('points')}</div>`:''}
               <div class="shop-card-price-mini"><img src='moeda.png' style='width:11px;height:11px;vertical-align:middle;object-fit:contain'> ${v.preco.toLocaleString()}</div>
             </div>
           </div>`;
         }).join('')}
     </div>
     ${VIOLOES.filter(v=>!state.violoesComprados.includes(v.id)).length===0
-      ?`<div style="color:#444;font-size:.82rem;padding:.5rem 0 1rem">Você possui todos os violões! 🎸</div>`
+      ?`<div style="color:#444;font-size:.82rem;padding:.5rem 0 1rem">${state.lang==='en'?'You own all guitars! 🎸':'Você possui todos os violões! 🎸'}</div>`
       :''}
   `;
 }
@@ -2881,27 +3340,27 @@ function renderInventario(){
         </div>
         <div style="flex:1;min-width:0">
           <div style="font-size:.68rem;color:#555;text-transform:uppercase;letter-spacing:.08em">${tipo}</div>
-          <div style="font-size:.92rem;font-weight:900;color:${cor}">${item.nome}</div>
+          <div style="font-size:.92rem;font-weight:900;color:${cor}">${itemName(item)}</div>
           <div style="font-size:.72rem;color:#888;margin-top:.15rem">${extra}</div>
         </div>
-        <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()" style="background:#252525;border:1.5px solid #3a3a3a;border-radius:9px;color:#aaa;font-size:.72rem;font-weight:700;padding:.4rem .7rem;cursor:pointer;white-space:nowrap">Trocar</button>
+        <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()" style="background:#252525;border:1.5px solid #3a3a3a;border-radius:9px;color:#aaa;font-size:.72rem;font-weight:700;padding:.4rem .7rem;cursor:pointer;white-space:nowrap">${t('swap_in_shop')}</button>
       </div>`;
   }
 
-  const violaoExtra = violaoEq.pct>0 ? `+${Math.round(violaoEq.pct*100)}% de XP por acerto` : 'Sem bônus';
+  const violaoExtra = violaoEq.pct>0 ? `+${Math.round(violaoEq.pct*100)}% ${state.lang==='en'?'XP per correct answer':'de XP por acerto'}` : (state.lang==='en'?'No bonus':'Sem bônus');
 
   const eduItems = state.inventario.filter(id=>LOJA_ITEMS[id]);
 
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title"><img src='inventario.png' style='width:24px;height:24px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> Inventário</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title"><img src='inventario.png' style='width:24px;height:24px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> ${t('inventory')}</span>
     </div>
 
-    <div class="section-title">Equipamento</div>
+    <div class="section-title">${t('equipment_section')}</div>
 
     <div class="inv-guitar-slot" style="border-color:${violaoEq.cor}55">
-      <div style="font-size:.62rem;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">Violão Equipado</div>
+      <div style="font-size:.62rem;color:#555;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem">${t('equipped_guitar_label')}</div>
       <div class="inv-guitar-img-wrap">
         <img src="${violaoEq.img}" class="inv-guitar-img" onerror="this.style.opacity='.2'">
       </div>
@@ -2909,31 +3368,31 @@ function renderInventario(){
         <div style="font-size:1.1rem;font-weight:900;color:${violaoEq.cor}">${violaoEq.nome}</div>
         <div style="font-size:.78rem;color:#888;margin:.2rem 0 .6rem">${violaoExtra}</div>
       </div>
-      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()" style="width:100%;padding:.55rem 0;background:#1e1e1e;border:2px solid #333;border-radius:11px;color:#aaa;font-size:.78rem;font-weight:700;cursor:pointer">Trocar na Loja</button>
+      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()" style="width:100%;padding:.55rem 0;background:#1e1e1e;border:2px solid #333;border-radius:11px;color:#aaa;font-size:.78rem;font-weight:700;cursor:pointer">${t('swap_in_shop')}</button>
     </div>
 
 
-    <div class="section-title" style="margin-top:.4rem">Violões disponíveis</div>
+    <div class="section-title" style="margin-top:.4rem">${t('available_guitars')}</div>
     ${state.violoesComprados.filter(id=>id!==state.violaoEquipado).length === 0
-      ? `<div style="color:#444;font-size:.8rem;padding:.5rem 0">Nenhum outro violão adquirido.</div>`
+      ? `<div style="color:#444;font-size:.8rem;padding:.5rem 0">${t('no_other_guitars')}</div>`
       : state.violoesComprados.filter(id=>id!==state.violaoEquipado).map(id=>{
           const v=VIOLOES.find(x=>x.id===id);
           return `<div class="loja-item" style="border-color:${v.cor}44">
             <div class="item-icon"><img src="${v.img}" style="width:100%;height:100%;object-fit:contain" onerror="this.outerHTML='<span style=\'font-size:1.8rem\'>🎸</span>'"></div>
-            <div class="item-info"><div class="item-name" style="color:${v.cor}">${v.nome}</div><div class="item-desc">${v.desc}</div></div>
-            <button class="item-buy" onclick="equiparViolao('${v.id}')" style="background:linear-gradient(180deg,#60dcff,#3aaccc);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)">Equipar</button>
+            <div class="item-info"><div class="item-name" style="color:${v.cor}">${guitarName(v)}</div><div class="item-desc">${guitarDesc(v)}</div></div>
+            <button class="item-buy" onclick="equiparViolao('${v.id}')" style="background:linear-gradient(180deg,#60dcff,#3aaccc);color:#fff;text-shadow:0 2px 6px rgba(0,0,0,.5)">${t('equip')}</button>
           </div>`;
         }).join('')}
 
 
-    <div class="section-title" style="margin-top:.4rem">Materiais Didáticos</div>
+    <div class="section-title" style="margin-top:.4rem">${t('educational_materials')}</div>
     ${eduItems.length===0
-      ? `<div style="color:#444;font-size:.8rem;padding:.5rem 0">Nenhum item adquirido ainda.</div>`
+      ? `<div style="color:#444;font-size:.8rem;padding:.5rem 0">${t('no_items_yet')}</div>`
       : eduItems.map(id=>{
           const item=LOJA_ITEMS[id];
           return `<div class="loja-item">
             <div class="item-icon"><img src="${item.img}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.outerHTML='<span>${item.icon}</span>'"></div>
-            <div class="item-info"><div class="item-name">${item.nome}</div><div class="item-desc">${item.desc}</div></div>
+            <div class="item-info"><div class="item-name">${itemName(item)}</div><div class="item-desc">${itemDesc(item)}</div></div>
             <button class="item-buy" style="background:#1a2a1a;border-color:#22c55e;color:#4ade80">⬇ Baixar</button>
           </div>`;
         }).join('')}
@@ -2985,36 +3444,36 @@ function renderNiveis(){
       <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
         <img src="${_nivelImg(currentGroup.title)}" style="width:40px;height:40px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">
         <div style="flex:1">
-          <div style="font-size:.62rem;color:#888;text-transform:uppercase;letter-spacing:.1em;font-weight:700">Categoria Atual</div>
+          <div style="font-size:.62rem;color:#888;text-transform:uppercase;letter-spacing:.1em;font-weight:700">${t('current_category')}</div>
           <div style="font-size:1rem;font-weight:900;color:${cor}">${currentGroup.title}</div>
         </div>
         ${nextGroup?`
         <div style="font-size:.6rem;color:#666;text-align:right">
-          <div style="font-weight:700;color:#888">Próxima</div>
+          <div style="font-weight:700;color:#888">${t('next_category')}</div>
           <div style="font-weight:900;color:${nextGroup.cor}">${nextGroup.title}</div>
         </div>`:
-        `<div style="font-size:.72rem;font-weight:900;color:#fbbf24">👑 Máximo</div>`}
+        `<div style="font-size:.72rem;font-weight:900;color:#fbbf24">${t('max_badge')}</div>`}
       </div>
       <div style="height:10px;background:#111;border-radius:99px;overflow:hidden;border:2px solid #2a2a2a;margin-bottom:.5rem">
         <div style="height:100%;width:${cgPct}%;background:linear-gradient(90deg,${cor}88,${cor},#fff8);border-radius:99px;transition:width .8s ease;box-shadow:0 0 8px ${cor}66"></div>
       </div>
       <div style="display:flex;justify-content:space-between;font-size:.68rem;font-weight:700">
-        <span style="color:#666">${state.xp-cgStart} XP nesta categoria</span>
+        <span style="color:#666">${state.xp-cgStart} ${t('xp_in_category')}</span>
         ${nextGroup
-          ? `<span style="color:${cor}">faltam ${xpFaltando.toLocaleString()} Pontos</span>`
-          : `<span style="color:#4ade80">✓ Categoria máxima</span>`}
+          ? `<span style="color:${cor}">${t('missing_points')} ${xpFaltando.toLocaleString()} ${t('points')}</span>`
+          : `<span style="color:#4ade80">${t('max_category')}</span>`}
       </div>
     </div>`;
 
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title">Níveis</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title">${t('levels')}</span>
     </div>
 
     ${progressHeader}
 
-    <div class="section-title">Categorias</div>
+    <div class="section-title">${t('categories')}</div>
 
     <div class="shop-cards-grid" style="margin-bottom:1.5rem">
       ${groups.map(g=>{
@@ -3030,7 +3489,7 @@ function renderNiveis(){
         <div class="shop-card" style="--card-color:${cor};${isCurrent?`border-color:${cor};box-shadow:4px 4px 0 #111, 0 0 18px ${cor}55`:''}" onclick="openNivelModal(${g.idx})">
           <!-- status badge top-left -->
           <div class="shop-card-badge" style="background:${badgeBg};color:${badgeColor};border-color:rgba(255,255,255,.15)">
-            ${isCurrent?'Você está aqui':isDone?'✓ Concluído':''}
+            ${isCurrent?t('here_badge'):isDone?t('done_badge'):''}
           </div>
           <!-- level range badge top-right -->
           <div style="position:absolute;top:.55rem;right:.55rem;font-size:.58rem;font-weight:800;color:${isLocked?'#999':cor};background:#0e0e0e;border:1.5px solid ${isLocked?'#333':cor+'55'};border-radius:20px;padding:.2rem .5rem;z-index:3;letter-spacing:.03em">
@@ -3054,11 +3513,11 @@ function renderNiveis(){
           <div class="shop-card-info">
             <div class="shop-card-name" style="color:${isLocked?'#aaa':cor}">${g.title}</div>
             <div style="font-size:.68rem;color:${isLocked?'#666':'#888'};margin-top:.2rem">
-              Níveis ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
+              ${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
             </div>
-            ${isCurrent?`<div class="shop-card-xp-mini" style="background:${cor}18;border-color:${cor}44;color:${cor};margin-top:.35rem">▶ Em progresso</div>`:''}
-            ${isDone?`<div class="shop-card-xp-mini" style="background:#22c55e18;border-color:#22c55e44;color:#4ade80;margin-top:.35rem">✓ Concluído</div>`:''}
-            ${isLocked?`<div class="shop-card-xp-mini" style="background:#22222288;border-color:#33333388;color:#888;margin-top:.35rem">🔒 Nível ${g.range[0]}+</div>`:''}
+            ${isCurrent?`<div class="shop-card-xp-mini" style="background:${cor}18;border-color:${cor}44;color:${cor};margin-top:.35rem">${t('in_progress_badge')}</div>`:''}
+            ${isDone?`<div class="shop-card-xp-mini" style="background:#22c55e18;border-color:#22c55e44;color:#4ade80;margin-top:.35rem">${t('done_badge')}</div>`:''}
+            ${isLocked?`<div class="shop-card-xp-mini" style="background:#22222288;border-color:#33333388;color:#888;margin-top:.35rem">🔒 ${t('level')} ${g.range[0]}+</div>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -3094,7 +3553,7 @@ function openNivelModal(idx){
     progressBar=`
       <div style="margin-bottom:1rem">
         <div style="display:flex;justify-content:space-between;font-size:.72rem;color:#bbb;margin-bottom:.4rem">
-          <span>Progresso nesta etapa</span><span style="color:${cor};font-weight:800">${pct}%</span>
+          <span>${t('step_progress')}</span><span style="color:${cor};font-weight:800">${pct}%</span>
         </div>
         <div style="height:8px;background:#1a1a1a;border-radius:99px;overflow:hidden;border:1.5px solid #2a2a2a">
           <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,${cor}88,${cor});border-radius:99px;transition:width .6s ease"></div>
@@ -3103,10 +3562,10 @@ function openNivelModal(idx){
   }
 
   const statusTag=isDone
-    ? `<div style="display:inline-flex;align-items:center;gap:.4rem;background:#14521433;border:1.5px solid #22c55e55;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:#4ade80;margin-bottom:.9rem">✓ Etapa Concluída</div>`
+    ? `<div style="display:inline-flex;align-items:center;gap:.4rem;background:#14521433;border:1.5px solid #22c55e55;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:#4ade80;margin-bottom:.9rem">${t('step_done')}</div>`
     : isCurrent
-    ? `<div style="display:inline-flex;align-items:center;gap:.4rem;background:${cor}18;border:1.5px solid ${cor}55;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:${cor};margin-bottom:.9rem">▶ Etapa Atual</div>`
-    : `<div style="display:inline-flex;align-items:center;gap:.4rem;background:#33333333;border:1.5px solid #444;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:#555;margin-bottom:.9rem">🔒 Bloqueado · Alcance o nível ${from}</div>`;
+    ? `<div style="display:inline-flex;align-items:center;gap:.4rem;background:${cor}18;border:1.5px solid ${cor}55;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:${cor};margin-bottom:.9rem">${t('step_current')}</div>`
+    : `<div style="display:inline-flex;align-items:center;gap:.4rem;background:#33333333;border:1.5px solid #444;border-radius:20px;padding:.3rem .8rem;font-size:.78rem;font-weight:800;color:#555;margin-bottom:.9rem">${t('step_locked')} ${from}</div>`;
 
   const overlay=document.createElement('div');
   overlay.id='nivel-modal-overlay';
@@ -3130,12 +3589,12 @@ function openNivelModal(idx){
         ${statusTag}
         <div style="font-size:1.6rem;font-weight:900;color:${isLocked?'#555':cor};margin-bottom:.25rem;letter-spacing:-.02em">${g.title}</div>
         <div style="font-size:.82rem;color:#666;font-weight:700;margin-bottom:.85rem">
-          Níveis ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
+          ${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
         </div>
         <div style="font-size:.9rem;color:${isLocked?'#444':'#aaa'};line-height:1.7;margin-bottom:1.1rem;font-style:italic">"${g.desc}"</div>
         ${progressBar}
-        ${!isDone&&!isCurrent?`<div style="font-size:.8rem;color:#555;display:flex;align-items:center;gap:.4rem">⭐ XP necessário: <strong style="color:#666">${xpNeeded.toLocaleString()} XP</strong></div>`:''}
-        ${isDone?`<div style="font-size:.8rem;color:#4ade8088;display:flex;align-items:center;gap:.4rem">✓ Você já superou esta etapa da jornada.</div>`:''}
+        ${!isDone&&!isCurrent?`<div style="font-size:.8rem;color:#555;display:flex;align-items:center;gap:.4rem">⭐ ${state.lang==='en'?'Required XP:':'XP necessário:'} <strong style="color:#666">${xpNeeded.toLocaleString()} XP</strong></div>`:''}
+        ${isDone?`<div style="font-size:.8rem;color:#4ade8088;display:flex;align-items:center;gap:.4rem">✓ ${state.lang==='en'?'You have already passed this stage.':'Você já superou esta etapa da jornada.'}</div>`:''}
       </div>
     </div>`;
 
@@ -3168,10 +3627,10 @@ function renderRanking(){
   const myUid=state.user?.uid;
   const data=state.rankingData;
   const rows=data.length===0
-    ?`<div style="color:#555;text-align:center;padding:2rem;font-size:.85rem">Carregando...</div>`
+    ?`<div style="color:#555;text-align:center;padding:2rem;font-size:.85rem">${t('no_ranking_data')}</div>`
     :data.map((p,i)=>{
       const isMe=p.uid===myUid;
-      const nome=p.displayName||'Jogador';
+      const nome=p.displayName||t('player_default_pt');
       const lvlIdx=getLvlIdx(p.xp||0);
       const lvl=LEVELS[lvlIdx];
       return `
@@ -3179,7 +3638,7 @@ function renderRanking(){
           <span class="rank-pos${i<3?' top':''}">${i+1}</span>
           <div class="rank-info">
             <div class="rank-name">${nome}</div>
-            <div class="rank-meta">Nível ${lvl.n} • ${lvl.title}</div>
+            <div class="rank-meta">${t('level')} ${lvl.n} • ${lvlTitle(lvl)}</div>
           </div>
           <div class="rank-xp-col">
             <div class="rank-xp">${(p.xp||0).toLocaleString()} <span style="font-size:.72rem">XP</span></div>
@@ -3188,8 +3647,8 @@ function renderRanking(){
     }).join('');
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">← Voltar</button>
-      <span class="page-title">Ranking</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title">${t('ranking_title')}</span>
     </div>
     <div class="rank-card">
       <div class="rank-arcade-header">
@@ -3257,7 +3716,7 @@ function nextQ(){
     setTimeout(()=>{
       const popup=document.createElement('div');
       popup.style.cssText='position:fixed;z-index:9999;left:50%;top:42%;transform:translate(-50%,-50%);font-size:1.6rem;font-weight:900;color:#60dcff;text-shadow:0 0 24px #60dcff,0 0 60px #60dcff88;pointer-events:none;white-space:nowrap;text-align:center;';
-      popup.innerHTML='💎 Pergunta Diamante';
+      popup.innerHTML='💎 '+t('diamond_question');
       document.body.appendChild(popup);
       popup.animate([
         {opacity:0,transform:'translate(-50%,-50%) scale(.7)'},
@@ -3286,7 +3745,7 @@ function afterLvlUp(){
     setTimeout(()=>{
       const popup=document.createElement('div');
       popup.style.cssText='position:fixed;z-index:9999;left:50%;top:42%;transform:translate(-50%,-50%);font-size:1.6rem;font-weight:900;color:#60dcff;text-shadow:0 0 24px #60dcff,0 0 60px #60dcff88;pointer-events:none;white-space:nowrap;text-align:center;';
-      popup.innerHTML='💎 Pergunta Diamante';
+      popup.innerHTML='💎 '+t('diamond_question');
       document.body.appendChild(popup);
       popup.animate([
         {opacity:0,transform:'translate(-50%,-50%) scale(.7)'},
@@ -3325,28 +3784,28 @@ function confirmarCompra({nome, preco, img, icon, onConfirm}){
             : `<span style="font-size:1.6rem">${icon||'🛒'}</span>`}
         </div>
         <div style="flex:1">
-          <div style="font-size:.68rem;color:#666;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">Confirmar compra</div>
+          <div style="font-size:.68rem;color:#666;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">${t('confirm_purchase')}</div>
           <div style="font-size:1rem;font-weight:900;color:#f0f0f0;line-height:1.3">${nome}</div>
         </div>
       </div>
       <div style="background:#111;border:2px solid #2a2a2a;border-radius:12px;padding:.75rem 1rem;margin-bottom:1.3rem;display:flex;align-items:center;justify-content:space-between">
-        <span style="font-size:.82rem;color:#888;font-weight:600">Valor da compra</span>
+        <span style="font-size:.82rem;color:#888;font-weight:600">${t('purchase_value')}</span>
         <div style="display:flex;align-items:center;gap:.4rem">
           <img src="moeda.png" style="width:18px;height:18px;object-fit:contain">
           <span style="font-size:1.1rem;font-weight:900;color:#F5A623">${preco.toLocaleString()}</span>
         </div>
       </div>
       <div style="font-size:.9rem;color:#bbb;text-align:center;margin-bottom:1.3rem;font-weight:500">
-        Tem certeza que deseja comprar este item?
+        ${t('are_you_sure')}
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:.75rem">
         <button onclick="playClickSfx('back');_cancelarCompra()"
           style="padding:.85rem;border-radius:14px;border:3px solid #1a1a1a;background:linear-gradient(180deg,#f87171,#dc2626);color:#fff;font-family:var(--font-body);font-size:.95rem;font-weight:800;cursor:pointer;box-shadow:0 4px 0 #1a1a1a;text-shadow:0 2px 6px rgba(0,0,0,.5);-webkit-tap-highlight-color:transparent">
-          Não
+          ${t('no_btn')}
         </button>
         <button onclick="_executarCompra()"
           style="padding:.85rem;border-radius:14px;border:3px solid #1a1a1a;background:linear-gradient(180deg,#ffbe4f,#e8931a);color:#fff;font-family:var(--font-body);font-size:.95rem;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #1a1a1a;text-shadow:0 2px 6px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent">
-          Sim, comprar
+          ${t('yes_buy')}
         </button>
       </div>
     </div>`;
@@ -3358,20 +3817,20 @@ function confirmarCompra({nome, preco, img, icon, onConfirm}){
 
 function comprarItem(id){
   const item=LOJA_ITEMS[id];
-  if(state.moedas<item.preco){showToast('Moedas insuficientes!','Você precisa de 🪙 '+item.preco+' moedas');return;}
-  if(state.inventario.includes(id)){showToast('Item já adquirido','Confira no seu Inventário');return;}
+  if(state.moedas<item.preco){showToast(t('not_enough_coins'),t('not_enough_coins_detail')+'🪙 '+item.preco+' '+t('coins').toLowerCase());return;}
+  if(state.inventario.includes(id)){showToast(t('item_already_owned'),t('check_inventory'));return;}
   confirmarCompra({
-    nome: item.nome,
+    nome: itemName(item),
     preco: item.preco,
     img: item.img,
     icon: item.icon,
     onConfirm: function(){
-      if(state.moedas<item.preco){showToast('Moedas insuficientes!','Você precisa de 🪙 '+item.preco+' moedas');return;}
-      if(state.inventario.includes(id)){showToast('Item já adquirido','Confira no seu Inventário');return;}
+      if(state.moedas<item.preco){showToast(t('not_enough_coins'),t('not_enough_coins_detail')+'🪙 '+item.preco+' '+t('coins').toLowerCase());return;}
+      if(state.inventario.includes(id)){showToast(t('item_already_owned'),t('check_inventory'));return;}
       state.moedas-=item.preco;
       state.inventario.push(id);
       playBuySfx();
-      showToast('Item adicionado ao Inventário!',item.nome);
+      showToast(t('item_added_inventory'),itemName(item));
       render();
     }
   });
@@ -3393,6 +3852,17 @@ function loadStreak(){
 }
 loadStreak();
 
+// ── Detecção de idioma ────────────────────────────────────────
+(function(){
+  const savedLang=localStorage.getItem('kaiserplay_lang');
+  if(savedLang){
+    state.lang=savedLang;
+  } else {
+    const nav=navigator.language||navigator.userLanguage||'pt';
+    state.lang=nav.toLowerCase().startsWith('pt')?'pt':'en';
+  }
+})();
+
 // ── Modal da loja ─────────────────────────────────────────────
 let shopModal=null;
 function openShopModal(type,id){
@@ -3400,17 +3870,17 @@ function openShopModal(type,id){
   let item,btnHtml,imgSrc,cor,nameTxt,benefits=[];
   if(type==='violao'){
     item=VIOLOES.find(v=>v.id===id);if(!item)return;
-    cor=item.cor; imgSrc=item.img; nameTxt=item.nome;
+    cor=item.cor; imgSrc=item.img; nameTxt=guitarName(item);
     if(item.pct>0) benefits.push({icon:'⭐',text:`+${Math.round(item.pct*100)}% de Pontos a cada resposta correta`,color:cor});
-    else benefits.push({icon:'🎸',text:'Violão padrão · sem bônus de Pontos',color:'#555'});
-    if(item.doubleDiamonds) benefits.push({icon:'💎',text:'Dobra os diamantes recebidos',color:'#c084fc'});
+    else benefits.push({icon:'🎸',text:state.lang==='en'?'Standard guitar · no Points bonus':'Violão padrão · sem bônus de Pontos',color:'#555'});
+    if(item.doubleDiamonds) benefits.push({icon:'💎',text:state.lang==='en'?'Doubles diamonds received':'Dobra os diamantes recebidos',color:'#c084fc'});
     const owned=state.violoesComprados.includes(id);
     const equipped=state.violaoEquipado===id;
     const canBuy=!owned&&state.moedas>=item.preco;
-    if(equipped) btnHtml=`<button class="modal-btn modal-btn--equipped">✓ Equipado</button>`;
-    else if(owned) btnHtml=`<button class="modal-btn modal-btn--equip" onclick="equiparViolao('${id}');closeShopModal()">Equipar</button>`;
+    if(equipped) btnHtml=`<button class="modal-btn modal-btn--equipped">✓ ${t('equipped')}</button>`;
+    else if(owned) btnHtml=`<button class="modal-btn modal-btn--equip" onclick="equiparViolao('${id}');closeShopModal()">${t('equip')}</button>`;
     else if(canBuy) btnHtml=`<button class="modal-btn modal-btn--buy" onclick="closeShopModal();comprarViolao('${id}')"><img src='moeda.png' style='width:14px;height:14px;vertical-align:middle;object-fit:contain'> ${item.preco.toLocaleString()}</button>`;
-    else btnHtml=`<button class="modal-btn modal-btn--locked" disabled><img src='moeda.png' style='width:14px;height:14px;vertical-align:middle;object-fit:contain'> ${item.preco.toLocaleString()} · Saldo insuficiente</button>`;
+    else btnHtml=`<button class="modal-btn modal-btn--locked" disabled><img src='moeda.png' style='width:14px;height:14px;vertical-align:middle;object-fit:contain'> ${item.preco.toLocaleString()} · ${t('insufficient_balance')}</button>`;
    }
   const overlay=document.createElement('div');
   overlay.id='shop-modal-overlay';
@@ -3430,7 +3900,7 @@ function openShopModal(type,id){
       <div style="flex:1;background:#111;padding:1.4rem 1.3rem 3rem;border-top:2.5px solid ${cor}44;">
         <div style="font-size:1.45rem;font-weight:900;color:${cor};margin-bottom:.9rem;letter-spacing:-.02em">${nameTxt}</div>
         <div style="display:flex;flex-direction:column;gap:.5rem;margin-bottom:1.2rem">${benefitsHtml}</div>
-        ${item.preco>0?`<div style="font-size:.82rem;color:#888;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem"><img src='moeda.png' style='width:15px;height:15px;object-fit:contain;vertical-align:middle'> Preço: <strong style="color:#F5A623">${item.preco.toLocaleString()} moedas</strong></div>`:''}
+        ${item.preco>0?`<div style="font-size:.82rem;color:#888;margin-bottom:.8rem;display:flex;align-items:center;gap:.4rem"><img src='moeda.png' style='width:15px;height:15px;object-fit:contain;vertical-align:middle'> ${t('price_label')} <strong style="color:#F5A623">${item.preco.toLocaleString()} ${t('coins').toLowerCase()}</strong></div>`:''}
         ${btnHtml}
       </div>
     </div>`;
@@ -3460,56 +3930,77 @@ function renderPerfil(){
           style="width:100%;padding:.7rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);outline:none;box-sizing:border-box">
       </div>`;
   }
+  const optStr=t('optional_fill_hint');
+  const delStr=t('delete_account_permanently');
+  const updEmailStr=t('update_email');
+  const updPassStr=t('update_password');
+  const accStr=t('account_section');
+  const nameRankStr=t('name_in_ranking');
+  const minCharsStr=t('min_chars');
   return `
     <div class="back-row">
-      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title">Configurações</span>
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title">${t('settings_title')}</span>
     </div>
     <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;padding-bottom:2rem">
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar nome de exibição</div>
-        ${field('Nome no ranking','perfil-nome','text','Seu nome',displayName)}
+        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">${t('change_display_name')}</div>
+        ${field(nameRankStr,'perfil-nome','text',displayName||nameRankStr,displayName)}
         <button onclick="perfilSalvarNome()"
           style="width:100%;padding:.7rem;background:linear-gradient(180deg,#a78bfa,#7c3aed);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
-          Salvar nome
+          ${t('save')}
         </button>
         <div id="perfil-nome-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">Trocar e-mail</div>
-        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">Opcional — preencha só se quiser alterar</div>
-        ${field('Novo e-mail','perfil-email','email','Novo e-mail','')}
-        ${field('Senha atual','perfil-email-senha','password','Senha atual','')}
+        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">${t('change_email')}</div>
+        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">${optStr}</div>
+        ${field(t('new_email'),'perfil-email','email',t('new_email'),'')}
+        ${field(t('current_password'),'perfil-email-senha','password',t('current_password'),'')}
         <button onclick="perfilTrocarEmail()"
           style="width:100%;padding:.7rem;background:linear-gradient(180deg,#60a5fa,#2563eb);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
-          Atualizar e-mail
+          ${updEmailStr}
         </button>
         <div id="perfil-email-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">Trocar senha</div>
-        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">Opcional — preencha só se quiser alterar</div>
-        ${field('Senha atual','perfil-senha-atual','password','Senha atual','')}
-        ${field('Nova senha','perfil-senha-nova','password','Mínimo 6 caracteres','')}
+        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">${t('change_password')}</div>
+        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">${optStr}</div>
+        ${field(t('current_password'),'perfil-senha-atual','password',t('current_password'),'')}
+        ${field(t('new_password'),'perfil-senha-nova','password',minCharsStr,'')}
         <button onclick="perfilTrocarSenha()"
           style="width:100%;padding:.7rem;background:linear-gradient(180deg,#4ade80,#16a34a);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
-          Atualizar senha
+          ${updPassStr}
         </button>
         <div id="perfil-senha-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Conta</div>
+        <div style="font-size:.68rem;font-weight:800;color:#F5A623;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem">${t('choose_language')}</div>
+        <div style="display:flex;gap:.5rem">
+          <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'}">
+            🇧🇷 Português
+          </button>
+          <button onclick="state.lang='en';localStorage.setItem('kaiserplay_lang','en');render()"
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'}">
+            🇺🇸 English
+          </button>
+        </div>
+      </div>
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">${accStr}</div>
         <button onclick="logoutUser()"
           style="width:100%;padding:.7rem;background:#111;border:2px solid #444;border-radius:12px;color:#aaa;font-size:.88rem;font-weight:700;font-family:var(--font-body);cursor:pointer;margin-bottom:.75rem">
-          Sair da conta
+          ${t('sign_out')}
         </button>
         <button onclick="perfilDeletarConta()"
           style="width:100%;padding:.7rem;background:#1a0a0a;border:2px solid #7f1d1d;border-radius:12px;color:#f87171;font-size:.88rem;font-weight:700;font-family:var(--font-body);cursor:pointer">
-          Deletar conta permanentemente
+          ${delStr}
         </button>
         <div id="perfil-conta-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
@@ -3520,21 +4011,21 @@ function renderPerfil(){
 function saveDisplayName(){
   const name=document.getElementById('display-name-input').value.trim();
   const errEl=document.getElementById('display-name-error');
-  if(!name){errEl.textContent='Escolha um nome.';return;}
+  if(!name){errEl.textContent=t('enter_display_name');return;}
   auth.currentUser.updateProfile({displayName:name})
     .then(()=>{state.user=auth.currentUser;state.phase='start';render();})
-    .catch(()=>{errEl.textContent='Erro ao salvar. Tente novamente.';});
+    .catch(()=>{errEl.textContent=t('auth_generic_error');});
 }
 function perfilSalvarNome(){
   const nome=document.getElementById('perfil-nome').value.trim();
   const msg=document.getElementById('perfil-nome-msg');
-  if(!nome){msg.style.color='#f87171';msg.textContent='Digite um nome.';return;}
+  if(!nome){msg.style.color='#f87171';msg.textContent=t('enter_display_name');return;}
   auth.currentUser.updateProfile({displayName:nome})
     .then(()=>{
       state.user=auth.currentUser;
       saveProgress();
       msg.style.color='#4ade80';
-      msg.textContent='Nome atualizado!';
+      msg.textContent=t('display_name_updated');
     })
     .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
 }
@@ -3542,27 +4033,27 @@ function perfilTrocarEmail(){
   const novoEmail=document.getElementById('perfil-email').value.trim();
   const senha=document.getElementById('perfil-email-senha').value;
   const msg=document.getElementById('perfil-email-msg');
-  if(!novoEmail||!senha){msg.style.color='#f87171';msg.textContent='Preencha todos os campos.';return;}
+  if(!novoEmail||!senha){msg.style.color='#f87171';msg.textContent=t('fill_all_fields');return;}
   const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
   auth.currentUser.reauthenticateWithCredential(cred)
     .then(()=>auth.currentUser.updateEmail(novoEmail))
-    .then(()=>{msg.style.color='#4ade80';msg.textContent='E-mail atualizado!';})
+    .then(()=>{msg.style.color='#4ade80';msg.textContent=t('email_updated');})
     .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
 }
 function perfilTrocarSenha(){
   const senhaAtual=document.getElementById('perfil-senha-atual').value;
   const senhaNova=document.getElementById('perfil-senha-nova').value;
   const msg=document.getElementById('perfil-senha-msg');
-  if(!senhaAtual||!senhaNova){msg.style.color='#f87171';msg.textContent='Preencha todos os campos.';return;}
+  if(!senhaAtual||!senhaNova){msg.style.color='#f87171';msg.textContent=t('fill_all_fields');return;}
   const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senhaAtual);
   auth.currentUser.reauthenticateWithCredential(cred)
     .then(()=>auth.currentUser.updatePassword(senhaNova))
-    .then(()=>{msg.style.color='#4ade80';msg.textContent='Senha atualizada!';})
+    .then(()=>{msg.style.color='#4ade80';msg.textContent=t('password_updated');})
     .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
 }
 function perfilDeletarConta(){
   const msg=document.getElementById('perfil-conta-msg');
-  const confirmado=confirm('Tem certeza? Isso apaga sua conta e todo o progresso permanentemente.');
+  const confirmado=confirm(t('delete_account_confirm'));
   if(!confirmado)return;
   const senha=prompt('Digite sua senha para confirmar:');
   if(!senha)return;
@@ -3619,7 +4110,7 @@ function loginUser(){
   const password=document.getElementById('login-password').value;
   const errEl=document.getElementById('login-error');
   errEl.textContent='';
-  if(!email||!password){errEl.textContent='Preencha e-mail e senha.';return;}
+  if(!email||!password){errEl.textContent=t('fill_all_fields');return;}
   auth.signInWithEmailAndPassword(email,password)
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
@@ -3627,9 +4118,9 @@ function forgotPassword(){
   const email=document.getElementById('forgot-email').value.trim();
   const errEl=document.getElementById('forgot-error');
   errEl.style.color='';
-  if(!email){errEl.textContent='Digite seu e-mail primeiro.';return;}
+  if(!email){errEl.textContent=t('enter_email_first');return;}
   auth.sendPasswordResetEmail(email)
-    .then(()=>{errEl.style.color='#4ade80';errEl.textContent='E-mail de recuperação enviado! Verifique sua caixa de entrada.'})
+    .then(()=>{errEl.style.color='#4ade80';errEl.textContent=t('reset_email_sent');})
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
 function signupUser(){
@@ -3638,11 +4129,11 @@ function signupUser(){
   const name=document.getElementById('signup-name').value.trim();
   const errEl=document.getElementById('signup-error');
   errEl.textContent='';
-  if(!email||!password||!name){errEl.textContent='Preencha todos os campos.';return;}
-  if(password.length<6){errEl.textContent='A senha deve ter pelo menos 6 caracteres.';return;}
+  if(!email||!password||!name){errEl.textContent=t('fill_all_fields');return;}
+  if(password.length<6){errEl.textContent=t('password_too_short');return;}
   auth.createUserWithEmailAndPassword(email,password)
     .then(cred=>cred.user.updateProfile({displayName:name}))
-    .then(()=>{state.user=auth.currentUser;state.phase='start';render();})
+    .then(()=>{state.isGuest=false;state.user=auth.currentUser;state.phase='start';render();})
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
 function logoutUser(){
@@ -3652,21 +4143,24 @@ function logoutUser(){
 }
 function _authError(code){
   const map={
-    'auth/invalid-email':'E-mail inválido.',
-    'auth/user-not-found':'Usuário não encontrado.',
-    'auth/wrong-password':'Senha incorreta.',
-    'auth/email-already-in-use':'Este e-mail já está cadastrado.',
-    'auth/weak-password':'A senha deve ter pelo menos 6 caracteres.',
-    'auth/too-many-requests':'Muitas tentativas. Aguarde um momento.',
-    'auth/invalid-credential':'E-mail ou senha incorretos.',
+    'auth/invalid-email':t('auth_invalid_email'),
+    'auth/user-disabled':t('auth_user_disabled'),
+    'auth/user-not-found':t('auth_user_not_found'),
+    'auth/wrong-password':t('auth_wrong_password'),
+    'auth/email-already-in-use':t('auth_email_in_use'),
+    'auth/weak-password':t('auth_weak_password'),
+    'auth/too-many-requests':t('auth_too_many_requests'),
+    'auth/network-request-failed':t('auth_network_error'),
+    'auth/invalid-credential':t('auth_wrong_password'),
   };
-  return map[code]||'Erro ao autenticar. Tente novamente.';
+  return map[code]||t('auth_generic_error');
 }
 
 // ── 9. INICIALIZAÇÃO ──────────────────────────────────────────
 auth.onAuthStateChanged(async user=>{
   state.user=user||null;
   if(user){
+    state.isGuest=false;
     await loadProgress(user.uid);
     startRankingListener();
     if(state.phase==='login'||state.phase==='set_display_name'){
@@ -3676,7 +4170,8 @@ auth.onAuthStateChanged(async user=>{
   } else {
     stopRankingListener();
     state.rankingData=[];
-    state.phase='login';
+    // Only redirect to login if not in guest mode
+    if(!state.isGuest){state.phase='login';}
   }
   try{render();}catch(e){console.error('render error:',e);}
 });

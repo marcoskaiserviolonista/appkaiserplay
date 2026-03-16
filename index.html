@@ -73,10 +73,10 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .logo-text .play{color:#F5A623}
 .header-tabs{display:flex;gap:.25rem}
 .tab{font-size:.8rem;font-weight:800;cursor:pointer;padding:.42rem 1rem;border-radius:20px;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
-#tab-treino{color:#fff;background:linear-gradient(180deg,#f5c842 0%,#F5A623 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111;text-shadow:0 2px 5px rgba(0,0,0,.45)}
 #tab-ranking{color:#fff;background:linear-gradient(180deg,#60a5fa 0%,#2563eb 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111}
-#tab-treino:hover{filter:brightness(1.1)}
 #tab-ranking:hover{filter:brightness(1.1)}
+#tab-perfil{color:#fff;background:linear-gradient(180deg,#a78bfa 0%,#7c3aed 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111}
+#tab-perfil:hover{filter:brightness(1.1)}
 
 
 /* ── Treino Focado ── */
@@ -539,8 +539,8 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
       </div>
     </div>
     <div class="header-tabs">
-      <button class="tab active" id="tab-treino" onclick="playClickSfx('soft');goToTraining()">Treinar</button>
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
+      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()">Perfil</button>
     </div>
   </div>
   <div id="content"></div>
@@ -2313,20 +2313,24 @@ function render(){
   }
   const header=document.querySelector('.header');
   if(header)header.style.display=state.phase==='login'?'none':'';
-  const tTreino=document.getElementById('tab-treino');
   const tRanking=document.getElementById('tab-ranking');
-  if(state.tab==='game'){
-    tTreino.className='tab active';
-    tRanking.className='tab';
-  } else {
+  const tPerfil=document.getElementById('tab-perfil');
+  if(state.tab==='ranking'){
     tRanking.className='tab active';
-    tTreino.className='tab';
+  } else {
+    tRanking.className='tab';
+  }
+  if(state.phase==='perfil'){
+    tPerfil.className='tab active';
+  } else {
+    tPerfil.className='tab';
   }
   const c=document.getElementById('content');
   // toggle bottom padding when combo bar is visible
   const appEl=document.getElementById('app');
   if(appEl){appEl.classList.toggle('has-combo',state.streak>=1&&state.tab==='game'&&['question','answered'].includes(state.phase));}
   if(state.phase==='login'){c.innerHTML=renderLogin();return;}
+  if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
   if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
@@ -2395,9 +2399,6 @@ function renderStart(){
     </div>
     <div class="nav-grid" style="margin-top:.75rem">
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">Níveis</span></button>
-    </div>
-    <div style="text-align:center;margin-top:.75rem;margin-bottom:.25rem">
-      <button onclick="logoutUser()" style="background:none;border:none;color:#555;font-size:.72rem;font-weight:600;cursor:pointer;text-decoration:underline;font-family:var(--font-body)">Sair da conta</button>
     </div>
   `;
 }
@@ -3241,11 +3242,134 @@ function closeShopModal(){
   if(shopModal){shopModal.remove();shopModal=null;}
 }
 
+// ── Perfil ────────────────────────────────────────────────────
+function goToPerfil(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.tab='game';
+  state.phase='perfil';
+  render();
+}
+function renderPerfil(){
+  const user=state.user;
+  const displayName=user?.displayName||'';
+  const email=user?.email||'';
+  function field(label,id,type,placeholder,val){
+    return `
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.65rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">${label}</div>
+        <input id="${id}" type="${type}" placeholder="${placeholder}" value="${val}"
+          style="width:100%;padding:.7rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);outline:none;box-sizing:border-box">
+      </div>`;
+  }
+  return `
+    <div class="back-row">
+      <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
+      <span class="page-title">Perfil</span>
+    </div>
+    <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;padding-bottom:2rem">
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Nome de exibição</div>
+        ${field('Nome no ranking','perfil-nome','text','Seu nome',displayName)}
+        <button onclick="perfilSalvarNome()"
+          style="width:100%;padding:.7rem;background:linear-gradient(180deg,#a78bfa,#7c3aed);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
+          Salvar nome
+        </button>
+        <div id="perfil-nome-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
+      </div>
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar e-mail</div>
+        ${field('Novo e-mail','perfil-email','email','Novo e-mail','')}
+        ${field('Senha atual','perfil-email-senha','password','Senha atual','')}
+        <button onclick="perfilTrocarEmail()"
+          style="width:100%;padding:.7rem;background:linear-gradient(180deg,#60a5fa,#2563eb);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
+          Atualizar e-mail
+        </button>
+        <div id="perfil-email-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
+      </div>
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Trocar senha</div>
+        ${field('Senha atual','perfil-senha-atual','password','Senha atual','')}
+        ${field('Nova senha','perfil-senha-nova','password','Mínimo 6 caracteres','')}
+        <button onclick="perfilTrocarSenha()"
+          style="width:100%;padding:.7rem;background:linear-gradient(180deg,#4ade80,#16a34a);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
+          Atualizar senha
+        </button>
+        <div id="perfil-senha-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
+      </div>
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">Conta</div>
+        <button onclick="logoutUser()"
+          style="width:100%;padding:.7rem;background:#111;border:2px solid #444;border-radius:12px;color:#aaa;font-size:.88rem;font-weight:700;font-family:var(--font-body);cursor:pointer;margin-bottom:.75rem">
+          Sair da conta
+        </button>
+        <button onclick="perfilDeletarConta()"
+          style="width:100%;padding:.7rem;background:#1a0a0a;border:2px solid #7f1d1d;border-radius:12px;color:#f87171;font-size:.88rem;font-weight:700;font-family:var(--font-body);cursor:pointer">
+          Deletar conta permanentemente
+        </button>
+        <div id="perfil-conta-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
+      </div>
+
+    </div>
+  `;
+}
+function perfilSalvarNome(){
+  const nome=document.getElementById('perfil-nome').value.trim();
+  const msg=document.getElementById('perfil-nome-msg');
+  if(!nome){msg.style.color='#f87171';msg.textContent='Digite um nome.';return;}
+  auth.currentUser.updateProfile({displayName:nome})
+    .then(()=>{
+      state.user=auth.currentUser;
+      saveProgress();
+      msg.style.color='#4ade80';
+      msg.textContent='Nome atualizado!';
+    })
+    .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
+}
+function perfilTrocarEmail(){
+  const novoEmail=document.getElementById('perfil-email').value.trim();
+  const senha=document.getElementById('perfil-email-senha').value;
+  const msg=document.getElementById('perfil-email-msg');
+  if(!novoEmail||!senha){msg.style.color='#f87171';msg.textContent='Preencha todos os campos.';return;}
+  const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
+  auth.currentUser.reauthenticateWithCredential(cred)
+    .then(()=>auth.currentUser.updateEmail(novoEmail))
+    .then(()=>{msg.style.color='#4ade80';msg.textContent='E-mail atualizado!';})
+    .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
+}
+function perfilTrocarSenha(){
+  const senhaAtual=document.getElementById('perfil-senha-atual').value;
+  const senhaNova=document.getElementById('perfil-senha-nova').value;
+  const msg=document.getElementById('perfil-senha-msg');
+  if(!senhaAtual||!senhaNova){msg.style.color='#f87171';msg.textContent='Preencha todos os campos.';return;}
+  const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senhaAtual);
+  auth.currentUser.reauthenticateWithCredential(cred)
+    .then(()=>auth.currentUser.updatePassword(senhaNova))
+    .then(()=>{msg.style.color='#4ade80';msg.textContent='Senha atualizada!';})
+    .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
+}
+function perfilDeletarConta(){
+  const msg=document.getElementById('perfil-conta-msg');
+  const confirmado=confirm('Tem certeza? Isso apaga sua conta e todo o progresso permanentemente.');
+  if(!confirmado)return;
+  const senha=prompt('Digite sua senha para confirmar:');
+  if(!senha)return;
+  const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
+  auth.currentUser.reauthenticateWithCredential(cred)
+    .then(()=>db.collection('players').doc(auth.currentUser.uid).delete())
+    .then(()=>auth.currentUser.delete())
+    .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
+}
+
 // ── Firestore: salvar e carregar progresso ────────────────────
 function saveProgress(){
   if(!state.user)return;
   _saveTimer=null;
   db.collection('players').doc(state.user.uid).set({
+    displayName:state.user.displayName||'',
     xp:state.xp,
     notas:state.notas,
     moedas:state.moedas,

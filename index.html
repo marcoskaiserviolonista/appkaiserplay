@@ -4034,12 +4034,12 @@ function renderPerfil(){
         <div style="font-size:.68rem;font-weight:800;color:#F5A623;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem">${t('choose_language')}</div>
         <div style="display:flex;gap:.5rem">
           <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'}">
-            🇧🇷 Português
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            <img src="brasil.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> Português
           </button>
           <button onclick="state.lang='en';localStorage.setItem('kaiserplay_lang','en');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'}">
-            🇺🇸 English
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            <img src="eua.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> English
           </button>
         </div>
       </div>
@@ -4057,6 +4057,9 @@ function renderPerfil(){
         <div id="perfil-conta-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
 
+    </div>
+    <div style="text-align:center;padding:.5rem 0 .25rem">
+      <span style="font-size:.62rem;color:#444;font-style:italic">Ícones por <a href="https://flaticon.com" target="_blank" style="color:#444;text-decoration:none">Flaticon</a> (flaticon.com)</span>
     </div>
   `;
 }

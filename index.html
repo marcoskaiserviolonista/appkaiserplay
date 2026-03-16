@@ -687,8 +687,9 @@ const STRINGS = {
     lvl_mago:'Mago do Som', lvl_guardiao:'Guardião das Cordas',
     lvl_arcanista:'Arcanista da Harmonia', lvl_lenda:'Lenda da Música', lvl_mestre:'Mestre Supremo',
     // Guest popup
-    guest_popup_title:'Salve seu progresso!',
-    guest_popup_body:'Crie uma conta gratuita e:\n• Salve seu progresso no jogo\n• Acompanhe suas estatísticas\n• Veja quais acordes você mais erra\n• Acompanhe sua evolução de nível\n• Mantenha tudo salvo para sempre',
+    guest_popup_title:'Crie sua conta grátis',
+    guest_popup_b1:'Salvar seu progresso no jogo',
+    guest_popup_b2:'Ver estatísticas e entender como evoluir',
     guest_popup_create:'Criar conta', guest_popup_later:'Deixar para depois',
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
@@ -862,8 +863,9 @@ const STRINGS = {
     lvl_mago:'Sound Wizard', lvl_guardiao:'Guardian of Strings',
     lvl_arcanista:'Harmony Arcanist', lvl_lenda:'Music Legend', lvl_mestre:'Supreme Master',
     // Guest popup
-    guest_popup_title:'Save your progress!',
-    guest_popup_body:'Create a free account and:\n• Save your game progress\n• Track your performance stats\n• See which chords you miss the most\n• Follow your level progression\n• Keep everything saved forever',
+    guest_popup_title:'Create your free account',
+    guest_popup_b1:'Save your game progress',
+    guest_popup_b2:'Track your stats and see how to improve',
     guest_popup_create:'Create account', guest_popup_later:'Maybe later',
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
@@ -1529,7 +1531,7 @@ const state={
   tab:'game',phase:'start',
   user:null,
   lang:null,
-  isGuest:true,guestExerciseCount:0,guestNextPrompt:1,showGuestPopup:false,
+  isGuest:true,guestExerciseCount:0,guestNextPrompt:3,showGuestPopup:false,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
@@ -1828,7 +1830,7 @@ function handleAnswer(choiceId,btnEl){
   state.phase='answered';
   if(state.isGuest){
     state.guestExerciseCount++;
-    if(state.guestExerciseCount===1||state.guestExerciseCount===state.guestNextPrompt){
+    if(state.guestExerciseCount===state.guestNextPrompt){
       state.showGuestPopup=true;
     }
   }
@@ -1930,7 +1932,7 @@ function handleQualityAnswer(quality, btnEl){
   state.phase='answered';
   if(state.isGuest){
     state.guestExerciseCount++;
-    if(state.guestExerciseCount===1||state.guestExerciseCount===state.guestNextPrompt){
+    if(state.guestExerciseCount===state.guestNextPrompt){
       state.showGuestPopup=true;
     }
   }
@@ -2870,15 +2872,25 @@ function render(){
     overlay.id='guest-popup-overlay';
     overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
     overlay.innerHTML=`
-      <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:20px;padding:1.75rem;max-width:340px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
-        <div style="font-size:1.3rem;font-weight:900;color:#F5A623;font-family:var(--font-title);margin-bottom:.75rem">${t('guest_popup_title')}</div>
-        <div style="font-size:.85rem;color:#ccc;line-height:1.7;margin-bottom:1.25rem;white-space:pre-line;text-align:left">${t('guest_popup_body')}</div>
+      <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+        <div style="font-size:2rem;margin-bottom:.5rem">🎸</div>
+        <div style="font-size:1.2rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:1.1rem;line-height:1.25">${t('guest_popup_title')}</div>
+        <div style="background:#111;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.2rem;text-align:left">
+          <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.6rem">
+            <span style="color:#4ade80;font-size:1.1rem;flex-shrink:0">✓</span>
+            <span style="font-size:.88rem;color:#ddd;font-weight:600">${t('guest_popup_b1')}</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:.65rem">
+            <span style="color:#4ade80;font-size:1.1rem;flex-shrink:0">✓</span>
+            <span style="font-size:.88rem;color:#ddd;font-weight:600">${t('guest_popup_b2')}</span>
+          </div>
+        </div>
         <button onclick="state.showGuestPopup=false;state.phase='signup';render()"
-          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.75rem">
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem">
           ${t('guest_popup_create')}
         </button>
         <button onclick="state.showGuestPopup=false;state.guestNextPrompt=state.guestExerciseCount+3;render()"
-          style="width:100%;padding:.6rem;background:transparent;border:none;color:#666;font-size:.85rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
+          style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
           ${t('guest_popup_later')}
         </button>
       </div>

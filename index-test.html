@@ -75,8 +75,8 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .tab{font-size:.8rem;font-weight:800;cursor:pointer;padding:.42rem 1rem;border-radius:20px;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
 #tab-ranking{color:#fff;background:linear-gradient(180deg,#60a5fa 0%,#2563eb 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111}
 #tab-ranking:hover{filter:brightness(1.1)}
-#tab-perfil{color:#fff;background:linear-gradient(180deg,#a78bfa 0%,#7c3aed 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111}
-#tab-perfil:hover{filter:brightness(1.1)}
+#tab-perfil{opacity:.75;transition:opacity .15s,filter .15s;cursor:pointer;display:block}
+#tab-perfil:hover,#tab-perfil.active{opacity:1;filter:brightness(1.15)}
 
 
 /* ── Treino Focado ── */
@@ -543,7 +543,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
     </div>
     <div class="header-tabs">
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
-      <button class="tab" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="display:flex;align-items:center;justify-content:center;padding:.35rem .55rem"><img src="engrenagem.png" style="width:19px;height:19px;object-fit:contain"></button>
+      <img src="engrenagem.png" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="width:26px;height:26px;object-fit:contain;margin-left:.35rem;flex-shrink:0">
     </div>
   </div>
   <div id="content"></div>
@@ -793,7 +793,7 @@ const STRINGS = {
     save:'Save', sign_out:'Sign out', registered_email:'Registered email',
     optional:'Optional', change_email:'Change email', change_password:'Change password',
     new_email:'New email', new_password:'New password', current_password:'Current password',
-    choose_language:'Escolha seu idioma',
+    choose_language:'Choose your language',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
     // Game - General
     play:'Play', next:'Next', confirm:'Confirm', back:'Back',
@@ -825,11 +825,11 @@ const STRINGS = {
     buy:'Buy', equipped:'Equipped', equip:'Equip', already_owned:'Owned',
     bonus_points:'+{n}% point bonus',
     // Shop items
-    item_arte_auditiva_name:'The Auditory Art of Guitar', item_arte_auditiva_desc:'How to play music by ear',
+    item_arte_auditiva_name:'A Arte Auditiva do Violão', item_arte_auditiva_desc:'Como tirar músicas de ouvido',
     item_tab_greensleeves_name:'Greensleeves Tablature', item_tab_greensleeves_desc:'Full score + tab',
     item_tab_romance_name:'Romance de Amor Tablature', item_tab_romance_desc:'Full score + tab',
-    item_arte_harmonica_name:'The Harmonic Art of Guitar', item_arte_harmonica_desc:'Applied harmonic theory',
-    item_cupom_name:'COUPON 20% off — Lifetime Plan', item_cupom_desc:'Exclusive KaiserPlay discount',
+    item_arte_harmonica_name:'A Arte Harmônica do Violão', item_arte_harmonica_desc:'Teoria harmônica aplicada',
+    item_cupom_name:'CUPOM 20% off — Plano Vitalício', item_cupom_desc:'Desconto exclusivo KaiserPlay',
     // Guitar names
     guitar_basico_name:'Basic Guitar',
     guitar_bom_name:'Good Guitar', guitar_luthier_name:'Luthier Guitar',
@@ -2699,7 +2699,7 @@ function renderTreinoFocadoMenu(){
       <div style="font-size:.84rem;color:#e8f5e9;line-height:1.6;margin-bottom:1rem">
         ${t('unlock_all_desc')}
       </div>
-      <div style="font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-.01em;margin-bottom:1.1rem;text-shadow:0 0 10px #22c55e44">R$ 49,90</div>
+      <div style="font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-.01em;margin-bottom:1.1rem;text-shadow:0 0 10px #22c55e44">${state.lang==='en'?'🇧🇷 ':''}R$ 49,90</div>
       <button onclick="showToast(t('coming_soon'),t('coming_soon_body'))"
         style="width:100%;padding:.95rem;background:linear-gradient(135deg,#15803d,#166534);border:3px solid #111;border-radius:12px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:3px 3px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4)">
         ${t('unlock_btn')}
@@ -2765,7 +2765,7 @@ function renderTreinoFocado(){
     </div>
     <div class="lvl-bar">
       <div class="lvl-row">
-        <span class="lvl-name">${t('level')} ${lvl.n} · ${lvlTitle(lvl)}</span>
+        <span class="lvl-name">${t('level')} ${lvl.n}</span>
         <span class="lvl-xp" id="xp-label">${dispXP-dispLvlStart} / ${dispLvl.xpToNext} XP</span>
       </div>
       <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:${prog}%"></div></div>
@@ -3079,7 +3079,7 @@ function renderGame(){
     </div>
     <div class="lvl-bar">
       <div class="lvl-row">
-        <span class="lvl-name">${t('level')} ${lvl.n} · ${lvlTitle(lvl)}</span>
+        <span class="lvl-name">${t('level')} ${lvl.n}</span>
         <span class="lvl-xp" id="xp-label">${dispXP-dispLvlStart} / ${dispLvl.xpToNext} XP</span>
       </div>
       <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:${prog}%"></div></div>

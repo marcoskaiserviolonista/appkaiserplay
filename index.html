@@ -666,6 +666,7 @@ const CHORDS_DIAMOND = [
   {id:143, name:"E7(#9)",  cifra:"E7(#9)",  midi:[40,56,62,67]},
   // Diminutos
   {id:144, name:"Bdim",    cifra:"Bdim",    midi:[47,50,53], quality:"diminuto"},
+  {id:150, name:"F#dim",   cifra:"F#dim",   midi:[42,48,51,57], quality:"diminuto"},
   // Meio-diminutos
   {id:145, name:"Gm7(b5)", cifra:"Gm7(b5)", midi:[55,61,65,70]},
   // Dissonantes (Xm7M)
@@ -2782,12 +2783,12 @@ function renderNiveis(){
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">← Voltar</button>
-      <span class="page-title"><img src='espada.png' style='width:24px;height:24px;vertical-align:middle;margin-right:.3rem;object-fit:contain' onerror="this.outerHTML='⚔️'"> Jornada</span>
+      <span class="page-title">Níveis</span>
     </div>
 
     ${progressHeader}
 
-    <div class="section-title">Sua Jornada</div>
+    <div class="section-title">Categorias</div>
 
     <div class="shop-cards-grid" style="margin-bottom:1.5rem">
       ${groups.map(g=>{
@@ -2798,13 +2799,12 @@ function renderNiveis(){
         const cor=g.cor;
         const badgeBg=isDone?'#22c55e':isCurrent?cor:'rgba(180,180,200,.15)';
         const badgeColor=isDone?'#fff':isCurrent?'#111':'#aaa';
-        const badgeText=isDone?'✓':isCurrent?'▶':'';
 
         return `
-        <div class="shop-card" style="--card-color:${cor}" onclick="openNivelModal(${g.idx})">
+        <div class="shop-card" style="--card-color:${cor};${isCurrent?`border-color:${cor};box-shadow:4px 4px 0 #111, 0 0 18px ${cor}55`:''}" onclick="openNivelModal(${g.idx})">
           <!-- status badge top-left -->
           <div class="shop-card-badge" style="background:${badgeBg};color:${badgeColor};border-color:rgba(255,255,255,.15)">
-            ${badgeText} ${isCurrent?'Atual':isDone?'Concluído':''}
+            ${isCurrent?'Você está aqui':isDone?'✓ Concluído':''}
           </div>
           <!-- level range badge top-right -->
           <div style="position:absolute;top:.55rem;right:.55rem;font-size:.58rem;font-weight:800;color:${isLocked?'#999':cor};background:#0e0e0e;border:1.5px solid ${isLocked?'#333':cor+'55'};border-radius:20px;padding:.2rem .5rem;z-index:3;letter-spacing:.03em">

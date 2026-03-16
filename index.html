@@ -15,6 +15,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 /* ── FONT MODE ── para reverter ao visual clássico, troque os valores abaixo:
    retro  : --font-body:'VT323',monospace     | --font-title:'Press Start 2P',monospace
@@ -556,6 +557,7 @@ firebase.initializeApp({
   appId:"1:876642046971:web:4d40a9a16a2020bfb2315e"
 });
 const auth=firebase.auth();
+const db=firebase.firestore();
 
 // ======================================================
 // KAISERPLAY — MAPA DE SEÇÕES
@@ -2301,7 +2303,12 @@ function renderComprar(){
 }
 
 
+let _saveTimer=null;
 function render(){
+  if(state.user&&state.phase!=='login'){
+    if(_saveTimer)clearTimeout(_saveTimer);
+    _saveTimer=setTimeout(saveProgress,4000);
+  }
   const header=document.querySelector('.header');
   if(header)header.style.display=state.phase==='login'?'none':'';
   const tTreino=document.getElementById('tab-treino');
@@ -3231,6 +3238,45 @@ function closeShopModal(){
   if(shopModal){shopModal.remove();shopModal=null;}
 }
 
+// ── Firestore: salvar e carregar progresso ────────────────────
+function saveProgress(){
+  if(!state.user)return;
+  _saveTimer=null;
+  db.collection('players').doc(state.user.uid).set({
+    xp:state.xp,
+    notas:state.notas,
+    moedas:state.moedas,
+    diamantes:state.diamantes,
+    bestStreak:state.bestStreak,
+    stats:state.stats,
+    chordStats:state.chordStats,
+    violaoEquipado:state.violaoEquipado,
+    violoesComprados:state.violoesComprados,
+    inventario:state.inventario,
+    firstCardSeen:state.firstCardSeen,
+  }).catch(e=>console.error('saveProgress error:',e));
+}
+async function loadProgress(uid){
+  try{
+    const doc=await db.collection('players').doc(uid).get();
+    if(doc.exists){
+      const d=doc.data();
+      if(d.xp!=null)state.xp=d.xp;
+      if(d.notas!=null)state.notas=d.notas;
+      if(d.moedas!=null)state.moedas=d.moedas;
+      if(d.diamantes!=null)state.diamantes=d.diamantes;
+      if(d.bestStreak!=null)state.bestStreak=d.bestStreak;
+      if(d.stats)state.stats=d.stats;
+      if(d.chordStats)state.chordStats=d.chordStats;
+      if(d.violaoEquipado)state.violaoEquipado=d.violaoEquipado;
+      if(d.violoesComprados)state.violoesComprados=d.violoesComprados;
+      if(d.inventario)state.inventario=d.inventario;
+      if(d.firstCardSeen!=null)state.firstCardSeen=d.firstCardSeen;
+      state.xpDisplay=state.xp;
+    }
+  }catch(e){console.error('loadProgress error:',e);}
+}
+
 // ── Auth ──────────────────────────────────────────────────────
 function loginUser(){
   const email=document.getElementById('login-email').value.trim();
@@ -3268,9 +3314,10 @@ function _authError(code){
 }
 
 // ── 9. INICIALIZAÇÃO ──────────────────────────────────────────
-auth.onAuthStateChanged(user=>{
+auth.onAuthStateChanged(async user=>{
   state.user=user||null;
   if(user){
+    await loadProgress(user.uid);
     if(state.phase==='login')state.phase='start';
   } else {
     state.phase='login';

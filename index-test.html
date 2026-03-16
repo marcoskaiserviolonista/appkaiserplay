@@ -39,6 +39,13 @@
 @keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 @keyframes autoProgress{from{width:100%}to{width:0%}}
 @keyframes lvlupEntrance{0%{opacity:0;transform:scale(.85) translateY(24px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes lvlupBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-8px) scale(1.03)}60%{transform:translateY(-3px) scale(1.01)}}
+@keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 16px #F5A62388) brightness(1)}50%{filter:drop-shadow(0 0 32px #F5A623ff) brightness(1.14)}}
+@keyframes arrowUp{0%{transform:translateY(0);opacity:1}33%{transform:translateY(-5px);opacity:1}66%{transform:translateY(-10px);opacity:0}67%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes sparkOn{0%,100%{opacity:1;transform:scale(1) rotate(0deg)}25%{opacity:0;transform:scale(.4) rotate(45deg)}50%{opacity:1;transform:scale(1.2) rotate(0deg)}75%{opacity:.3;transform:scale(.7) rotate(-30deg)}}
+.lvlup-arrow{position:absolute;font-family:'VT323',monospace;font-size:2rem;color:#4ade80;text-shadow:0 0 6px #4ade80cc,2px 2px 0 #1a5c1a;animation:arrowUp .55s steps(4) infinite;pointer-events:none}
+.lvlup-spark{position:absolute;font-family:'VT323',monospace;color:#F5A623;text-shadow:0 0 6px #F5A623cc;animation:sparkOn .7s steps(3) infinite;pointer-events:none}
+.lvlup-frame{position:relative;height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0}
 @keyframes scoreCount{0%{transform:scale(2);color:#F5A623}100%{transform:scale(1)}}
 @keyframes pulse{from{opacity:.8}to{opacity:1;text-shadow:0 0 18px rgba(245,166,35,.9)}}
 @keyframes walletPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
@@ -71,7 +78,7 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .logo-text{font-size:1rem;font-weight:800;letter-spacing:-.02em}
 .logo-text .kaiser{color:#999}
 .logo-text .play{color:#F5A623}
-.header-tabs{display:flex;gap:.25rem}
+.header-tabs{display:flex;gap:.25rem;align-items:center}
 .tab{font-size:.8rem;font-weight:800;cursor:pointer;padding:.42rem 1rem;border-radius:20px;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
 #tab-ranking{color:#fff;background:linear-gradient(180deg,#60a5fa 0%,#2563eb 100%);border:2.5px solid #111;box-shadow:3px 3px 0 #111}
 #tab-ranking:hover{filter:brightness(1.1)}
@@ -545,7 +552,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
     </div>
     <div class="header-tabs">
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
-      <img src="engrenagem.png" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="width:26px;height:26px;object-fit:contain;margin-left:.35rem;flex-shrink:0">
+      <img src="engrenagem.png" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="width:39px;height:39px;object-fit:contain;margin-left:.35rem;flex-shrink:0">
     </div>
   </div>
   <div id="content"></div>
@@ -2812,7 +2819,7 @@ function render(){
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
-  if(state.phase==='levelup'){c.innerHTML=renderLevelUp();requestAnimationFrame(()=>initLevelUpCanvas('lvlup-canvas'));return;}
+  if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
   if(state.phase==='inventario'){c.innerHTML=renderInventario();return;}
@@ -3228,7 +3235,18 @@ function renderLevelUp(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding-top:12dvh;min-height:60dvh;animation:lvlupEntrance .4s cubic-bezier(.34,1.56,.64,1) forwards">
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
-        <canvas id="lvlup-canvas" width="280" height="165" style="display:block;max-width:100%;max-height:31dvh;image-rendering:pixelated;image-rendering:crisp-edges"></canvas>
+        <div class="lvlup-frame">
+          <img src="up.png"
+            style="max-height:100%;max-width:100%;object-fit:contain;animation:lvlupBounce .9s ease-in-out infinite,lvlupGlow 1.1s ease-in-out infinite;position:relative;z-index:1"
+            onerror="this.style.display='none'">
+          <span class="lvlup-arrow" style="left:18%;top:2%;font-size:1.9rem;animation-delay:0s">▲</span>
+          <span class="lvlup-arrow" style="right:18%;top:2%;font-size:1.9rem;animation-delay:.18s">▲</span>
+          <span class="lvlup-spark" style="left:6%;top:18%;font-size:1.2rem;animation-delay:0s">✦</span>
+          <span class="lvlup-spark" style="right:4%;top:22%;font-size:.9rem;animation-delay:.23s">✦</span>
+          <span class="lvlup-spark" style="left:28%;bottom:8%;font-size:.85rem;animation-delay:.41s">+</span>
+          <span class="lvlup-spark" style="right:24%;bottom:5%;font-size:1rem;animation-delay:.15s">+</span>
+          <span class="lvlup-spark" style="left:50%;top:5%;font-size:.8rem;animation-delay:.35s;transform:translateX(-50%)">✦</span>
+        </div>
         <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">${t('new_level')}</div>
         <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;text-shadow:4px 4px 0 ${cor}99,0 0 30px ${cor}55;line-height:1;margin-bottom:.9rem">${lvl.n}</div>
         <button class="cta-btn" onclick="afterLvlUp()">${t('continue_journey')}</button>

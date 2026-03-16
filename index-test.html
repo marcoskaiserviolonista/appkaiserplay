@@ -39,6 +39,8 @@
 @keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 @keyframes autoProgress{from{width:100%}to{width:0%}}
 @keyframes lvlupEntrance{0%{opacity:0;transform:scale(.85) translateY(24px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes lvlupBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-10px) scale(1.04)}60%{transform:translateY(-4px) scale(1.01)}}
+@keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 18px #F5A62399) brightness(1)}50%{filter:drop-shadow(0 0 38px #F5A623ff) brightness(1.18)}}
 @keyframes scoreCount{0%{transform:scale(2);color:#F5A623}100%{transform:scale(1)}}
 @keyframes pulse{from{opacity:.8}to{opacity:1;text-shadow:0 0 18px rgba(245,166,35,.9)}}
 @keyframes walletPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
@@ -3186,7 +3188,7 @@ function renderLevelUp(){
       <div class="lvlup-wrap" style="background:#111;border-color:${cor}55;text-align:center;padding:.5rem 1.5rem 1.2rem;width:100%;max-width:380px">
         <div style="height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0">
           <img src="up.png"
-            style="max-height:100%;max-width:100%;object-fit:contain;filter:drop-shadow(0 0 30px ${cor}99)"
+            style="max-height:100%;max-width:100%;object-fit:contain;animation:lvlupBounce .9s ease-in-out infinite,lvlupGlow 1.1s ease-in-out infinite"
             onerror="this.style.display='none'">
         </div>
         <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">${t('new_level')}</div>

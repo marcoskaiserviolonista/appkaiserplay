@@ -13,6 +13,8 @@
 <link rel="apple-touch-icon" href="LOGO_1.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Fredoka:wght@600;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <style>
 /* ── FONT MODE ── para reverter ao visual clássico, troque os valores abaixo:
    retro  : --font-body:'VT323',monospace     | --font-title:'Press Start 2P',monospace
@@ -544,6 +546,17 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 </div>
 
 <script>
+// ── Firebase ──────────────────────────────────────────
+firebase.initializeApp({
+  apiKey:"[REMOVED]",
+  authDomain:"kaiserplay-dd8fc.firebaseapp.com",
+  projectId:"kaiserplay-dd8fc",
+  storageBucket:"kaiserplay-dd8fc.firebasestorage.app",
+  messagingSenderId:"876642046971",
+  appId:"1:876642046971:web:4d40a9a16a2020bfb2315e"
+});
+const auth=firebase.auth();
+
 // ======================================================
 // KAISERPLAY — MAPA DE SEÇÕES
 //
@@ -1127,7 +1140,8 @@ function getLvlIdx(xp){
 function getLvlStartXP(idx){return LEVEL_XP_START[idx]||0;}
 
 const state={
-  tab:'game',phase:'start',
+  tab:'game',phase:'login',
+  user:null,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
@@ -2288,6 +2302,8 @@ function renderComprar(){
 
 
 function render(){
+  const header=document.querySelector('.header');
+  if(header)header.style.display=state.phase==='login'?'none':'';
   const tTreino=document.getElementById('tab-treino');
   const tRanking=document.getElementById('tab-ranking');
   if(state.tab==='game'){
@@ -2301,6 +2317,7 @@ function render(){
   // toggle bottom padding when combo bar is visible
   const appEl=document.getElementById('app');
   if(appEl){appEl.classList.toggle('has-combo',state.streak>=1&&state.tab==='game'&&['question','answered'].includes(state.phase));}
+  if(state.phase==='login'){c.innerHTML=renderLogin();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
   if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
@@ -2323,7 +2340,8 @@ function renderStart(){
   const lvl=LEVELS[lIdx];
   const lvlStart=getLvlStartXP(lIdx);
   const prog=Math.min((state.xp-lvlStart)/lvl.xpToNext,1)*100;
-  const initials='MK';
+  const userName=state.user?.displayName||state.user?.email?.split('@')[0]||'Jogador';
+  const initials=userName[0].toUpperCase();
   return `
     <div class="profile-card">
       <div style="width:52px;flex-shrink:0;aspect-ratio:2/3;background:transparent;display:flex;align-items:center;justify-content:center">
@@ -2333,7 +2351,7 @@ function renderStart(){
           alt="${lvl.title}"/>
       </div>
       <div class="profile-info">
-        <div class="profile-name">Marcos Kaiser</div>
+        <div class="profile-name">${userName}</div>
         <div class="profile-title">${lvl.title}</div>
         <div class="profile-xp-track"><div class="profile-xp-fill" style="width:${prog}%"></div></div>
         <div class="profile-xp-label">${state.xp-lvlStart} / ${lvl.xpToNext} XP</div>
@@ -2368,6 +2386,35 @@ function renderStart(){
     </div>
     <div class="nav-grid" style="margin-top:.75rem">
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">Níveis</span></button>
+    </div>
+    <div style="text-align:center;margin-top:.75rem;margin-bottom:.25rem">
+      <button onclick="logoutUser()" style="background:none;border:none;color:#555;font-size:.72rem;font-weight:600;cursor:pointer;text-decoration:underline;font-family:var(--font-body)">Sair da conta</button>
+    </div>
+  `;
+}
+
+// ── Render: Login ─────────────────────────────────────────────
+function renderLogin(){
+  return `
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
+      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
+        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">Entre na sua conta</div>
+        <input id="login-email" type="email" placeholder="E-mail" autocomplete="email"
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
+        <input id="login-password" type="password" placeholder="Senha" autocomplete="current-password"
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
+        <div id="login-error" style="min-height:1.2rem;font-size:.78rem;color:#f87171;font-weight:600;margin-bottom:.75rem;text-align:center"></div>
+        <button onclick="loginUser()"
+          style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem">
+          Entrar
+        </button>
+        <button onclick="signupUser()"
+          style="width:100%;padding:.75rem;background:#1e1e1e;border:2px solid #333;border-radius:14px;color:#aaa;font-size:.9rem;font-weight:700;font-family:var(--font-body);cursor:pointer">
+          Criar conta
+        </button>
+      </div>
     </div>
   `;
 }
@@ -3184,8 +3231,52 @@ function closeShopModal(){
   if(shopModal){shopModal.remove();shopModal=null;}
 }
 
+// ── Auth ──────────────────────────────────────────────────────
+function loginUser(){
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  const errEl=document.getElementById('login-error');
+  errEl.textContent='';
+  if(!email||!password){errEl.textContent='Preencha e-mail e senha.';return;}
+  auth.signInWithEmailAndPassword(email,password)
+    .catch(e=>{errEl.textContent=_authError(e.code);});
+}
+function signupUser(){
+  const email=document.getElementById('login-email').value.trim();
+  const password=document.getElementById('login-password').value;
+  const errEl=document.getElementById('login-error');
+  errEl.textContent='';
+  if(!email||!password){errEl.textContent='Preencha e-mail e senha.';return;}
+  auth.createUserWithEmailAndPassword(email,password)
+    .catch(e=>{errEl.textContent=_authError(e.code);});
+}
+function logoutUser(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  auth.signOut();
+}
+function _authError(code){
+  const map={
+    'auth/invalid-email':'E-mail inválido.',
+    'auth/user-not-found':'Usuário não encontrado.',
+    'auth/wrong-password':'Senha incorreta.',
+    'auth/email-already-in-use':'Este e-mail já está cadastrado.',
+    'auth/weak-password':'A senha deve ter pelo menos 6 caracteres.',
+    'auth/too-many-requests':'Muitas tentativas. Aguarde um momento.',
+    'auth/invalid-credential':'E-mail ou senha incorretos.',
+  };
+  return map[code]||'Erro ao autenticar. Tente novamente.';
+}
+
 // ── 9. INICIALIZAÇÃO ──────────────────────────────────────────
-render();
+auth.onAuthStateChanged(user=>{
+  state.user=user||null;
+  if(user){
+    if(state.phase==='login')state.phase='start';
+  } else {
+    state.phase='login';
+  }
+  try{render();}catch(e){console.error('render error:',e);}
+});
 </script>
 
 </body>

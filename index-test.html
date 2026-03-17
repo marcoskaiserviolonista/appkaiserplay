@@ -985,17 +985,8 @@ const CHORDS = [
   {id:11, name:"Gm", cifra:"Gm", midi:[43,50,55,58,62,67], quality:'menor'},
   {id:12, name:"Am", cifra:"Am", midi:[45,52,57,60,64], quality:'menor'},
   {id:13, name:"Bm", cifra:"Bm", midi:[47,54,59,62,66], quality:'menor'},
-  // Voicings alternativos — menores
-  {id:56, name:"Am", cifra:"Am", midi:[45,60,64,69], quality:'menor'},
-  {id:58, name:"Dm", cifra:"Dm", midi:[50,65,69,74], quality:'menor'},
-  {id:59, name:"Cm", cifra:"Cm", midi:[48,55,60,63,67,72], quality:'menor'},
-  // Voicings alternativos — maiores
-  {id:57, name:"D",  cifra:"D",  midi:[50,66,69,74], quality:'maior'},
-  {id:156, name:"F", cifra:"F", midi:[53,60,65,69,72], quality:'maior'},
-  {id:60,  name:"F", cifra:"F", midi:[53,57,60,65,69], quality:'maior'},
   // DOMINANTES 7ª (14–20)
   {id:14, name:"C7", cifra:"C7", midi:[48,52,58,60,64]},
-  {id:159, name:"C7", cifra:"C7", midi:[48,55,58,64,67,72]},
   {id:15, name:"D7", cifra:"D7", midi:[50,57,60,66]},
   {id:16, name:"E7", cifra:"E7", midi:[40,47,52,56,62,64]},
   {id:17, name:"F7", cifra:"F7", midi:[41,48,51,57,60,65]},
@@ -1008,7 +999,6 @@ const CHORDS = [
   {id:23, name:"E7M", cifra:"E7M", cifraEn:"Emaj7", midi:[40,47,51,56,59,64]},
   {id:24, name:"F7M", cifra:"F7M", cifraEn:"Fmaj7", midi:[41,57,60,64]},
   {id:25, name:"G7M", cifra:"G7M", cifraEn:"Gmaj7", midi:[43,54,59,62]},
-  {id:157, name:"G7M", cifra:"G7M", cifraEn:"Gmaj7", midi:[55,62,66,71,74]},
   {id:26, name:"B7M", cifra:"B7M", cifraEn:"Bmaj7", midi:[47,54,58,63,66]},
   // MENOR 7ª (27–32)
   {id:27, name:"Cm7", cifra:"Cm7",midi:[48,55,58,63,67]},
@@ -1028,6 +1018,15 @@ const CHORDS = [
   {id:37, name:"Csus4", cifra:"Csus4",midi:[48,53,55,60]},
   // NOVOS: 6ª
   {id:39, name:"E6",      cifra:"E6",      midi:[40,47,52,56,61,64]},
+  // Voicings alternativos
+  {id:56,  name:"Am",  cifra:"Am",  midi:[45,60,64,69],          quality:'menor'},
+  {id:57,  name:"D",   cifra:"D",   midi:[50,66,69,74],          quality:'maior'},
+  {id:58,  name:"Dm",  cifra:"Dm",  midi:[50,65,69,74],          quality:'menor'},
+  {id:59,  name:"Cm",  cifra:"Cm",  midi:[48,55,60,63,67,72],    quality:'menor'},
+  {id:60,  name:"F",   cifra:"F",   midi:[53,57,60,65,69],       quality:'maior'},
+  {id:156, name:"F",   cifra:"F",   midi:[53,60,65,69,72],       quality:'maior'},
+  {id:157, name:"G7M", cifra:"G7M", cifraEn:"Gmaj7", midi:[55,62,66,71,74]},
+  {id:159, name:"C7",  cifra:"C7",  midi:[48,55,58,64,67,72]},
 ];
 
 // ── Acordes Diamante (sempre avançados) ──
@@ -1138,21 +1137,28 @@ function _titleForLvl(n){
   return"Mestre Supremo";
 }
 function _poolForLvl(n){
-  // IDs de referência:
+  // Todos os valores são IDs (não índices de array):
   // Tríades maiores: 0-6   (C D E F G A B)
   // Tríades menores: 7-13  (Cm Dm Em Fm Gm Am Bm)
   // Dom7:           14-20  (C7 D7 E7 F7 G7 A7 B7)
   // 7M:             21-26  (C7M D7M E7M F7M G7M B7M) + 44 (A7M)
   // m7:             27-32  (Cm7 Dm7 Em7 Gm7 Am7 C#m7) + 43 (Bm7)
   // Sextas/Sus:     33,34,35,37,39,45 (D6 G6 Gm6 Csus4 E6 C6)
-  // Inversões/Aumentados/Alterados → CHORDS_DIAMOND
+  // Voicings maiores: 57(D) 60(F) 156(F)
+  // Voicings menores: 56(Am) 58(Dm) 59(Cm)
+  // Voicings dom7:   159(C7)
+  // Voicings 7M:     157(G7M)
 
-  const MAIORES   = [0,1,2,3,4,5,6];
-  const MENORES   = [7,8,9,10,11,12,13];
-  const DOM7      = [14,15,16,17,18,19,20];
-  const SET7M     = [21,22,23,24,25,26,44];  // + A7M
-  const MENOR7    = [27,28,29,30,31,32,43];  // + Bm7
-  const EXTRAS    = [33,34,35,37,39,45];     // D6 G6 Gm6 Csus4 E6 C6
+  const MAIORES  = [0,1,2,3,4,5,6];
+  const MENORES  = [7,8,9,10,11,12,13];
+  const DOM7     = [14,15,16,17,18,19,20];
+  const SET7M    = [21,22,23,24,25,26,44];  // + A7M
+  const MENOR7   = [27,28,29,30,31,32,43];  // + Bm7
+  const EXTRAS   = [33,34,35,37,39,45];     // D6 G6 Gm6 Csus4 E6 C6
+  const VOICE_M  = [57,60,156];             // voicings maiores
+  const VOICE_m  = [56,58,59];              // voicings menores
+  const VOICE_D7 = [159];                   // voicing dom7
+  const VOICE_7M = [157];                   // voicing 7M
 
   if(n===1) return [5,0,3,4];                          // A C F G
   if(n===2) return [5,0,3,4,2];                        // + E
@@ -1160,13 +1166,14 @@ function _poolForLvl(n){
   if(n===4) return MAIORES;                            // todos maiores
   if(n===5) return [...MAIORES,8,12];                  // + Dm Am
   if(n<=7)  return MENORES;                            // só menores
-  if(n<=10) return [...MAIORES,...MENORES];             // maiores + menores
+  if(n<=9)  return [...MAIORES,...MENORES];             // maiores + menores
+  if(n===10)return [...MAIORES,...MENORES,...VOICE_M,...VOICE_m]; // + voicings (nível 10+)
   if(n===11)return DOM7;                               // só dominantes
-  if(n<=16) return [...MAIORES,...MENORES,...DOM7];     // dom + maiores + menores
-  if(n===17)return SET7M;                              // só tétrades maiores
-  if(n<=21) return [...MAIORES,...MENORES,...DOM7,...SET7M]; // + tétrades maiores
-  if(n===22)return [...MENORES,...MENOR7];             // só menores tríade + m7
-  if(n<=26) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7]; // + tétrades menores
+  if(n<=16) return [...MAIORES,...MENORES,...DOM7,...VOICE_M,...VOICE_m,...VOICE_D7];
+  if(n===17)return [...SET7M,...VOICE_7M];             // só tétrades maiores + voicing
+  if(n<=21) return [...MAIORES,...MENORES,...DOM7,...SET7M,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M];
+  if(n===22)return [...MENORES,...MENOR7,...VOICE_m];  // menores tríade + m7 + voicings menores
+  if(n<=26) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M];
   return 'ALL';                                         // todos CHORDS + CHORDS_DIAMOND
 }
 // XP por nível n = 6 acertos × 10 XP × n = 60n
@@ -1677,11 +1684,11 @@ function genQ(){
         pool=[...CHORDS_DIAMOND.filter(c=>c.quality==='diminuto'),...CHORDS.filter(c=>c.quality==='aumentado'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];
       } else if(pair.opts[1]==='diminuto'){
         // menor/diminuto: menores do CHORDS + diminutos do diamond
-        const menores=pair.ids.map(i=>CHORDS[i]).filter(Boolean);
+        const menores=pair.ids.map(id=>CHORDS.find(c=>c.id===id)).filter(Boolean);
         const dims=CHORDS_DIAMOND.filter(c=>c.quality==='diminuto');
         pool=[...menores,...dims];
       } else {
-        pool=pair.ids.map(i=>CHORDS[i]).filter(Boolean);
+        pool=pair.ids.map(id=>CHORDS.find(c=>c.id===id)).filter(Boolean);
       }
       const _prevId=state.chord?.id;
       let chord=pool[Math.floor(Math.random()*pool.length)];
@@ -1701,7 +1708,7 @@ function genQ(){
   } else {
     const lIdx=getLvlIdx(state.xp);
     const lvlPool=LEVELS[lIdx].pool;
-    pool=lvlPool==='ALL'?[...CHORDS,...CHORDS_DIAMOND]:lvlPool.map(i=>CHORDS[i]);
+    pool=lvlPool==='ALL'?[...CHORDS,...CHORDS_DIAMOND]:lvlPool.map(id=>CHORDS.find(c=>c.id===id)).filter(Boolean);
   }
   const _prevIdN=state.chord?.id;
   let ans=pool[Math.floor(Math.random()*pool.length)];
@@ -3767,7 +3774,7 @@ function renderRanking(){
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

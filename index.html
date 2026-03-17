@@ -643,6 +643,13 @@ const STRINGS = {
     change_email_question:'QUER TROCAR O SEU E-MAIL?', change_password_question:'QUER TROCAR A SUA SENHA?', do_it_below:'Faça isso abaixo.', preview_label:'🔒 Prévia',
     new_email:'Novo e-mail', new_password:'Nova senha', current_password:'Senha atual',
     choose_language:'Escolha seu idioma',
+    section_about:'Sobre', section_legal:'Jurídico',
+    rate_app:'Avalie o app', contact_support:'Contato / Suporte',
+    terms_conditions:'Termos e Condições', privacy_policy:'Política de Privacidade',
+    terms_agree:'Ao continuar, você concorda com nossos', terms_and:'e a',
+    terms_link:'Termos e Condições', privacy_link:'Política de Privacidade',
+    rate_popup_title:'Você está curtindo o KaiserPlay?', rate_popup_body:'Avalie o app e nos ajude a crescer!',
+    rate_now:'Avaliar agora ⭐', rate_later:'Deixar para depois',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
     // Game - General
     play:'Jogar', next:'Próxima', confirm:'Confirmar', back:'Voltar',
@@ -826,6 +833,13 @@ const STRINGS = {
     change_email_question:'WANT TO CHANGE YOUR EMAIL?', change_password_question:'WANT TO CHANGE YOUR PASSWORD?', do_it_below:'Do it below.', preview_label:'🔒 Preview',
     new_email:'New email', new_password:'New password', current_password:'Current password',
     choose_language:'Choose your language',
+    section_about:'About', section_legal:'Legal',
+    rate_app:'Rate the app', contact_support:'Contact / Support',
+    terms_conditions:'Terms and Conditions', privacy_policy:'Privacy Policy',
+    terms_agree:'By continuing, you agree to our', terms_and:'and our',
+    terms_link:'Terms and Conditions', privacy_link:'Privacy Policy',
+    rate_popup_title:'Enjoying KaiserPlay?', rate_popup_body:'Leave a review and help us grow!',
+    rate_now:'Rate now ⭐', rate_later:'Maybe later',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
     // Game - General
     play:'Play', next:'Next', confirm:'Confirm', back:'Back',
@@ -1618,6 +1632,8 @@ const state={
   _pendingDisplayName:false,
   fullAccess:false,
   rankingData:[],
+  ratingDone:false,
+  ratingSkippedAt:0,
 };
 
 let autoTimer=null;
@@ -1830,7 +1846,7 @@ function handleAnswer(choiceId,btnEl){
     state.score+=gain;state.xp+=gain;
     state.xpDisplay=xpBefore;
     const lvlBefore=getLvlIdx(state.xp-gain);
-    if(getLvlIdx(state.xp)>lvlBefore)state.lvlUpPending=true;
+    if(getLvlIdx(state.xp)>lvlBefore){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
 
     const rect=btnEl.getBoundingClientRect();
     const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
@@ -1952,7 +1968,7 @@ function handleQualityAnswer(quality, btnEl){
     state.score+=gain;state.xp+=gain;state.xpDisplay=xpBefore;
     state.notas+=gain;
     const lvlBefore=getLvlIdx(state.xp-gain);
-    if(getLvlIdx(state.xp)>lvlBefore)state.lvlUpPending=true;
+    if(getLvlIdx(state.xp)>lvlBefore){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
     const rect=btnEl.getBoundingClientRect();
     const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
     const cl=(window.innerWidth-520)/2;
@@ -2463,7 +2479,7 @@ function handleFocusedQualityAnswer(quality, btnEl){
     state.focusedSessionScore+=pontos;
     state.focusedSessionCorrect++;
     state.focusedSessionTotal++;
-    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)) state.lvlUpPending=true;
+    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
 
     const color=getFocusedColor(state.focusedStreak);
     playSfx(getFocusedSound(state.focusedStreak));
@@ -2554,7 +2570,7 @@ function handleFocusedAnswer(choiceId,btnEl){
     state.focusedSessionScore+=pontos;
     state.focusedSessionCorrect++;
     state.focusedSessionTotal++;
-    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)) state.lvlUpPending=true;
+    if(getLvlIdx(state.xp)>getLvlIdx(xpBefore)){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
 
     const color=getFocusedColor(state.focusedStreak);
     playSfx(getFocusedSound(state.focusedStreak));
@@ -3014,6 +3030,9 @@ function renderLogin(){
           ${t('play_as_guest')}
         </button>
       </div>
+      <div style="text-align:center;font-size:.68rem;color:#444;line-height:1.7;padding:0 .5rem;max-width:320px">
+        ${t('terms_agree')} <a href="#TERMOS_URL" target="_blank" style="color:#F5A623;text-decoration:underline">${t('terms_link')}</a> ${t('terms_and')} <a href="#PRIVACIDADE_URL" target="_blank" style="color:#F5A623;text-decoration:underline">${t('privacy_link')}</a>.
+      </div>
     </div>
   `;
 }
@@ -3043,6 +3062,9 @@ function renderSignup(){
           style="width:100%;padding:.75rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;color:#60dcff;font-size:.85rem;font-weight:800;font-family:var(--font-body);cursor:pointer;text-shadow:0 0 10px #60dcff44">
           ${t('already_have_account')}
         </button>
+      </div>
+      <div style="text-align:center;font-size:.68rem;color:#444;line-height:1.7;padding:0 .5rem;max-width:320px">
+        ${t('terms_agree')} <a href="#TERMOS_URL" target="_blank" style="color:#F5A623;text-decoration:underline">${t('terms_link')}</a> ${t('terms_and')} <a href="#PRIVACIDADE_URL" target="_blank" style="color:#F5A623;text-decoration:underline">${t('privacy_link')}</a>.
       </div>
     </div>
   `;
@@ -4135,6 +4157,34 @@ function renderPerfil(){
         <div id="perfil-conta-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
       </div>
 
+      <div style="font-size:.68rem;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.12em;padding-left:.2rem;margin-top:.25rem">${t('section_about')}</div>
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;overflow:hidden;box-shadow:4px 4px 0 #111">
+        <div onclick="window.open('#LOJA_URL','_blank')" style="display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;cursor:pointer;border-bottom:1px solid #222">
+          <span style="font-size:1.1rem">⭐</span>
+          <span style="flex:1;font-size:.92rem;font-weight:700;color:#e5e5e5">${t('rate_app')}</span>
+          <span style="color:#555;font-size:1rem">›</span>
+        </div>
+        <div onclick="window.open('#SUPORTE_URL','_blank')" style="display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;cursor:pointer">
+          <span style="font-size:1.1rem">✉️</span>
+          <span style="flex:1;font-size:.92rem;font-weight:700;color:#e5e5e5">${t('contact_support')}</span>
+          <span style="color:#555;font-size:1rem">›</span>
+        </div>
+      </div>
+
+      <div style="font-size:.68rem;font-weight:900;color:#666;text-transform:uppercase;letter-spacing:.12em;padding-left:.2rem;margin-top:.25rem">${t('section_legal')}</div>
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;overflow:hidden;box-shadow:4px 4px 0 #111">
+        <div onclick="window.open('#TERMOS_URL','_blank')" style="display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;cursor:pointer;border-bottom:1px solid #222">
+          <span style="font-size:1.1rem">📄</span>
+          <span style="flex:1;font-size:.92rem;font-weight:700;color:#e5e5e5">${t('terms_conditions')}</span>
+          <span style="color:#555;font-size:1rem">›</span>
+        </div>
+        <div onclick="window.open('#PRIVACIDADE_URL','_blank')" style="display:flex;align-items:center;gap:.85rem;padding:1rem 1.1rem;cursor:pointer">
+          <span style="font-size:1.1rem">🔒</span>
+          <span style="flex:1;font-size:.92rem;font-weight:700;color:#e5e5e5">${t('privacy_policy')}</span>
+          <span style="color:#555;font-size:1rem">›</span>
+        </div>
+      </div>
+
     </div>
     <div style="text-align:center;padding:.5rem 0 .25rem">
       <span style="font-size:.62rem;color:#444;font-style:italic">Ícones por <a href="https://flaticon.com" target="_blank" style="color:#444;text-decoration:none">Flaticon</a> (flaticon.com)</span>
@@ -4216,6 +4266,39 @@ function perfilDeletarConta(){
   };
 }
 
+// ── Sistema de avaliação ──────────────────────────────────────
+function checkRatingPrompt(lvlN){
+  if(state.ratingDone||state.ratingSkippedAt>=30)return;
+  const show=(lvlN>=10&&state.ratingSkippedAt===0)||(lvlN>=20&&state.ratingSkippedAt===10)||(lvlN>=30&&state.ratingSkippedAt===20);
+  if(show)setTimeout(showRatingPrompt,2500);
+}
+function showRatingPrompt(){
+  if(state.ratingDone||document.getElementById('_rating-overlay'))return;
+  const overlay=document.createElement('div');
+  overlay.id='_rating-overlay';
+  overlay.style.cssText='position:fixed;inset:0;background:#000a;z-index:9998;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.innerHTML=`
+    <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:18px;padding:1.5rem;max-width:300px;width:100%;text-align:center;box-shadow:6px 6px 0 #111">
+      <div style="font-size:2rem;margin-bottom:.4rem">⭐</div>
+      <div style="font-size:.95rem;font-weight:900;color:#F5A623;margin-bottom:.5rem">${t('rate_popup_title')}</div>
+      <div style="font-size:.82rem;color:#999;margin-bottom:1.2rem;line-height:1.5">${t('rate_popup_body')}</div>
+      <button id="_rate-now" style="width:100%;padding:.75rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#111;font-size:.9rem;font-weight:900;font-family:var(--font-body);cursor:pointer;margin-bottom:.6rem">${t('rate_now')}</button>
+      <button id="_rate-later" style="width:100%;padding:.4rem;background:transparent;border:none;color:#555;font-size:.78rem;font-weight:600;font-family:var(--font-body);cursor:pointer;text-decoration:underline">${t('rate_later')}</button>
+    </div>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector('#_rate-now').onclick=()=>{
+    state.ratingDone=true;
+    saveProgress();
+    overlay.remove();
+    window.open('#LOJA_URL','_blank'); // substituir pela URL da loja quando publicado
+  };
+  overlay.querySelector('#_rate-later').onclick=()=>{
+    state.ratingSkippedAt=state.ratingSkippedAt===0?10:state.ratingSkippedAt===10?20:30;
+    saveProgress();
+    overlay.remove();
+  };
+}
+
 // ── Firestore: salvar e carregar progresso ────────────────────
 function saveProgress(){
   if(!state.user)return;
@@ -4233,6 +4316,8 @@ function saveProgress(){
     violoesComprados:state.violoesComprados,
     inventario:state.inventario,
     firstCardSeen:state.firstCardSeen,
+    ratingDone:state.ratingDone,
+    ratingSkippedAt:state.ratingSkippedAt,
   }).catch(e=>console.error('saveProgress error:',e));
 }
 async function loadProgress(uid){
@@ -4251,6 +4336,8 @@ async function loadProgress(uid){
       if(d.violoesComprados)state.violoesComprados=d.violoesComprados;
       if(d.inventario)state.inventario=d.inventario;
       if(d.firstCardSeen!=null)state.firstCardSeen=d.firstCardSeen;
+      if(d.ratingDone!=null)state.ratingDone=d.ratingDone;
+      if(d.ratingSkippedAt!=null)state.ratingSkippedAt=d.ratingSkippedAt;
       state.xpDisplay=state.xp;
     }
   }catch(e){console.error('loadProgress error:',e);}

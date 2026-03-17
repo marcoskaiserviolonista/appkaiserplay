@@ -82,6 +82,8 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .tab{font-size:.8rem;font-weight:800;cursor:pointer;padding:.42rem 1rem;border-radius:20px;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
 #tab-ranking{color:#60dcff;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:2.5px solid #60dcff88;box-shadow:3px 3px 0 #0a1520;text-shadow:0 0 10px #60dcff44}
 #tab-ranking:hover{filter:brightness(1.15)}
+#tab-login{color:#111;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:2.5px solid #111;box-shadow:3px 3px 0 #111;text-shadow:none}
+#tab-login:hover{filter:brightness(1.1)}
 #tab-perfil{opacity:.75;transition:opacity .15s,filter .15s;cursor:pointer;display:block}
 #tab-perfil:hover,#tab-perfil.active{opacity:1;filter:brightness(1.15)}
 
@@ -552,6 +554,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
     </div>
     <div class="header-tabs">
       <button class="tab" id="tab-ranking" onclick="playClickSfx('soft');setTab('ranking')">Ranking</button>
+      <button class="tab" id="tab-login" onclick="playClickSfx('soft');state.phase='login';render()">Entrar</button>
       <img src="engrenagem.png" id="tab-perfil" onclick="playClickSfx('soft');goToPerfil()" style="width:39px;height:39px;object-fit:contain;margin-left:.35rem;flex-shrink:0">
     </div>
   </div>
@@ -2814,6 +2817,8 @@ function render(){
   if(header)header.style.display=(state.phase==='login'||state.phase==='signup'||state.phase==='set_display_name'||state.phase==='forgot_password')?'none':'';
   const tRanking=document.getElementById('tab-ranking');
   const tPerfil=document.getElementById('tab-perfil');
+  const tLogin=document.getElementById('tab-login');
+  if(tLogin)tLogin.style.display=state.isGuest?'':'none';
   if(state.tab==='ranking'){
     tRanking.className='tab active';
   } else {

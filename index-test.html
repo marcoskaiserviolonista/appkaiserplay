@@ -2799,16 +2799,15 @@ function renderComprar(){
       <button class="back-btn" onclick="playClickSfx('back');state.phase='treino_focado_menu';render()">${t('back_btn')}</button>
       <span style="font-size:1.05rem;font-weight:900;color:#f0f0f0">${t('comprar_title')}</span>
     </div>
-    <div style="width:100%;max-width:520px;text-align:center;padding:2rem 1rem">
-      <div style="font-size:2.5rem;margin-bottom:1rem">🔓</div>
-      <div style="font-size:1.3rem;font-weight:900;color:#f0f0f0;margin-bottom:.6rem">${t('unlock_all_trainings')}</div>
-      <div style="font-size:.88rem;color:#aaa;line-height:1.6;margin-bottom:2rem">
-        ${t('comprar_desc')}
-      </div>
-      <button style="width:100%;padding:.95rem;background:linear-gradient(135deg,#15803d,#166534);border:3px solid #111;border-radius:12px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:3px 3px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4);margin-bottom:.75rem" onclick="showToast(t('coming_soon'),t('coming_soon_body'))">
-        ${t('unlock_btn')}<br><span style="font-size:.82rem;font-weight:700;opacity:.85">R$ 49,90</span>
+    <div style="width:100%;max-width:520px;background:linear-gradient(160deg,#061208,#0d1f10);border:2px solid #22c55e55;border-radius:16px;padding:1.4rem 1.2rem;margin-top:.5rem;text-align:center;box-shadow:0 0 16px #22c55e14">
+      <div style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.5rem;letter-spacing:.01em">${t('unlock_all_trainings')}</div>
+      <div style="font-size:.84rem;color:#e8f5e9;line-height:1.6;margin-bottom:1rem">${t('unlock_all_desc')}</div>
+      <div style="font-size:1.9rem;font-weight:900;color:#fff;letter-spacing:-.01em;margin-bottom:1.1rem;text-shadow:0 0 10px #22c55e44">${state.lang==='en'?'🇧🇷 ':''}R$ 49,90</div>
+      <button onclick="showToast(t('coming_soon'),t('coming_soon_body'))"
+        style="width:100%;padding:.95rem;background:linear-gradient(135deg,#15803d,#166534);border:3px solid #111;border-radius:12px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:3px 3px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4)">
+        ${t('unlock_btn')}
       </button>
-      <div style="font-size:.72rem;color:#555;margin-top:.5rem">${t('payment_info')}</div>
+      <div style="font-size:.68rem;color:#b0c8b4;margin-top:.65rem">${t('payment_info')}</div>
     </div>
   `;
 }

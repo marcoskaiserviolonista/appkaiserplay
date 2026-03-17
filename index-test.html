@@ -597,7 +597,7 @@ const STRINGS = {
     // Auth - Signup
     signup_title:'Criar conta', display_name:'Nome de exibição',
     display_name_hint:'Este nome aparecerá no jogo e no ranking.',
-    password_min:'Senha (mínimo 6 caracteres)', signup_button:'Criar conta',
+    password_min:'Senha (mínimo 6 caracteres)', confirm_password:'Confirmar senha', passwords_dont_match:'As senhas não conferem.', signup_button:'Criar conta',
     // Auth - Forgot
     recover_password_title:'Recuperar minha senha',
     recover_password_desc:'Preencha abaixo seu endereço de email para receber as instruções necessárias e criar uma nova senha. O email pode demorar até 10 minutos para chegar.',
@@ -626,6 +626,7 @@ const STRINGS = {
     settings_title:'Configurações', change_display_name:'Trocar nome de exibição',
     save:'Salvar', sign_out:'Sair da conta', registered_email:'E-mail cadastrado',
     optional:'Opcional', change_email:'Trocar e-mail', change_password:'Trocar senha',
+    change_email_question:'Quer trocar o seu e-mail cadastrado?', change_password_question:'Quer trocar a sua senha?', do_it_below:'Faça isso abaixo.',
     new_email:'Novo e-mail', new_password:'Nova senha', current_password:'Senha atual',
     choose_language:'Escolha seu idioma',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
@@ -773,7 +774,7 @@ const STRINGS = {
     // Auth - Signup
     signup_title:'Create account', display_name:'Display name',
     display_name_hint:'This name will appear in the game and in the ranking.',
-    password_min:'Password (minimum 6 characters)', signup_button:'Create account',
+    password_min:'Password (minimum 6 characters)', confirm_password:'Confirm password', passwords_dont_match:'Passwords do not match.', signup_button:'Create account',
     // Auth - Forgot
     recover_password_title:'Recover my password',
     recover_password_desc:'Enter your email address below to receive the instructions needed to create a new password. The email may take up to 10 minutes to arrive.',
@@ -802,6 +803,7 @@ const STRINGS = {
     settings_title:'Settings', change_display_name:'Change display name',
     save:'Save', sign_out:'Sign out', registered_email:'Registered email',
     optional:'Optional', change_email:'Change email', change_password:'Change password',
+    change_email_question:'Want to change your registered email?', change_password_question:'Want to change your password?', do_it_below:'Do it below.',
     new_email:'New email', new_password:'New password', current_password:'Current password',
     choose_language:'Choose your language',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
@@ -2984,6 +2986,8 @@ function renderSignup(){
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
         <input id="signup-password" type="password" placeholder="${t('password_min')}" autocomplete="new-password"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
+        <input id="signup-password-confirm" type="password" placeholder="${t('confirm_password')}" autocomplete="new-password"
+          style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.75rem;outline:none;box-sizing:border-box">
         <input id="signup-name" type="text" placeholder="${t('display_name')}" maxlength="30" autocomplete="nickname"
           style="width:100%;padding:.75rem 1rem;background:#111;border:2px solid #333;border-radius:12px;color:#fff;font-size:.92rem;font-family:var(--font-body);margin-bottom:.5rem;outline:none;box-sizing:border-box">
         <div style="font-size:.7rem;color:#555;margin-bottom:.75rem;padding-left:.25rem">${t('display_name_hint')}</div>
@@ -4031,7 +4035,7 @@ function renderPerfil(){
     <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;padding-bottom:2rem">
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#a78bfa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">${t('change_display_name')}</div>
+        <div style="font-size:.9rem;font-weight:900;color:#a78bfa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">${t('change_display_name')}</div>
         ${field(nameRankStr,'perfil-nome','text',displayName||nameRankStr,displayName)}
         <button onclick="perfilSalvarNome()"
           style="width:100%;padding:.7rem;background:linear-gradient(180deg,#a78bfa,#7c3aed);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#fff;font-size:.88rem;font-weight:900;font-family:var(--font-body);cursor:pointer">
@@ -4041,8 +4045,8 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#60a5fa;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">${t('change_email')}</div>
-        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">${optStr}</div>
+        <div style="font-size:1rem;font-weight:900;color:#60a5fa;margin-bottom:.4rem">${t('change_email_question')}</div>
+        <div style="font-size:.84rem;color:#888;margin-bottom:.9rem">${t('do_it_below')}</div>
         ${field(t('new_email'),'perfil-email','email',t('new_email'),'')}
         ${field(t('current_password'),'perfil-email-senha','password',t('current_password'),'')}
         <button onclick="perfilTrocarEmail()"
@@ -4053,8 +4057,8 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#4ade80;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.25rem">${t('change_password')}</div>
-        <div style="font-size:.72rem;color:#555;font-weight:500;margin-bottom:.9rem">${optStr}</div>
+        <div style="font-size:1rem;font-weight:900;color:#4ade80;margin-bottom:.4rem">${t('change_password_question')}</div>
+        <div style="font-size:.84rem;color:#888;margin-bottom:.9rem">${t('do_it_below')}</div>
         ${field(t('current_password'),'perfil-senha-atual','password',t('current_password'),'')}
         ${field(t('new_password'),'perfil-senha-nova','password',minCharsStr,'')}
         <button onclick="perfilTrocarSenha()"
@@ -4065,7 +4069,7 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#F5A623;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.75rem">${t('choose_language')}</div>
+        <div style="font-size:.9rem;font-weight:900;color:#F5A623;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">${t('choose_language')}</div>
         <div style="display:flex;gap:.5rem">
           <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
             style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
@@ -4079,7 +4083,7 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1rem">${accStr}</div>
+        <div style="font-size:.9rem;font-weight:900;color:#888;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">${accStr}</div>
         <button onclick="logoutUser()"
           style="width:100%;padding:.7rem;background:#111;border:2px solid #444;border-radius:12px;color:#aaa;font-size:.88rem;font-weight:700;font-family:var(--font-body);cursor:pointer;margin-bottom:.75rem">
           ${t('sign_out')}
@@ -4234,11 +4238,13 @@ function forgotPassword(){
 function signupUser(){
   const email=document.getElementById('signup-email').value.trim();
   const password=document.getElementById('signup-password').value;
+  const passwordConfirm=document.getElementById('signup-password-confirm').value;
   const name=document.getElementById('signup-name').value.trim();
   const errEl=document.getElementById('signup-error');
   errEl.textContent='';
-  if(!email||!password||!name){errEl.textContent=t('fill_all_fields');return;}
+  if(!email||!password||!passwordConfirm||!name){errEl.textContent=t('fill_all_fields');return;}
   if(password.length<6){errEl.textContent=t('password_too_short');return;}
+  if(password!==passwordConfirm){errEl.textContent=t('passwords_dont_match');return;}
   auth.createUserWithEmailAndPassword(email,password)
     .then(cred=>cred.user.updateProfile({displayName:name}))
     .then(()=>{state.isGuest=false;state.user=auth.currentUser;state.phase='start';render();})

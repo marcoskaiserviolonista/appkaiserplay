@@ -16,7 +16,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js"></script>
 <style>
 /* ── FONT MODE ── para reverter ao visual clássico, troque os valores abaixo:
    retro  : --font-body:'VT323',monospace     | --font-title:'Press Start 2P',monospace
@@ -678,7 +677,7 @@ const STRINGS = {
     item_arte_auditiva_name:'A Arte Auditiva do Violão', item_arte_auditiva_desc:'Como tirar músicas de ouvido',
     item_tab_greensleeves_name:'Tablatura de Greensleeves', item_tab_greensleeves_desc:'Partitura completa + tab',
     item_tab_romance_name:'Tablatura de Romance de Amor', item_tab_romance_desc:'Partitura completa + tab',
-    item_arte_harmonica_name:'A Arte Harmônica do Violão', item_arte_harmonica_desc:'Teoria harmônica aplicada',
+    item_tab_abismo_name:'Tablatura de Abismo de Rosas', item_tab_abismo_desc:'Partitura completa + tab',
     item_cupom_name:'CUPOM 20% off — Plano Vitalício', item_cupom_desc:'Desconto exclusivo KaiserPlay',
     // Guitar names
     guitar_basico_name:'Violão Básico',
@@ -858,7 +857,7 @@ const STRINGS = {
     item_arte_auditiva_name:'A Arte Auditiva do Violão', item_arte_auditiva_desc:'Como tirar músicas de ouvido',
     item_tab_greensleeves_name:'Greensleeves Tablature', item_tab_greensleeves_desc:'Full score + tab',
     item_tab_romance_name:'Romance de Amor Tablature', item_tab_romance_desc:'Full score + tab',
-    item_arte_harmonica_name:'A Arte Harmônica do Violão', item_arte_harmonica_desc:'Teoria harmônica aplicada',
+    item_tab_abismo_name:'Abismo de Rosas Tablature', item_tab_abismo_desc:'Full score + tab',
     item_cupom_name:'CUPOM 20% off — Plano Vitalício', item_cupom_desc:'Desconto exclusivo KaiserPlay',
     // Guitar names
     guitar_basico_name:'Basic Guitar',
@@ -1180,7 +1179,7 @@ function lvlTitle(lvl){ return t(lvl.titleKey)||lvl.title; }
 // Translated guitar and item names
 function guitarName(v){ const k='guitar_'+v.id.replace('violao_','')+'_name'; const r=t(k); return (r&&r!==k)?r:v.nome; }
 function guitarDesc(v){ if(v.pct>0)return`+${Math.round(v.pct*100)}% ${t('points')} ${state.lang==='en'?'per correct answer':'por acerto'}`; return state.lang==='en'?'Standard guitar':'Violão padrão'; }
-const _ITEM_KEYS={0:'arte_auditiva',1:'tab_greensleeves',2:'tab_romance',4:'arte_harmonica',5:'cupom'};
+const _ITEM_KEYS={0:'arte_auditiva',1:'tab_greensleeves',2:'tab_romance',3:'tab_abismo',5:'cupom'};
 function itemName(item){ const slug=_ITEM_KEYS[item.id]; if(!slug)return item.nome; const k='item_'+slug+'_name'; const r=t(k); return (r&&r!==k)?r:item.nome; }
 function itemDesc(item){ const slug=_ITEM_KEYS[item.id]; if(!slug)return item.desc; const k='item_'+slug+'_desc'; const r=t(k); return (r&&r!==k)?r:item.desc; }
 
@@ -1194,11 +1193,11 @@ const MOCK_RANKING = [
 
 // ── Itens educacionais (mundo real) ──────────────────────────
 const LOJA_ITEMS = [
-  {id:1,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Greensleeves',    desc:'Partitura completa + tab',         preco:160,  file:'materiais/tablatura_greensleeves.pdf'},
-  {id:2,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Romance de Amor', desc:'Partitura completa + tab',         preco:160,  file:'materiais/tablatura_romance_de_amor.pdf'},
+  {id:1,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Greensleeves',    desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1bMpZ5ob_uLHSLbFZtLcqDsofbTH2Ughq'},
+  {id:2,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Romance de Amor', desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1oLf88_0Lsr0bVrxGpfS_bePw-PlDABnm'},
+  {id:3,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Abismo de Rosas', desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1r63XQkGkRBYqBORO8GINUg4N0ak4msmD'},
   {id:5,img:'cupom.png',               icon:'🏷️',nome:'CUPOM 20% off — Plano Vitalício',desc:'Desconto exclusivo KaiserPlay', preco:1600, cupom:'KAISERPLAY20'},
-  {id:0,img:'livro_arte_auditiva.png', icon:'📖',nome:'A Arte Auditiva do Violão',    desc:'Como tirar músicas de ouvido',    preco:22000,file:'materiais/arte_auditiva.pdf'},
-  {id:4,img:'livro_arte_harmonica.png',icon:'📖',nome:'A Arte Harmônica do Violão',   desc:'Teoria harmônica aplicada',        preco:22000,file:'materiais/arte_harmonica.pdf'},
+  {id:0,img:'livro_arte_auditiva.png', icon:'📖',nome:'A Arte Auditiva do Violão',    desc:'Como tirar músicas de ouvido',    preco:22000,file:'https://drive.google.com/uc?export=download&id=1Od4y6XcnYXqPMSeZbM9fNVCpfJtiRdmQ'},
 ];
 
 // ── Violões (itens do jogo) ───────────────────────────────────
@@ -3911,7 +3910,7 @@ function confirmarCompra({nome, preco, img, icon, onConfirm}){
   playClickSfx('soft');
 }
 
-async function downloadMaterial(itemId){
+function downloadMaterial(itemId){
   const item=LOJA_ITEMS.find(x=>x.id===itemId);
   if(!item) return;
   if(item.cupom){
@@ -3920,12 +3919,7 @@ async function downloadMaterial(itemId){
     return;
   }
   if(!item.file){showToast(t('coming_soon'),t('coming_soon_body'));return;}
-  try{
-    const url=await firebase.storage().ref(item.file).getDownloadURL();
-    window.open(url,'_blank');
-  }catch(e){
-    showToast(t('download_error_title'),t('download_error_body'));
-  }
+  window.open(item.file,'_blank');
 }
 
 function comprarItem(id){

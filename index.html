@@ -4,12 +4,12 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>KaiserPlay</title>
+<title>SoundQuest</title>
 <link rel="manifest" href="manifest.json"/>
 <meta name="theme-color" content="#111111"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
-<meta name="apple-mobile-web-app-title" content="KaiserPlay"/>
+<meta name="apple-mobile-web-app-title" content="SoundQuest"/>
 <link rel="apple-touch-icon" href="LOGO_1.png"/>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Fredoka:wght@600;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
@@ -555,7 +555,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 <div class="app" id="app">
   <div class="header">
     <div class="logo-wrap">
-      <img src="LOGO_1.png" alt="KaiserPlay" style="height:80px;object-fit:contain"
+      <img src="LOGO_1.png" alt="SoundQuest" style="height:80px;object-fit:contain"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
       />
       <div style="display:none;align-items:center;gap:.5rem">
@@ -648,7 +648,7 @@ const STRINGS = {
     terms_conditions:'Termos e Condições', privacy_policy:'Política de Privacidade',
     terms_agree:'Ao continuar, você concorda com nossos', terms_and:'e a',
     terms_link:'Termos e Condições', privacy_link:'Política de Privacidade',
-    rate_popup_title:'Você está curtindo o KaiserPlay?', rate_popup_body:'Avalie o app e nos ajude a crescer!',
+    rate_popup_title:'Você está curtindo o SoundQuest?', rate_popup_body:'Avalie o app e nos ajude a crescer!',
     rate_now:'Avaliar agora ⭐', rate_later:'Deixar para depois',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
     // Game - General
@@ -838,7 +838,7 @@ const STRINGS = {
     terms_conditions:'Terms and Conditions', privacy_policy:'Privacy Policy',
     terms_agree:'By continuing, you agree to our', terms_and:'and our',
     terms_link:'Terms and Conditions', privacy_link:'Privacy Policy',
-    rate_popup_title:'Enjoying KaiserPlay?', rate_popup_body:'Leave a review and help us grow!',
+    rate_popup_title:'Enjoying SoundQuest?', rate_popup_body:'Leave a review and help us grow!',
     rate_now:'Rate now ⭐', rate_later:'Maybe later',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
     // Game - General
@@ -3005,7 +3005,7 @@ function renderLogin(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">SoundQuest</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('sign_in')}</div>
         <input id="login-email" type="email" placeholder="${t('email')}" autocomplete="email"
@@ -3041,7 +3041,7 @@ function renderSignup(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">SoundQuest</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('signup_title')}</div>
         <input id="signup-email" type="email" placeholder="${t('email')}" autocomplete="email"
@@ -3074,7 +3074,7 @@ function renderForgotPassword(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">SoundQuest</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:1.35rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:.75rem;text-align:center">${t('recover_password_title')}</div>
         <div style="font-size:.85rem;color:#aaa;line-height:1.55;margin-bottom:1.2rem;text-align:center">${t('recover_password_desc')}</div>
@@ -3098,7 +3098,7 @@ function renderSetDisplayName(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
       <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">KaiserPlay</div>
+      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">SoundQuest</div>
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;text-align:center">${t('account_created')}</div>
         <div style="font-size:.88rem;color:#ddd;font-weight:500;margin-bottom:1.2rem;text-align:center;line-height:1.5">${t('choose_display_name')}</div>

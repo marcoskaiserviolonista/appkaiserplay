@@ -2818,7 +2818,7 @@ function render(){
   const tRanking=document.getElementById('tab-ranking');
   const tPerfil=document.getElementById('tab-perfil');
   const tLogin=document.getElementById('tab-login');
-  if(tLogin)tLogin.style.display=state.isGuest?'':'none';
+  if(tLogin){tLogin.style.display=state.isGuest?'':'none';tLogin.textContent=t('sign_in');}
   if(state.tab==='ranking'){
     tRanking.className='tab active';
   } else {

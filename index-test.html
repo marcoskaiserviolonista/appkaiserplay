@@ -977,9 +977,6 @@ const CHORDS = [
   {id:4,  name:"G", cifra:"G",  midi:[43,47,50,55,62,67], quality:'maior'},
   {id:5,  name:"A", cifra:"A",  midi:[45,52,57,61,64], quality:'maior'},
   {id:6,  name:"B", cifra:"B",  midi:[47,54,59,63,66], quality:'maior'},
-  {id:57, name:"D",  cifra:"D",  midi:[50,66,69,74], quality:'maior'},
-  {id:156, name:"F", cifra:"F", midi:[53,60,65,69,72], quality:'maior'},
-  {id:60,  name:"F", cifra:"F", midi:[53,57,60,65,69], quality:'maior'},
   // MENORES (7–13)
   {id:7,  name:"Cm", cifra:"Cm", midi:[48,55,60,63,67], quality:'menor'},
   {id:8,  name:"Dm", cifra:"Dm", midi:[50,57,62,65], quality:'menor'},
@@ -988,9 +985,14 @@ const CHORDS = [
   {id:11, name:"Gm", cifra:"Gm", midi:[43,50,55,58,62,67], quality:'menor'},
   {id:12, name:"Am", cifra:"Am", midi:[45,52,57,60,64], quality:'menor'},
   {id:13, name:"Bm", cifra:"Bm", midi:[47,54,59,62,66], quality:'menor'},
+  // Voicings alternativos — menores
   {id:56, name:"Am", cifra:"Am", midi:[45,60,64,69], quality:'menor'},
   {id:58, name:"Dm", cifra:"Dm", midi:[50,65,69,74], quality:'menor'},
   {id:59, name:"Cm", cifra:"Cm", midi:[48,55,60,63,67,72], quality:'menor'},
+  // Voicings alternativos — maiores
+  {id:57, name:"D",  cifra:"D",  midi:[50,66,69,74], quality:'maior'},
+  {id:156, name:"F", cifra:"F", midi:[53,60,65,69,72], quality:'maior'},
+  {id:60,  name:"F", cifra:"F", midi:[53,57,60,65,69], quality:'maior'},
   // DOMINANTES 7ª (14–20)
   {id:14, name:"C7", cifra:"C7", midi:[48,52,58,60,64]},
   {id:159, name:"C7", cifra:"C7", midi:[48,55,58,64,67,72]},
@@ -1713,14 +1715,17 @@ function genQ(){
 // ── Grupos sonoros para seleção inteligente de alternativas ───
 const SONIC_GROUP={
   // BRILHANTE: maiores, maj7, E6
-  brilhante:[0,1,2,3,4,5,6,   // C D E F G A B
-             21,22,23,24,25,26, // C7M D7M E7M F7M G7M B7M
-             39],               // E6
+  brilhante:[0,1,2,3,4,5,6,      // C D E F G A B
+             57,60,156,           // D F F (voicings alt maiores)
+             21,22,23,24,25,26,157, // C7M D7M E7M F7M G7M B7M G7M(alt)
+             39],                 // E6
   // SOMBRIO: menores, m7
   sombrio:[7,8,9,10,11,12,13,  // Cm Dm Em Fm Gm Am Bm
+           56,58,59,            // Am Dm Cm (voicings alt menores)
            27,28,29,30,31,32], // Cm7 Dm7 Em7 Gm7 Am7 C#m7
   // TENSO: dom7, alterados, dim, hdim, aumentados
   tenso:[14,15,16,17,18,19,20, // C7 D7 E7 F7 G7 A7 B7
+         159,                   // C7 (voicing alt)
          40,41,42,               // C7M(#5) C(#5) D(#5)
          108,109,110,111,        // B7(9) B7(#9) B7(b9) A7(b9)
          113,115,116,117,118,119,120, // E7(9) D7/F# F#7(#11) G7(13) G7(#5) B7(13) B7(#5)
@@ -1739,7 +1744,8 @@ const _chordGroup=id=>{
 const _adjacent={brilhante:['sombrio','colorido','tenso'],sombrio:['brilhante','colorido','tenso'],tenso:['colorido','sombrio','brilhante'],colorido:['tenso','brilhante','sombrio']};
 
 function _pickWrong(ans,pool){
-  const avail=pool.filter(c=>c.id!==ans.id);
+  const seenCifras=new Set([ans.cifra]);
+  const avail=pool.filter(c=>{if(seenCifras.has(c.cifra))return false;seenCifras.add(c.cifra);return true;});
   if(avail.length<=3)return avail.sort(()=>Math.random()-.5);
   const g=_chordGroup(ans.id);
   const sameGroup=avail.filter(c=>_chordGroup(c.id)===g).sort(()=>Math.random()-.5);
@@ -1768,7 +1774,8 @@ function handleAnswer(choiceId,btnEl){
 
   state.selected=choiceId;
   btnEl.blur(); // remove foco residual que causa contorno laranja
-  const ok=choiceId===state.chord.id;
+  const selectedCifra=(state.choices.find(c=>c.id===choiceId)||{}).cifra;
+  const ok=selectedCifra===state.chord.cifra;
   const ns=ok?state.streak+1:0;
   state.streak=ns;
   if(ns>state.bestStreak)state.bestStreak=ns;
@@ -2512,7 +2519,8 @@ function handleFocusedQualityAnswer(quality, btnEl){
 function handleFocusedAnswer(choiceId,btnEl){
   if(state.selected!==null||state.phase!=='treino_focado_question') return;
   state.selected=choiceId;
-  const ok=(choiceId===state.chord.id);
+  const selectedCifraF=(state.choices.find(c=>c.id===choiceId)||{}).cifra;
+  const ok=(selectedCifraF===state.chord.cifra);
   state.result={ok};
   state.phase='treino_focado_answered';
 

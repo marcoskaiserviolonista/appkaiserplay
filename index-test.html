@@ -1212,7 +1212,7 @@ function playChord(chord){
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
-  const noteDelay=chord.midi.length>1?110+Math.round(15*Math.max(0,6-chord.midi.length)):110;
+  const noteDelay=110;
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);

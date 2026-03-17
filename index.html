@@ -758,6 +758,9 @@ const STRINGS = {
     delete_account_confirm:'Tem certeza? Isso apaga sua conta e todo o progresso permanentemente.',
     account_deleted_success:'Conta excluída com sucesso.',
     delete_account_permanently:'Deletar conta permanentemente',
+    delete_password_prompt:'Digite sua senha para confirmar:',
+    btn_cancel:'Cancelar', btn_delete:'Deletar', password_required:'Digite sua senha.',
+    premium_locked:'Conteúdo Premium', premium_locked_body:'Desbloqueie o acesso completo no final da página.',
     update_email:'Atualizar e-mail', update_password:'Atualizar senha',
     account_section:'Conta', name_in_ranking:'Nome no ranking',
     min_chars:'Mínimo 6 caracteres',
@@ -938,6 +941,9 @@ const STRINGS = {
     delete_account_confirm:'Are you sure? This permanently deletes your account and all progress.',
     account_deleted_success:'Account successfully deleted.',
     delete_account_permanently:'Delete account permanently',
+    delete_password_prompt:'Enter your password to confirm:',
+    btn_cancel:'Cancel', btn_delete:'Delete', password_required:'Please enter your password.',
+    premium_locked:'Premium Content', premium_locked_body:'Unlock full access at the bottom of the page.',
     update_email:'Update email', update_password:'Update password',
     account_section:'Account', name_in_ranking:'Name in ranking',
     min_chars:'Minimum 6 characters',
@@ -1725,11 +1731,12 @@ const SONIC_GROUP={
   brilhante:[0,1,2,3,4,5,6,      // C D E F G A B
              57,60,156,           // D F F (voicings alt maiores)
              21,22,23,24,25,26,157, // C7M D7M E7M F7M G7M B7M G7M(alt)
+             44,45,              // A7M C6
              39],                 // E6
   // SOMBRIO: menores, m7
   sombrio:[7,8,9,10,11,12,13,  // Cm Dm Em Fm Gm Am Bm
            56,58,59,            // Am Dm Cm (voicings alt menores)
-           27,28,29,30,31,32], // Cm7 Dm7 Em7 Gm7 Am7 C#m7
+           27,28,29,30,31,32,43,52], // Cm7 Dm7 Em7 Gm7 Am7 C#m7 Bm7 Fm7
   // TENSO: dom7, alterados, dim, hdim, aumentados
   tenso:[14,15,16,17,18,19,20, // C7 D7 E7 F7 G7 A7 B7
          159,                   // C7 (voicing alt)
@@ -2310,7 +2317,7 @@ function hasFocusedSwitch(){
 
 function toggleFocusedSwitch(key){
   if(!isSwitchUnlocked(key)){
-    showToast('Conteúdo Premium','Desbloqueie o acesso completo no final da página.');
+    showToast(t('premium_locked'),t('premium_locked_body'));
     playClickSfx('back');
     return;
   }
@@ -4185,11 +4192,11 @@ function perfilDeletarConta(){
   overlay.innerHTML=`
     <div style="background:#1a1a1a;border:2px solid #f87171;border-radius:16px;padding:1.5rem;max-width:320px;width:100%;text-align:center">
       <div style="font-size:1rem;font-weight:700;color:#f87171;margin-bottom:.5rem">${t('delete_account_confirm')}</div>
-      <div style="font-size:.82rem;color:#aaa;margin-bottom:1rem">Digite sua senha para confirmar:</div>
+      <div style="font-size:.82rem;color:#aaa;margin-bottom:1rem">${t('delete_password_prompt')}</div>
       <input id="_del-senha" type="password" placeholder="Sua senha" style="width:100%;box-sizing:border-box;padding:.6rem .8rem;border-radius:8px;border:1.5px solid #444;background:#111;color:#fff;font-size:.95rem;margin-bottom:1rem">
       <div style="display:flex;gap:.75rem;justify-content:center">
-        <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #555;background:transparent;color:#aaa;font-weight:700;cursor:pointer">Cancelar</button>
-        <button id="_del-confirmar" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #f87171;background:#f871711a;color:#f87171;font-weight:700;cursor:pointer">Deletar</button>
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #555;background:transparent;color:#aaa;font-weight:700;cursor:pointer">${t('btn_cancel')}</button>
+        <button id="_del-confirmar" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #f87171;background:#f871711a;color:#f87171;font-weight:700;cursor:pointer">${t('btn_delete')}</button>
       </div>
       <div id="_del-msg" style="font-size:.8rem;margin-top:.75rem;min-height:1.2em"></div>
     </div>`;
@@ -4199,7 +4206,7 @@ function perfilDeletarConta(){
   senhaInput.focus();
   overlay.querySelector('#_del-confirmar').onclick=()=>{
     const senha=senhaInput.value;
-    if(!senha){delMsg.style.color='#f87171';delMsg.textContent='Digite sua senha.';return;}
+    if(!senha){delMsg.style.color='#f87171';delMsg.textContent=t('password_required');return;}
     const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
     auth.currentUser.reauthenticateWithCredential(cred)
       .then(()=>db.collection('players').doc(auth.currentUser.uid).delete())

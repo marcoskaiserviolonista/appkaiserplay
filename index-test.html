@@ -464,6 +464,17 @@ background:#1a2a1a;border-color:#22c55e;color:#4ade80;cursor:default;
 .shop-card-btn.locked{
 background:#111;border-color:#333;color:#555;cursor:not-allowed;font-size:.8rem;
 }
+/* ── Nivel Cards ──────────────────────────────────────────── */
+.nivel-card{position:relative;border-radius:14px;overflow:hidden;border:2.5px solid #252525;box-shadow:3px 3px 0 #0a0a0a;cursor:pointer;transition:transform .2s;background:#0e0e0e;display:flex;flex-direction:column;}
+.nivel-card:active{transform:scale(.97);}
+.nivel-card--locked{opacity:.6;}
+.nivel-card-img-area{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0a0a;position:relative;}
+.nivel-card-img{width:78%;height:78%;object-fit:contain;display:block;transition:transform .3s ease;filter:drop-shadow(0 6px 20px rgba(0,0,0,.9));}
+.nivel-card:hover .nivel-card-img{transform:scale(1.07);}
+.nivel-card-info{padding:.5rem .7rem .65rem;}
+.nivel-card-name{font-size:.8rem;font-weight:900;line-height:1.2;letter-spacing:-.01em;}
+.nivel-card-range{font-size:.62rem;color:#777;margin-top:.18rem;font-weight:600;}
+.nivel-card-tag{display:inline-flex;align-items:center;gap:.2rem;font-size:.58rem;font-weight:800;border-radius:20px;padding:.18rem .5rem;margin-top:.32rem;border:1.5px solid;}
 /* Modal botões */
 .modal-btn{
 width:100%;padding:.7rem 0;border-radius:13px;
@@ -3581,38 +3592,22 @@ function renderNiveis(){
         const badgeColor=isDone?'#fff':isCurrent?'#111':'#aaa';
 
         return `
-        <div class="shop-card" style="--card-color:${cor};${isCurrent?`border-color:${cor};box-shadow:4px 4px 0 #111, 0 0 18px ${cor}55`:''}" onclick="openNivelModal(${g.idx})">
-          <!-- status badge top-left -->
-          <div class="shop-card-badge" style="background:${badgeBg};color:${badgeColor};border-color:rgba(255,255,255,.15)">
-            ${isCurrent?t('here_badge'):isDone?t('done_badge'):''}
-          </div>
-          <!-- level range badge top-right -->
-          <div style="position:absolute;top:.55rem;right:.55rem;font-size:.58rem;font-weight:800;color:${isLocked?'#999':cor};background:#0e0e0e;border:1.5px solid ${isLocked?'#333':cor+'55'};border-radius:20px;padding:.2rem .5rem;z-index:3;letter-spacing:.03em">
-            ${g.range[0]}${g.range[1]!==g.range[0]?'–'+g.range[1]:''}
-          </div>
+        <div class="nivel-card ${isLocked?'nivel-card--locked':''}" style="${isCurrent?`border-color:${cor};box-shadow:3px 3px 0 #0a0a0a,0 0 18px ${cor}44`:''}" onclick="openNivelModal(${g.idx})">
+          ${isCurrent||isDone?`<div style="position:absolute;top:.5rem;left:.5rem;z-index:3;font-size:.58rem;font-weight:800;border-radius:20px;padding:.18rem .5rem;background:${isDone?'#22c55e':cor};color:${isDone?'#fff':'#111'};border:1.5px solid rgba(255,255,255,.15)">${isCurrent?t('here_badge'):t('done_badge')}</div>`:''}
+          <div style="position:absolute;top:.5rem;right:.5rem;z-index:3;font-size:.58rem;font-weight:800;color:${isLocked?'#777':cor};background:#0e0e0e;border:1.5px solid ${isLocked?'#2a2a2a':cor+'44'};border-radius:20px;padding:.18rem .5rem">${g.range[0]}${g.range[1]!==g.range[0]?'–'+g.range[1]:''}</div>
 
-          <div class="shop-card-img-wrap" style="position:relative">
-            <!-- imagem SEM escurecer -->
-            <img src="${img}" class="shop-card-img"
-              onerror="this.src='violao.png';this.style.opacity='.25'">
-
-            <!-- overlay de cadeado apenas para bloqueados -->
-            ${isLocked?`
-            <div style="position:absolute;inset:0;z-index:4;pointer-events:none;display:flex;align-items:center;justify-content:center">
-              <div style="font-size:2.2rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,.8))">🔒</div>
-            </div>`:''}
-
-            ${isCurrent?`<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,${cor},transparent);z-index:2"></div>`:''}
+          <div class="nivel-card-img-area">
+            <img src="${img}" class="nivel-card-img" onerror="this.src='violao.png';this.style.opacity='.2'">
+            ${isLocked?`<div style="position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5)"><div style="font-size:2rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,.9))">🔒</div></div>`:''}
+            ${isCurrent?`<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,${cor},transparent);z-index:2"></div>`:''}
           </div>
 
-          <div class="shop-card-info">
-            <div class="shop-card-name" style="color:${isLocked?'#aaa':cor}">${g.title}</div>
-            <div style="font-size:.68rem;color:${isLocked?'#666':'#888'};margin-top:.2rem">
-              ${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
-            </div>
-            ${isCurrent?`<div class="shop-card-xp-mini" style="background:${cor}18;border-color:${cor}44;color:${cor};margin-top:.35rem">${t('in_progress_badge')}</div>`:''}
-            ${isDone?`<div class="shop-card-xp-mini" style="background:#22c55e18;border-color:#22c55e44;color:#4ade80;margin-top:.35rem">${t('done_badge')}</div>`:''}
-            ${isLocked?`<div class="shop-card-xp-mini" style="background:#22222288;border-color:#33333388;color:#888;margin-top:.35rem">🔒 ${t('level')} ${g.range[0]}+</div>`:''}
+          <div class="nivel-card-info">
+            <div class="nivel-card-name" style="color:${isLocked?'#999':cor}">${g.title}</div>
+            <div class="nivel-card-range">${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}</div>
+            ${isCurrent?`<div class="nivel-card-tag" style="background:${cor}18;border-color:${cor}44;color:${cor}">${t('in_progress_badge')}</div>`:''}
+            ${isDone?`<div class="nivel-card-tag" style="background:#22c55e18;border-color:#22c55e44;color:#4ade80">${t('done_badge')}</div>`:''}
+            ${isLocked?`<div class="nivel-card-tag" style="background:#1e1e1e;border-color:#333;color:#666">🔒 ${t('level')} ${g.range[0]}+</div>`:''}
           </div>
         </div>`;
       }).join('')}
@@ -3759,7 +3754,7 @@ function renderRanking(){
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

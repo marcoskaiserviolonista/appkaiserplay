@@ -1502,6 +1502,8 @@ function drawParticles(){
 }
 drawParticles();
 
+function esc(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
 let _toastTimer=null;
 function showToast(msg,sub){
   const el=document.getElementById('toast');
@@ -2322,7 +2324,7 @@ function startSmartSession(){
 
 function genFocusedQ(){
   const pool=state.focusedPool;
-  if(!pool||pool.length<2) return;
+  if(!pool||pool.length<2){state.phase='treino_focado';render();return;}
 
   if(state.isSmartSession){
     // 50% qualidade (2 botões) se tiver pares ativos, 50% acorde específico (4 botões)
@@ -2885,7 +2887,7 @@ function renderStart(){
   const lvl=LEVELS[lIdx];
   const lvlStart=getLvlStartXP(lIdx);
   const prog=Math.min((state.xp-lvlStart)/lvl.xpToNext,1)*100;
-  const userName=state.isGuest?t('guest_label'):(state.user?.displayName||state.user?.email?.split('@')[0]||t('player_default_pt'));
+  const userName=esc(state.isGuest?t('guest_label'):(state.user?.displayName||state.user?.email?.split('@')[0]||t('player_default_pt')));
   const initials=userName[0].toUpperCase();
   return `
     <div class="profile-card">
@@ -3714,7 +3716,7 @@ function renderRanking(){
     ?`<div style="color:#555;text-align:center;padding:2rem;font-size:.85rem">${t('no_ranking_data')}</div>`
     :data.map((p,i)=>{
       const isMe=p.uid===myUid;
-      const nome=p.displayName||t('player_default_pt');
+      const nome=esc(p.displayName||t('player_default_pt'));
       const lvlIdx=getLvlIdx(p.xp||0);
       const lvl=LEVELS[lvlIdx];
       return `
@@ -4140,15 +4142,34 @@ function perfilTrocarSenha(){
 }
 function perfilDeletarConta(){
   const msg=document.getElementById('perfil-conta-msg');
-  const confirmado=confirm(t('delete_account_confirm'));
-  if(!confirmado)return;
-  const senha=prompt('Digite sua senha para confirmar:');
-  if(!senha)return;
-  const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
-  auth.currentUser.reauthenticateWithCredential(cred)
-    .then(()=>db.collection('players').doc(auth.currentUser.uid).delete())
-    .then(()=>auth.currentUser.delete())
-    .catch(e=>{msg.style.color='#f87171';msg.textContent=_authError(e.code);});
+  // Modal com campo de senha mascarado
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;background:#000a;z-index:9999;display:flex;align-items:center;justify-content:center;padding:1rem';
+  overlay.innerHTML=`
+    <div style="background:#1a1a1a;border:2px solid #f87171;border-radius:16px;padding:1.5rem;max-width:320px;width:100%;text-align:center">
+      <div style="font-size:1rem;font-weight:700;color:#f87171;margin-bottom:.5rem">${t('delete_account_confirm')}</div>
+      <div style="font-size:.82rem;color:#aaa;margin-bottom:1rem">Digite sua senha para confirmar:</div>
+      <input id="_del-senha" type="password" placeholder="Sua senha" style="width:100%;box-sizing:border-box;padding:.6rem .8rem;border-radius:8px;border:1.5px solid #444;background:#111;color:#fff;font-size:.95rem;margin-bottom:1rem">
+      <div style="display:flex;gap:.75rem;justify-content:center">
+        <button onclick="this.closest('div[style*=fixed]').remove()" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #555;background:transparent;color:#aaa;font-weight:700;cursor:pointer">Cancelar</button>
+        <button id="_del-confirmar" style="flex:1;padding:.55rem;border-radius:8px;border:2px solid #f87171;background:#f871711a;color:#f87171;font-weight:700;cursor:pointer">Deletar</button>
+      </div>
+      <div id="_del-msg" style="font-size:.8rem;margin-top:.75rem;min-height:1.2em"></div>
+    </div>`;
+  document.body.appendChild(overlay);
+  const senhaInput=overlay.querySelector('#_del-senha');
+  const delMsg=overlay.querySelector('#_del-msg');
+  senhaInput.focus();
+  overlay.querySelector('#_del-confirmar').onclick=()=>{
+    const senha=senhaInput.value;
+    if(!senha){delMsg.style.color='#f87171';delMsg.textContent='Digite sua senha.';return;}
+    const cred=firebase.auth.EmailAuthProvider.credential(auth.currentUser.email,senha);
+    auth.currentUser.reauthenticateWithCredential(cred)
+      .then(()=>db.collection('players').doc(auth.currentUser.uid).delete())
+      .then(()=>auth.currentUser.delete())
+      .then(()=>overlay.remove())
+      .catch(e=>{delMsg.style.color='#f87171';delMsg.textContent=_authError(e.code);});
+  };
 }
 
 // ── Firestore: salvar e carregar progresso ────────────────────

@@ -629,7 +629,7 @@ const STRINGS = {
     settings_title:'Configurações', change_display_name:'Trocar nome de exibição',
     save:'Salvar', sign_out:'Sair da conta', registered_email:'E-mail cadastrado',
     optional:'Opcional', change_email:'Trocar e-mail', change_password:'Trocar senha',
-    change_email_question:'QUER TROCAR O SEU E-MAIL?', change_password_question:'QUER TROCAR A SUA SENHA?', do_it_below:'Faça isso abaixo.',
+    change_email_question:'QUER TROCAR O SEU E-MAIL?', change_password_question:'QUER TROCAR A SUA SENHA?', do_it_below:'Faça isso abaixo.', preview_label:'🔒 Prévia',
     new_email:'Novo e-mail', new_password:'Nova senha', current_password:'Senha atual',
     choose_language:'Escolha seu idioma',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
@@ -806,7 +806,7 @@ const STRINGS = {
     settings_title:'Settings', change_display_name:'Change display name',
     save:'Save', sign_out:'Sign out', registered_email:'Registered email',
     optional:'Optional', change_email:'Change email', change_password:'Change password',
-    change_email_question:'WANT TO CHANGE YOUR EMAIL?', change_password_question:'WANT TO CHANGE YOUR PASSWORD?', do_it_below:'Do it below.',
+    change_email_question:'WANT TO CHANGE YOUR EMAIL?', change_password_question:'WANT TO CHANGE YOUR PASSWORD?', do_it_below:'Do it below.', preview_label:'🔒 Preview',
     new_email:'New email', new_password:'New password', current_password:'Current password',
     choose_language:'Choose your language',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
@@ -2649,7 +2649,7 @@ function renderTreinoFocadoMenu(){
 <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
     <div style="font-size:.78rem;color:#aaa">${t('most_missed_chords')}</div>
-    ${paywall?`<div style="font-size:.65rem;color:#60dcff88;letter-spacing:.06em;text-transform:uppercase">🔒 Prévia</div>`:''}
+    ${paywall?`<div style="font-size:.65rem;color:#60dcff88;letter-spacing:.06em;text-transform:uppercase">${t('preview_label')}</div>`:''}
   </div>
   <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
     ${topErrors.map(c=>`

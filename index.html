@@ -984,13 +984,13 @@ const CHORDS = [
   {id:19, name:"A7", cifra:"A7", midi:[45,52,55,61]},
   {id:20, name:"B7", cifra:"B7", midi:[47,51,57,59,66]},
   // 7ª MAIOR (21–26)
-  {id:21, name:"C7M", cifra:"C7M",midi:[48,52,55,59,64]},
-  {id:22, name:"D7M", cifra:"D7M",midi:[50,57,61,66]},
-  {id:23, name:"E7M", cifra:"E7M",midi:[40,47,51,56,59,64]},
-  {id:24, name:"F7M", cifra:"F7M",midi:[41,57,60,64]},
-  {id:25, name:"G7M", cifra:"G7M",midi:[43,54,59,62]},
-  {id:157, name:"G7M", cifra:"G7M", midi:[55,62,66,71,74]},
-  {id:26, name:"B7M", cifra:"B7M",midi:[47,54,58,63,66]},
+  {id:21, name:"C7M", cifra:"C7M", cifraEn:"Cmaj7", midi:[48,52,55,59,64]},
+  {id:22, name:"D7M", cifra:"D7M", cifraEn:"Dmaj7", midi:[50,57,61,66]},
+  {id:23, name:"E7M", cifra:"E7M", cifraEn:"Emaj7", midi:[40,47,51,56,59,64]},
+  {id:24, name:"F7M", cifra:"F7M", cifraEn:"Fmaj7", midi:[41,57,60,64]},
+  {id:25, name:"G7M", cifra:"G7M", cifraEn:"Gmaj7", midi:[43,54,59,62]},
+  {id:157, name:"G7M", cifra:"G7M", cifraEn:"Gmaj7", midi:[55,62,66,71,74]},
+  {id:26, name:"B7M", cifra:"B7M", cifraEn:"Bmaj7", midi:[47,54,58,63,66]},
   // MENOR 7ª (27–32)
   {id:27, name:"Cm7", cifra:"Cm7",midi:[48,55,58,63,67]},
   {id:28, name:"Dm7", cifra:"Dm7",midi:[50,57,60,65]},
@@ -1000,7 +1000,7 @@ const CHORDS = [
   {id:32, name:"C#m7", cifra:"C#m7",midi:[49,56,59,64,68]},
   {id:43, name:"Bm7",   cifra:"Bm7",  midi:[47,54,57,62,66]},
   {id:52, name:"Fm7",   cifra:"Fm7",  midi:[41,48,51,56,60,65]},
-  {id:44, name:"A7M",   cifra:"A7M",  midi:[45,52,56,61,64]},
+  {id:44, name:"A7M",   cifra:"A7M",  cifraEn:"Amaj7", midi:[45,52,56,61,64]},
   {id:45, name:"C6",    cifra:"C6",   midi:[48,55,57,64]},
   // COM 6ª / SUS / INVERSÕES (33–38)
   {id:33, name:"D6", cifra:"D6",   midi:[50,57,59,66]},
@@ -1013,7 +1013,7 @@ const CHORDS = [
 
 // ── Acordes Diamante (sempre avançados) ──
 const CHORDS_DIAMOND = [
-  {id:100, name:"C7M(9)", cifra:"C7M(9)",   midi:[48,52,59,62]},
+  {id:100, name:"C7M(9)", cifra:"C7M(9)", cifraEn:"Cmaj7(9)", midi:[48,52,59,62]},
   {id:101, name:"C7(9)", cifra:"C7(9)",    midi:[48,52,58,62]},
   {id:102, name:"C6(9)", cifra:"C6(9)",    midi:[48,52,57,62]},
   {id:103, name:"A(9)", cifra:"A9",     midi:[45,52,59,61]},
@@ -1037,19 +1037,19 @@ const CHORDS_DIAMOND = [
   {id:122, name:"Edim", cifra:"Edim",     midi:[55,58,61,64], quality:"diminuto"},
   {id:123, name:"Fdim", cifra:"Fdim",     midi:[41,50,56,59], quality:"diminuto"},
   {id:124, name:"G#dim", cifra:"G#dim",    midi:[44,53,59,62], quality:"diminuto"},
-  {id:125, name:"Bm7(b5)", cifra:"Bm7(b5)",  midi:[47,53,57,62]},
-  {id:126, name:"Em7(b5)", cifra:"Em7(b5)",  midi:[52,58,62,67]},
-  {id:127, name:"F#m7(b5)", cifra:"F#m7(b5)", midi:[42,52,57,60]},
-  {id:128, name:"Am7(b5)", cifra:"Am7(b5)",  midi:[45,55,60,63]},
+  {id:125, name:"Bm7(b5)",  cifra:"Bm7(b5)",  cifraEn:"Bm7b5",   midi:[47,53,57,62]},
+  {id:126, name:"Em7(b5)",  cifra:"Em7(b5)",  cifraEn:"Em7b5",   midi:[52,58,62,67]},
+  {id:127, name:"F#m7(b5)", cifra:"F#m7(b5)", cifraEn:"F#m7b5",  midi:[42,52,57,60]},
+  {id:128, name:"Am7(b5)",  cifra:"Am7(b5)",  cifraEn:"Am7b5",   midi:[45,55,60,63]},
   // Extensões estáveis — nonas
   {id:130, name:"C9",      cifra:"C9",      midi:[48,52,55,62,64]},
   {id:131, name:"D9",      cifra:"D9",      midi:[50,57,64,66]},
-  {id:132, name:"D7M(9)",  cifra:"D7M(9)",  midi:[50,54,61,64]},
+  {id:132, name:"D7M(9)",  cifra:"D7M(9)",  cifraEn:"Dmaj7(9)", midi:[50,54,61,64]},
   {id:133, name:"D7(9)",   cifra:"D7(9)",   midi:[50,54,60,64]},
   {id:134, name:"Am7(9)",  cifra:"Am7(9)",  midi:[45,55,59,60,64]},
-  {id:135, name:"A7M(9)",  cifra:"A7M(9)",  midi:[45,56,59,61,64]},
+  {id:135, name:"A7M(9)",  cifra:"A7M(9)",  cifraEn:"Amaj7(9)", midi:[45,56,59,61,64]},
   {id:136, name:"G7(9)",   cifra:"G7(9)",   midi:[43,53,57,59]},
-  {id:137, name:"G7M(9)",  cifra:"G7M(9)",  midi:[43,54,57,59]},
+  {id:137, name:"G7M(9)",  cifra:"G7M(9)",  cifraEn:"Gmaj7(9)", midi:[43,54,57,59]},
   {id:138, name:"G7(b9)",  cifra:"G7(b9)",  midi:[43,53,56,59]},
   {id:139, name:"A7(9)",   cifra:"A7(9)",   midi:[45,55,59,61]},
   // Inversões
@@ -1059,8 +1059,8 @@ const CHORDS_DIAMOND = [
   {id:147, name:"Gm/Bb",   cifra:"Gm/Bb",   midi:[46,50,55,62]},
   {id:148, name:"G/B",     cifra:"G/B",     midi:[47,50,55,62]},
   // Aumentados
-  {id:142, name:"A(#5)",   cifra:"A(#5)",   midi:[45,53,57,61]},
-  {id:151, name:"Ab(#5)",  cifra:"Ab(#5)",  midi:[44,52,56,60], quality:"aumentado"},
+  {id:142, name:"A(#5)",   cifra:"A(#5)",   cifraEn:"Aaug",  midi:[45,53,57,61]},
+  {id:151, name:"Ab(#5)",  cifra:"Ab(#5)",  cifraEn:"Abaug", midi:[44,52,56,60], quality:"aumentado"},
   // Aumentados/Alterados
   {id:129, name:"E7(#5)", cifra:"E7(#5)", midi:[40,50,56,60]},
   // Dominantes c/ extensão
@@ -1069,25 +1069,25 @@ const CHORDS_DIAMOND = [
   {id:144, name:"Bdim",    cifra:"Bdim",    midi:[47,50,53], quality:"diminuto"},
   {id:150, name:"F#dim",   cifra:"F#dim",   midi:[42,48,51,57], quality:"diminuto"},
   // Meio-diminutos
-  {id:145, name:"Gm7(b5)", cifra:"Gm7(b5)", midi:[55,61,65,70]},
+  {id:145, name:"Gm7(b5)", cifra:"Gm7(b5)", cifraEn:"Gm7b5", midi:[55,61,65,70]},
   // Dissonantes (Xm7M)
-  {id:46,  name:"Am7M",    cifra:"Am7M",    midi:[45,52,56,60,64]},
-  {id:47,  name:"Bm7M",    cifra:"Bm7M",    midi:[47,54,58,62,66]},
-  {id:48,  name:"Gm7M",    cifra:"Gm7M",    midi:[43,54,58,62]},
-  {id:49,  name:"Dm7M",    cifra:"Dm7M",    midi:[50,57,61,65]},
+  {id:46,  name:"Am7M",    cifra:"Am7M",    cifraEn:"AmMaj7", midi:[45,52,56,60,64]},
+  {id:47,  name:"Bm7M",    cifra:"Bm7M",    cifraEn:"BmMaj7", midi:[47,54,58,62,66]},
+  {id:48,  name:"Gm7M",    cifra:"Gm7M",    cifraEn:"GmMaj7", midi:[43,54,58,62]},
+  {id:49,  name:"Dm7M",    cifra:"Dm7M",    cifraEn:"DmMaj7", midi:[50,57,61,65]},
   // Inversões já existentes
   {id:36, name:"D6/F#",   cifra:"D6/F#",   midi:[42,50,57,59]},
   {id:38, name:"E7/G#",   cifra:"E7/G#",   midi:[44,52,59,62]},
   // Aumentados e alterados
   {id:40, name:"C7M(#5)", cifra:"C7M(#5)", midi:[48,52,56,59]},
-  {id:41, name:"C(#5)",   cifra:"C(#5)",   midi:[48,56,60,64], quality:'aumentado'},
-  {id:42, name:"D(#5)",   cifra:"D(#5)",   midi:[50,58,62,66], quality:'aumentado'},
+  {id:41, name:"C(#5)",   cifra:"C(#5)",   cifraEn:"Caug", midi:[48,56,60,64], quality:'aumentado'},
+  {id:42, name:"D(#5)",   cifra:"D(#5)",   cifraEn:"Daug", midi:[50,58,62,66], quality:'aumentado'},
   // Voicings alternativos
   {id:152, name:"F#dim",  cifra:"F#dim",   midi:[54,60,63,69], quality:"diminuto"},
   {id:153, name:"C7/E",   cifra:"C7/E",    midi:[52,58,60,62]},
   {id:154, name:"E7/G#",  cifra:"E7/G#",   midi:[56,62,64,71]},
-  {id:155, name:"E7M",    cifra:"E7M",     midi:[52,56,59,63,68]},
-  {id:158, name:"F7M(9)", cifra:"F7M(9)", midi:[53,57,64,67]},
+  {id:155, name:"E7M",    cifra:"E7M",    cifraEn:"Emaj7",    midi:[52,56,59,63,68]},
+  {id:158, name:"F7M(9)", cifra:"F7M(9)", cifraEn:"Fmaj7(9)", midi:[53,57,64,67]},
   {id:160, name:"Eb7(9)", cifra:"Eb7(9)", midi:[51,55,61,65]},
 ];
 
@@ -2654,7 +2654,7 @@ function renderTreinoFocadoMenu(){
   <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
     ${topErrors.map(c=>`
       <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:72px">
-        <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1${paywall?';filter:blur(5px);user-select:none':''}">${c.cifra}</div>
+        <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1${paywall?';filter:blur(5px);user-select:none':''}">${(state.lang==='en'&&c.cifraEn)?c.cifraEn:c.cifra}</div>
         <div style="font-size:.6rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
       </div>
     `).join('')}
@@ -2731,7 +2731,7 @@ function renderTreinoFocado(){
         else cls+=' dim';
       }
       return `<button class="${cls}" onclick="handleFocusedAnswer(${ch.id},this)">
-        <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${ch.cifra}</span>
+        <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
       </button>`;
     }).join('') + `</div>`;
   }
@@ -3134,7 +3134,7 @@ function renderGame(){
           }
           const diamondStyle=state.isBonus&&!cls.includes('correct')&&!cls.includes('wrong')&&!cls.includes('dim')?'background:linear-gradient(180deg,#0d2444,#07162c);border-color:#60dcff;':'';
           return `<button class="${cls}" style="${diamondStyle}" onclick="handleAnswer(${ch.id},this)">
-            <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${ch.cifra}</span>
+            <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
           </button>`;
         }).join('')}
       </div>

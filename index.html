@@ -4041,6 +4041,20 @@ function renderPerfil(){
     <div style="width:100%;max-width:520px;display:flex;flex-direction:column;gap:1rem;padding-bottom:2rem">
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
+        <div style="font-size:.9rem;font-weight:900;color:#F5A623;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">${t('choose_language')}</div>
+        <div style="display:flex;gap:.5rem">
+          <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            <img src="brasil.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> Português
+          </button>
+          <button onclick="state.lang='en';localStorage.setItem('kaiserplay_lang','en');render()"
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            <img src="eua.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> English
+          </button>
+        </div>
+      </div>
+
+      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
         <div style="font-size:.9rem;font-weight:900;color:#a78bfa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:1rem">${t('change_display_name')}</div>
         ${field(nameRankStr,'perfil-nome','text',displayName||nameRankStr,displayName)}
         <button onclick="perfilSalvarNome()"
@@ -4072,20 +4086,6 @@ function renderPerfil(){
           ${updPassStr}
         </button>
         <div id="perfil-senha-msg" style="min-height:1.1rem;font-size:.75rem;font-weight:600;margin-top:.5rem;text-align:center"></div>
-      </div>
-
-      <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.9rem;font-weight:900;color:#F5A623;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">${t('choose_language')}</div>
-        <div style="display:flex;gap:.5rem">
-          <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
-            <img src="brasil.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> Português
-          </button>
-          <button onclick="state.lang='en';localStorage.setItem('kaiserplay_lang','en');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
-            <img src="eua.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> English
-          </button>
-        </div>
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">

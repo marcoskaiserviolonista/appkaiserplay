@@ -629,7 +629,7 @@ const STRINGS = {
     settings_title:'Configurações', change_display_name:'Trocar nome de exibição',
     save:'Salvar', sign_out:'Sair da conta', registered_email:'E-mail cadastrado',
     optional:'Opcional', change_email:'Trocar e-mail', change_password:'Trocar senha',
-    change_email_question:'Quer trocar o seu e-mail cadastrado?', change_password_question:'Quer trocar a sua senha?', do_it_below:'Faça isso abaixo.',
+    change_email_question:'QUER TROCAR O SEU E-MAIL?', change_password_question:'QUER TROCAR A SUA SENHA?', do_it_below:'Faça isso abaixo.',
     new_email:'Novo e-mail', new_password:'Nova senha', current_password:'Senha atual',
     choose_language:'Escolha seu idioma',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
@@ -806,7 +806,7 @@ const STRINGS = {
     settings_title:'Settings', change_display_name:'Change display name',
     save:'Save', sign_out:'Sign out', registered_email:'Registered email',
     optional:'Optional', change_email:'Change email', change_password:'Change password',
-    change_email_question:'Want to change your registered email?', change_password_question:'Want to change your password?', do_it_below:'Do it below.',
+    change_email_question:'WANT TO CHANGE YOUR EMAIL?', change_password_question:'WANT TO CHANGE YOUR PASSWORD?', do_it_below:'Do it below.',
     new_email:'New email', new_password:'New password', current_password:'Current password',
     choose_language:'Choose your language',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
@@ -4051,7 +4051,7 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.9rem;font-weight:900;color:#60a5fa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">${t('change_email')}</div>
+        <div style="font-size:.9rem;font-weight:900;color:#60a5fa;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">${t('change_email_question')}</div>
         <div style="font-size:.84rem;color:#888;margin-bottom:.9rem">${t('do_it_below')}</div>
         ${field(t('new_email'),'perfil-email','email',t('new_email'),'')}
         ${field(t('current_password'),'perfil-email-senha','password',t('current_password'),'')}
@@ -4063,7 +4063,7 @@ function renderPerfil(){
       </div>
 
       <div style="background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.2rem;box-shadow:4px 4px 0 #111">
-        <div style="font-size:.9rem;font-weight:900;color:#4ade80;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">${t('change_password')}</div>
+        <div style="font-size:.9rem;font-weight:900;color:#4ade80;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">${t('change_password_question')}</div>
         <div style="font-size:.84rem;color:#888;margin-bottom:.9rem">${t('do_it_below')}</div>
         ${field(t('current_password'),'perfil-senha-atual','password',t('current_password'),'')}
         ${field(t('new_password'),'perfil-senha-nova','password',minCharsStr,'')}

@@ -3091,6 +3091,13 @@ function renderStart(){
     <div class="nav-grid" style="margin-top:.75rem">
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
+    <a href="https://kaiserplay.com.br" target="_blank" rel="noopener" onclick="playClickSfx('nav')"
+       style="display:block;width:100%;max-width:520px;margin-top:.75rem;background:linear-gradient(160deg,#1c1c1c,#141414);border:2px solid #F5A623;border-radius:20px;box-shadow:4px 4px 0 rgba(245,166,35,.2);padding:1rem 1.25rem 1.1rem;text-align:center;text-decoration:none;box-sizing:border-box">
+      <div style="font-size:.72rem;font-weight:700;color:#aaa;text-transform:uppercase;letter-spacing:.13em;margin-bottom:.65rem">Aprenda violão no</div>
+      <div style="background:#fff;border-radius:12px;padding:.4rem 1.4rem;display:inline-block">
+        <img src="logo-abreviado.png" style="height:42px;object-fit:contain;display:block">
+      </div>
+    </a>
     ${state.isGuest?`<div style="width:100%;max-width:520px;margin-top:.75rem;text-align:center">
       <button onclick="state.phase='signup';render()" style="background:transparent;border:none;color:#F5A623;font-size:.82rem;font-weight:700;font-family:var(--font-body);cursor:pointer;text-decoration:underline">${t('guest_popup_create')}</button>
     </div>`:''}

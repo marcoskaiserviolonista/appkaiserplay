@@ -3092,11 +3092,11 @@ function renderStart(){
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
     <a href="https://kaiserplay.com.br" target="_blank" rel="noopener" onclick="playClickSfx('nav')"
-       style="display:block;width:100%;max-width:520px;margin-top:1.25rem;text-align:center;text-decoration:none">
-      <div style="font-size:1rem;font-weight:700;color:#e8e8e8;margin-bottom:0">Aprenda violão no</div>
-      <div style="display:flex;align-items:center;justify-content:center;gap:.75rem">
+       style="display:flex;flex-direction:column;align-items:center;gap:0;width:100%;max-width:520px;margin-top:1.25rem;text-decoration:none">
+      <div style="font-size:1rem;font-weight:700;color:#e8e8e8;line-height:1">Aprenda violão no</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:.75rem;width:100%">
         <span style="font-size:1.3rem;color:#F5A623">→</span>
-        <img src="logo-kaiserplay-transp.png" style="width:65%;object-fit:contain">
+        <img src="logo-kaiserplay-transp.png" style="width:65%;object-fit:contain;display:block">
         <span style="font-size:1.3rem;color:#F5A623">←</span>
       </div>
     </a>

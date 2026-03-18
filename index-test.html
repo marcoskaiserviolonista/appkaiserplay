@@ -2364,11 +2364,10 @@ function startSmartSession(){
   const allChords=[...CHORDS,...CHORDS_DIAMOND];
   const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
   const specificWeak=Object.entries(state.chordStats)
-    .filter(([,v])=>v.e>0).sort((a,b)=>b[1].e-a[1].e).slice(0,5)
+    .filter(([,v])=>v.e>0).sort((a,b)=>b[1].e-a[1].e).slice(0,4)
     .map(([id])=>chordMap[parseInt(id)]).filter(Boolean);
   const seen=new Set();const pool=[];
   for(const c of specificWeak){if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}
-  if(pool.length<4){for(const c of allChords){if(pool.length>=4)break;if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}}}
   state.focusedPool=pool;
   state.isSmartSession=true;
   state.smartActivePairs=[];
@@ -2383,12 +2382,10 @@ function genFocusedQ(){
   if(!pool||pool.length<2){state.phase='treino_focado';render();return;}
 
   if(state.isSmartSession){
-    // 50% qualidade (2 botões) se tiver pares ativos, 50% acorde específico (4 botões)
-      const ans=pool[Math.floor(Math.random()*pool.length)];
-      const wrong=_pickWrong(ans,pool);
-      state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
-      state.choices=[ans,...wrong].sort(()=>Math.random()-.5);
-      state.selected=null;state.qualitySelected=null;state.result=null;
+    const ans=pool[Math.floor(Math.random()*pool.length)];
+    state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
+    state.choices=[...pool].sort(()=>Math.random()-.5);
+    state.selected=null;state.qualitySelected=null;state.result=null;
     setTimeout(()=>playChord(state.chord),120);return;
   }
 
@@ -2656,7 +2653,7 @@ function renderTreinoFocadoMenu(){
     ? Object.entries(state.chordStats)
         .filter(([,v])=>v.e>0)
         .sort((a,b)=>b[1].e-a[1].e)
-        .slice(0,3)
+        .slice(0,4)
         .map(([id])=>chordMap[parseInt(id)])
         .filter(Boolean)
     : [];
@@ -2707,9 +2704,9 @@ function renderTreinoFocadoMenu(){
   </div>
   <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
     ${topErrors.map(c=>`
-      <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.5rem .8rem;text-align:center;min-width:72px">
-        <div style="font-size:1.1rem;font-weight:900;color:#f0f0f0;line-height:1${paywall?';filter:blur(5px);user-select:none':''}">${(state.lang==='en'&&c.cifraEn)?c.cifraEn:c.cifra}</div>
-        <div style="font-size:.6rem;color:#f87171;font-weight:700;margin-top:.3rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
+      <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.75rem 1rem;text-align:center;min-width:86px">
+        <div style="font-size:1.25rem;font-weight:900;color:#f0f0f0;line-height:1${paywall?';filter:blur(5px);user-select:none':''}">${(state.lang==='en'&&c.cifraEn)?c.cifraEn:c.cifra}</div>
+        <div style="font-size:.65rem;color:#f87171;font-weight:700;margin-top:.4rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
       </div>
     `).join('')}
   </div>

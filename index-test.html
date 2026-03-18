@@ -1296,13 +1296,31 @@ function getAudioCtx(){
 
 const howls = {};
 SAMPLE_NOTES.forEach(n => {
-  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:1.0});
+  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.7});
 });
+
+// Compressor dinâmico — evita distorção quando várias notas somam volume
+let _compressorInit = false;
+function initCompressor() {
+  if (_compressorInit || !Howler.ctx) return;
+  _compressorInit = true;
+  const ctx = Howler.ctx;
+  const comp = ctx.createDynamicsCompressor();
+  comp.threshold.value = -18;
+  comp.knee.value = 6;
+  comp.ratio.value = 4;
+  comp.attack.value = 0.003;
+  comp.release.value = 0.25;
+  Howler.masterGain.disconnect();
+  Howler.masterGain.connect(comp);
+  comp.connect(ctx.destination);
+}
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}
 
 let _playTimer=null;
 function playChord(chord){
+  initCompressor();
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
 
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});

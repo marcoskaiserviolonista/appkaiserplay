@@ -1319,11 +1319,16 @@ function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}
 
 let _playTimer=null;
+let _fadeTimer=null;
+let _playingIds=[];
+const FADE_DURATION=600;
 function playChord(chord){
   initCompressor();
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
+  if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
 
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  _playingIds=[];
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
@@ -1334,13 +1339,18 @@ function playChord(chord){
     setTimeout(()=>{
       const id=howls[sn].play();
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
+      _playingIds.push({howl:howls[sn],id});
     },i*noteDelay);
   });
+  const totalDur=(chord.midi.length-1)*noteDelay+3000;
+  _fadeTimer=setTimeout(()=>{
+    _playingIds.forEach(({howl,id})=>{try{howl.fade(0.85,0,FADE_DURATION,id);}catch(e){}});
+  },totalDur-FADE_DURATION);
   _playTimer=setTimeout(()=>{
     _playTimer=null;state.playing=false;
     const _pbtn2=document.querySelector('.play-btn');
     if(_pbtn2){_pbtn2.textContent=t('listen_chord');_pbtn2.classList.remove('playing');}
-  },(chord.midi.length-1)*noteDelay+3000);
+  },totalDur);
 }
 
 function playSfx(type){

@@ -1296,7 +1296,7 @@ function getAudioCtx(){
 
 const howls = {};
 SAMPLE_NOTES.forEach(n => {
-  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.7});
+  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.85});
 });
 
 // Compressor dinâmico — evita distorção quando várias notas somam volume

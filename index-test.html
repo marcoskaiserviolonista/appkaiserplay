@@ -132,18 +132,18 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .combo-mult.new-level{animation:multiBurst .3s ease,multiGlow .5s ease}
 
 /* ── Stats ── */
-.stats-grid{width:100%;max-width:520px;display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.75rem}
-.stat-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:1rem .5rem;text-align:center;box-shadow:4px 4px 0 #151515}
-.stat-val{font-size:1.7rem;font-weight:900;color:#f0f0f0;line-height:1}
+.stats-grid{width:100%;max-width:520px;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.6rem}
+.stat-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:.75rem .5rem;text-align:center;box-shadow:4px 4px 0 #151515}
+.stat-val{font-size:1.5rem;font-weight:900;color:#f0f0f0;line-height:1}
 .stat-val.orange{color:#F5A623}
 .stat-val.anim{animation:scoreCount .35s ease}
-.stat-lbl{font-size:.6rem;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:.35rem}
+.stat-lbl{font-size:.6rem;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:.3rem}
 
 /* ── Play Area ── */
-.play-area{width:100%;max-width:520px;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:22px;padding:1.5rem 1.25rem 1.25rem;margin-bottom:.75rem;box-shadow:5px 5px 0 #151515}
+.play-area{width:100%;max-width:520px;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:22px;padding:1.1rem 1rem 1rem;margin-bottom:.75rem;box-shadow:5px 5px 0 #151515}
 .play-area.shake{animation:wrongShake .35s ease}
-.label-sm{font-size:.65rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.14em;text-align:center;margin-bottom:.9rem}
-.label-sm.mt{margin-top:1.3rem}
+.label-sm{font-size:.65rem;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.14em;text-align:center;margin-bottom:.7rem}
+.label-sm.mt{margin-top:.8rem}
 
 .play-btn{display:block;width:100%;background:linear-gradient(180deg,#ffbe4f 0%,#e8931a 100%);color:#fff;font-family:var(--font-body);font-size:1rem;font-weight:800;letter-spacing:.04em;padding:1.1rem;border:3px solid #1a1a1a;border-radius:16px;box-shadow:4px 4px 0 #1a1a1a;cursor:pointer;transition:all .12s;text-shadow:0 2px 6px rgba(0,0,0,.55)}
 .play-btn:hover:not(:disabled){background:linear-gradient(180deg,#ffc85a 0%,#f0a020 100%);transform:translate(-2px,-2px);box-shadow:6px 6px 0 #1a1a1a}
@@ -151,7 +151,7 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 .play-btn:disabled{background:#2a2a2a;color:#555;border-color:#222;box-shadow:4px 4px 0 #111;cursor:not-allowed}
 .play-btn.playing{cursor:default}
 
-.choices{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:5rem 5rem;gap:.7rem}
+.choices{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:5rem 5rem;gap:.55rem}
 .choice{background:linear-gradient(180deg,#1e2a42 0%,#111827 100%);border:3px solid #2a3a55;color:#fff;font-family:var(--font-body);font-size:1rem;font-weight:700;padding:0 .5rem;height:5rem;min-height:0;display:flex;align-items:center;justify-content:center;cursor:pointer;border-radius:16px;box-shadow:4px 4px 0 #0a0f1a;transition:all .12s;text-align:center;text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .choice:focus{outline:none}
 .choice:focus-visible{outline:none;box-shadow:none}
@@ -2770,7 +2770,7 @@ function renderTreinoFocado(){
           else cls+=' dim';
         }
         return `<button class="${cls}" style="flex:1;max-width:200px" onclick="handleFocusedQualityAnswer('${q}',this)">
-          <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${_translateQualityLabel(q,pair.labels[i])}</span>
+          <span style="font-size:1.6rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${_translateQualityLabel(q,pair.labels[i])}</span>
         </button>`;
       }).join('') + `</div>`;
   } else {
@@ -2783,7 +2783,7 @@ function renderTreinoFocado(){
         else cls+=' dim';
       }
       return `<button class="${cls}" style="height:5rem" onclick="handleFocusedAnswer(${ch.id},this)">
-        <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
+        <span style="font-size:1.75rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
       </button>`;
     }).join('') + `</div>`;
   }
@@ -3178,7 +3178,7 @@ function renderGame(){
               else cls+=' dim';
             }
             return `<button class="${cls}" style="flex:1;max-width:200px" onclick="handleQualityAnswer('${o.q}',this)">
-              <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${o.label}</span>
+              <span style="font-size:1.6rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${o.label}</span>
             </button>`;
           }).join('');
         })() : state.choices.map(ch=>{
@@ -3191,7 +3191,7 @@ function renderGame(){
           }
           const diamondStyle=state.isBonus&&!cls.includes('correct')&&!cls.includes('wrong')&&!cls.includes('dim')?'background:linear-gradient(180deg,#0d2444,#07162c);border-color:#60dcff;':'';
           return `<button class="${cls}" style="${diamondStyle}height:5rem" onclick="handleAnswer(${ch.id},this)">
-            <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
+            <span style="font-size:1.75rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
           </button>`;
         }).join('')}
       </div>

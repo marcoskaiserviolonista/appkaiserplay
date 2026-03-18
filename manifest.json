@@ -1,6 +1,6 @@
 {
-  "name": "KaiserPlay",
-  "short_name": "KaiserPlay",
+  "name": "Kaiserplay Chords",
+  "short_name": "Kaiserplay Chords",
   "description": "Treinamento auditivo para guitarristas",
   "start_url": "/appkaiserplay/",
   "display": "standalone",
@@ -9,14 +9,8 @@
   "theme_color": "#111111",
   "icons": [
     {
-      "src": "LOGO_1.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any maskable"
-    },
-    {
-      "src": "LOGO_1.png",
-      "sizes": "512x512",
+      "src": "app-icon.png",
+      "sizes": "1024x1024",
       "type": "image/png",
       "purpose": "any maskable"
     }

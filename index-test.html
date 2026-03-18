@@ -2702,9 +2702,9 @@ function renderTreinoFocadoMenu(){
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem">
     <div style="font-size:.78rem;color:#aaa">${t('most_missed_chords')}</div>
   </div>
-  <div style="display:flex;gap:.5rem;flex-wrap:wrap;justify-content:flex-start;margin-bottom:.85rem">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.85rem">
     ${topErrors.map(c=>`
-      <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.75rem 1rem;text-align:center;min-width:86px">
+      <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.75rem .5rem;text-align:center">
         <div style="font-size:1.25rem;font-weight:900;color:#f0f0f0;line-height:1${paywall?';filter:blur(5px);user-select:none':''}">${(state.lang==='en'&&c.cifraEn)?c.cifraEn:c.cifra}</div>
         <div style="font-size:.65rem;color:#f87171;font-weight:700;margin-top:.4rem;text-transform:uppercase;letter-spacing:.06em">${state.chordStats[c.id]?.e||0} ${t('wrong_answers').toLowerCase()}</div>
       </div>

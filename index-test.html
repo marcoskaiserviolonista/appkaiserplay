@@ -133,11 +133,11 @@ body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh
 
 /* ── Stats ── */
 .stats-grid{width:100%;max-width:520px;display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:.6rem}
-.stat-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:.65rem .5rem;text-align:center;box-shadow:4px 4px 0 #151515}
+.stat-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:.65rem .5rem;text-align:center;box-shadow:4px 4px 0 #151515;display:flex;flex-direction:column;align-items:center;justify-content:space-between}
 .stat-val{font-size:1.4rem;font-weight:900;color:#f0f0f0;line-height:1}
 .stat-val.orange{color:#F5A623}
 .stat-val.anim{animation:scoreCount .35s ease}
-.stat-lbl{font-size:.58rem;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-top:.28rem}
+.stat-lbl{font-size:.58rem;color:#bbb;font-weight:700;text-transform:uppercase;letter-spacing:.1em}
 
 /* ── Play Area ── */
 .play-area{width:100%;max-width:520px;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:22px;padding:1.25rem 1.5rem 1.1rem;margin-bottom:.75rem;box-shadow:5px 5px 0 #151515}
@@ -851,7 +851,7 @@ const STRINGS = {
     which_chord:'Which chord did you hear?',
     quality_question_major_minor:'Major or Minor?',
     quality_question_minor_dim:'Minor or Diminished?',
-    quality_question_dim_halfdim:'Diminished or Half-Dim.?',
+    quality_question_dim_halfdim:'Diminished or Half Diminished?',
     quality_question_dim_aug:'Diminished or Augmented?',
     diamond_question:'Diamond Question',
     // Game - Results
@@ -888,7 +888,7 @@ const STRINGS = {
     locked:'Locked', unlock:'Unlock', free:'Free',
     // Quality pair labels
     quality_major:'Major', quality_minor:'Minor', quality_diminished:'Diminished',
-    quality_half_dim:'Half-Dim.', quality_augmented:'Augmented',
+    quality_half_dim:'Half Diminished', quality_augmented:'Augmented',
     // Switch labels
     switch_maior_menor:'Major / Minor', switch_menor_diminuto:'Minor / Diminished',
     switch_triades_maiores:'Major Triads', switch_tetrades_menores:'Minor Tetrads',

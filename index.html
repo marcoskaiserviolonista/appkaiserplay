@@ -556,7 +556,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 <div class="app" id="app">
   <div class="header">
     <div class="logo-wrap">
-      <img src="LOGO_1.png" alt="Kaiserplay Chords" style="height:80px;object-fit:contain"
+      <img src="LOGO-APP-2.png" alt="Kaiserplay Chords" style="height:44px;object-fit:contain"
         onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
       />
       <div style="display:none;align-items:center;gap:.5rem">
@@ -1281,7 +1281,7 @@ const VIOLOES = [
 // ── Cordas (itens do jogo) ────────────────────────────────────
 
 
-const SAMPLE_NOTES = [40, 43, 45, 47, 48, 49, 50, 52, 53, 54, 55, 57, 59, 60, 62, 64, 66, 67, 68, 69, 71, 73, 76];
+const SAMPLE_NOTES = [40, 41, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 62, 64, 65, 66, 67, 68, 69, 71, 73, 76];
 
 // ── 2. SISTEMA DE ÁUDIO ───────────────────────────────────────
 // ── AudioContext único compartilhado ──────────────────────────
@@ -1676,7 +1676,7 @@ const state={
   tab:'game',phase:'start',
   user:null,
   lang:null,
-  isGuest:true,guestExerciseCount:0,guestNextPrompt:3,showGuestPopup:false,
+  isGuest:true,guestExerciseCount:0,guestNextPrompt:3,guestPopupCount:0,showGuestPopup:false,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
@@ -3037,7 +3037,7 @@ function render(){
     overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
     overlay.innerHTML=`
       <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
-        <img src="violao_icon.png" style="width:56px;height:56px;object-fit:contain;margin-bottom:.5rem" onerror="this.style.display='none'">
+        <img src="violao-modal.png" style="width:72px;height:72px;object-fit:contain;margin-bottom:.75rem" onerror="this.style.display='none'">
         <div style="font-size:1.2rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:1.1rem;line-height:1.25">${t('guest_popup_title')}</div>
         <div style="background:#111;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.2rem;text-align:left">
           <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.6rem">
@@ -3053,7 +3053,7 @@ function render(){
           style="width:100%;padding:.85rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem">
           ${t('guest_popup_create')}
         </button>
-        <button onclick="state.showGuestPopup=false;state.guestNextPrompt=state.guestExerciseCount+3;render()"
+        <button onclick="state.showGuestPopup=false;state.guestPopupCount++;state.guestNextPrompt=state.guestExerciseCount+(state.guestPopupCount===1?10:30);render()"
           style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
           ${t('guest_popup_later')}
         </button>
@@ -3140,8 +3140,7 @@ function renderStart(){
 function renderLogin(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
-      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">Kaiserplay Chords</div>
+      <img src="LOGO-APP-2.png" style="height:70px;object-fit:contain;max-width:280px" onerror="this.style.display='none'">
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('sign_in')}</div>
         <input id="login-email" type="email" placeholder="${t('email')}" autocomplete="email"
@@ -3176,8 +3175,7 @@ function renderLogin(){
 function renderSignup(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
-      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">Kaiserplay Chords</div>
+      <img src="LOGO-APP-2.png" style="height:70px;object-fit:contain;max-width:280px" onerror="this.style.display='none'">
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:1.2rem;text-align:center">${t('signup_title')}</div>
         <input id="signup-email" type="email" placeholder="${t('email')}" autocomplete="email"
@@ -3209,8 +3207,7 @@ function renderSignup(){
 function renderForgotPassword(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
-      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">Kaiserplay Chords</div>
+      <img src="LOGO-APP-2.png" style="height:70px;object-fit:contain;max-width:280px" onerror="this.style.display='none'">
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:1.35rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:.75rem;text-align:center">${t('recover_password_title')}</div>
         <div style="font-size:.85rem;color:#aaa;line-height:1.55;margin-bottom:1.2rem;text-align:center">${t('recover_password_desc')}</div>
@@ -3233,8 +3230,7 @@ function renderForgotPassword(){
 function renderSetDisplayName(){
   return `
     <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:70vh;gap:1.25rem;padding:1.5rem">
-      <img src="LOGO_1.png" style="height:80px;object-fit:contain" onerror="this.style.display='none'">
-      <div style="font-family:var(--font-title);font-size:2rem;font-weight:700;color:#F5A623;letter-spacing:.02em">Kaiserplay Chords</div>
+      <img src="LOGO-APP-2.png" style="height:70px;object-fit:contain;max-width:280px" onerror="this.style.display='none'">
       <div style="width:100%;max-width:360px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:20px;padding:1.5rem;box-shadow:5px 5px 0 #111">
         <div style="font-size:.68rem;font-weight:800;color:#888;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.4rem;text-align:center">${t('account_created')}</div>
         <div style="font-size:.88rem;color:#ddd;font-weight:500;margin-bottom:1.2rem;text-align:center;line-height:1.5">${t('choose_display_name')}</div>

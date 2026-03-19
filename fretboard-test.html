@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>KaiserPlay — Braço (Protótipo)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #111;
+      color: #fff;
+      font-family: 'Poppins', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 0 60px;
+    }
+    h1 { font-family: 'Fredoka One', cursive; color: #F5A623; font-size: 26px; margin-bottom: 2px; }
+    .subtitle { color: #555; font-size: 12px; margin-bottom: 20px; }
+    .chord-name { font-family: 'Fredoka One', cursive; font-size: 72px; color: #fff; line-height: 1; margin-bottom: 6px; text-align: center; }
+    .instruction { color: #999; font-size: 13px; text-align: center; padding: 0 20px; margin-bottom: 10px; min-height: 20px; }
+    .result-msg { font-size: 22px; font-weight: 700; text-align: center; min-height: 34px; margin-bottom: 10px; }
+    .result-msg.correct { color: #4caf50; }
+    .result-msg.wrong   { color: #f44336; }
+    .fb-wrap { width: 100%; display: flex; justify-content: center; margin-bottom: 16px; }
+    .fb-wrap svg { display: block; }
+    .notes-hint { font-size: 12px; color: #555; text-align: center; margin-bottom: 20px; padding: 0 16px; }
+    .notes-hint span { color: #777; }
+    .btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 16px; }
+    .btn { background: #F5A623; color: #111; border: 3px solid #000; box-shadow: 3px 3px 0 #000; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; padding: 11px 28px; border-radius: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+    .btn-sec { background: #222; color: #ccc; border-color: #444; box-shadow: 3px 3px 0 #444; }
+    .fc { cursor: pointer; touch-action: manipulation; }
+  </style>
+</head>
+<body>
+  <h1>KaiserPlay</h1>
+  <p class="subtitle">Protótipo — Braço Interativo</p>
+  <div id="app"></div>
+
+  <script>
+  // ── Audio ──────────────────────────────────────────────────────────
+  var _actx;
+  function actx() {
+    if (!_actx) _actx = new (window.AudioContext || window.webkitAudioContext)();
+    if (_actx.state === 'suspended') _actx.resume();
+    return _actx;
+  }
+  function playNote(midi, delay) {
+    delay = delay || 0;
+    var c = actx(), t = c.currentTime + delay;
+    var freq = 440 * Math.pow(2, (midi - 69) / 12);
+    var osc = c.createOscillator(), flt = c.createBiquadFilter(), gain = c.createGain();
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(7000, t);
+    flt.frequency.exponentialRampToValueAtTime(700, t + 0.35);
+    flt.Q.value = 1.2;
+    gain.gain.setValueAtTime(0.38, t);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 2.2);
+    osc.connect(flt); flt.connect(gain); gain.connect(c.destination);
+    osc.start(t); osc.stop(t + 2.3);
+  }
+  function playCells(cells) {
+    cells.forEach(function(k) { var p = k.split('-').map(Number); playNote(OPEN[p[0]] + p[1]); });
+  }
+
+  // ── Constantes ────────────────────────────────────────────────────
+  var OPEN   = [40, 45, 50, 55, 59, 64];
+  var SNAMES = ['E', 'A', 'D', 'G', 'B', 'e'];
+  var NNAMES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  var DOT_FRETS = [3, 5, 7, 9];
+
+  // ── Banco de acordes ──────────────────────────────────────────────
+  var CHORDS = [
+    { name:'Am',    notes:[9,0,4],       fifth:4,  opt5:false },
+    { name:'C',     notes:[0,4,7],       fifth:7,  opt5:false },
+    { name:'G',     notes:[7,11,2],      fifth:2,  opt5:false },
+    { name:'Em',    notes:[4,7,11],      fifth:11, opt5:false },
+    { name:'D',     notes:[2,6,9],       fifth:9,  opt5:false },
+    { name:'A',     notes:[9,1,4],       fifth:4,  opt5:false },
+    { name:'E',     notes:[4,8,11],      fifth:11, opt5:false },
+    { name:'Dm',    notes:[2,5,9],       fifth:9,  opt5:false },
+    { name:'Bm',    notes:[11,2,6],      fifth:6,  opt5:false },
+    { name:'G7',    notes:[7,11,2,5],    fifth:2,  opt5:true  },
+    { name:'Am7',   notes:[9,0,4,7],     fifth:4,  opt5:true  },
+    { name:'D7',    notes:[2,6,9,0],     fifth:9,  opt5:true  },
+    { name:'E7',    notes:[4,8,11,2],    fifth:11, opt5:true  },
+    { name:'C7(9)', notes:[0,4,7,10,2],  fifth:7,  opt5:true  },
+    { name:'Em7',   notes:[4,7,11,2],    fifth:11, opt5:true  },
+  ];
+
+  // ── Layout ────────────────────────────────────────────────────────
+  // SVG_W = 290px. Cordas: levemente mais largas na base (braço real).
+  // PLAY_H: altura total do nut até o 12º traste.
+  // Espaçamento dos trastes segue a fórmula real do violão.
+
+  var SVG_W  = 290;
+  var NUT_Y  = 130;   // y do pestanejo
+  var PLAY_H = 520;   // px do nut até o fim do 12º traste
+  var SVG_H  = NUT_Y + PLAY_H + 24;
+
+  // x de cada corda no nut e no 12º traste (braço levemente mais largo embaixo)
+  var NUT_X = [38,  83, 128, 173, 218, 263];
+  var BOT_X = [30,  78, 126, 174, 222, 270];
+
+  function strX(s, t) {           // t = 0 (nut) .. 1 (fret 12)
+    return NUT_X[s] + (BOT_X[s] - NUT_X[s]) * t;
+  }
+
+  // Posição y de cada traste a partir do nut — fórmula real de violão
+  // fretY[n] = 2 * PLAY_H * (1 - 2^(-n/12))
+  var FRET_Y = [0];
+  for (var _fi = 1; _fi <= 12; _fi++) {
+    FRET_Y.push(Math.round(2 * PLAY_H * (1 - Math.pow(2, -_fi / 12))));
+  }
+  // resultado aprox: [0,58,113,165,215,261,305,346,385,422,457,490,520]
+
+  // Bordas de coluna para hit-testing (baseadas nos x do nut)
+  var COL_EDGES = [0];
+  for (var _ci = 0; _ci < 5; _ci++) {
+    COL_EDGES.push(Math.round((NUT_X[_ci] + NUT_X[_ci + 1]) / 2));
+  }
+  COL_EDGES.push(SVG_W);
+  // = [0, 61, 106, 151, 196, 241, 290]
+
+  // ── Estado ────────────────────────────────────────────────────────
+  var st = { ci:0, chord:CHORDS[0], sel:{}, phase:'play', ok:false };
+
+  // ── Validação ─────────────────────────────────────────────────────
+  function noteClass(s, f) { return (OPEN[s] + f) % 12; }
+  function validate() {
+    var keys = Object.keys(st.sel);
+    if (!keys.length) return false;
+    var chord = st.chord, got = {};
+    keys.forEach(function(k) {
+      var p = k.split('-').map(Number);
+      got[noteClass(p[0], p[1])] = true;
+    });
+    var required = chord.notes.filter(function(n) { return !(chord.opt5 && n === chord.fifth); });
+    for (var i = 0; i < required.length; i++) { if (!got[required[i]]) return false; }
+    var all = {};
+    chord.notes.forEach(function(n) { all[n] = true; });
+    var gk = Object.keys(got);
+    for (var j = 0; j < gk.length; j++) { if (!all[gk[j]]) return false; }
+    return true;
+  }
+
+  // ── Construção do SVG ─────────────────────────────────────────────
+  function buildSVG() {
+    var o = '';
+    function a(s) { o += s; }
+
+    a('<svg width="' + SVG_W + '" height="' + SVG_H + '" viewBox="0 0 ' + SVG_W + ' ' + SVG_H + '" xmlns="http://www.w3.org/2000/svg" style="display:block">');
+
+    // Fundo
+    a('<rect width="' + SVG_W + '" height="' + SVG_H + '" fill="#111"/>');
+
+    // ── Silhueta completa do braço (headstock + transição + escala) ──
+    var nx0 = NUT_X[0], nx5 = NUT_X[5];
+    var bx0 = BOT_X[0], bx5 = BOT_X[5];
+    var endY = NUT_Y + PLAY_H;
+
+    // Path: contorno do headstock com topo arredondado + pescoço completo
+    var neck = 'M 15,14 Q 15,5 25,5 L 265,5 Q 275,5 275,14'
+      + ' L 275,76 L ' + nx5 + ',' + NUT_Y
+      + ' L ' + bx5 + ',' + endY
+      + ' L ' + bx0 + ',' + endY
+      + ' L ' + nx0 + ',' + NUT_Y
+      + ' L 15,76 Z';
+    a('<path d="' + neck + '" fill="#1c0e00" stroke="#4a3010" stroke-width="2"/>');
+
+    // Área do braço (escala) com tom levemente diferente
+    var fb = 'M ' + nx0 + ',' + NUT_Y
+      + ' L ' + bx0 + ',' + endY
+      + ' L ' + bx5 + ',' + endY
+      + ' L ' + nx5 + ',' + NUT_Y + ' Z';
+    a('<path d="' + fb + '" fill="#160b00"/>');
+
+    // ── Tarraxas (decorativas) ────────────────────────────────────
+    // 3 pares de slots — esquerda (E,A,D) e direita (G,B,e)
+    for (var pi = 0; pi < 3; pi++) {
+      var py = 17 + pi * 19;
+      // esquerda
+      a('<rect x="19" y="' + py + '" width="21" height="11" rx="3" fill="#261200" stroke="#5a3808" stroke-width="1"/>');
+      a('<circle cx="29" cy="' + (py+5) + '" r="3.5" fill="#777" stroke="#aaa" stroke-width="0.5"/>');
+      // direita
+      a('<rect x="250" y="' + py + '" width="21" height="11" rx="3" fill="#261200" stroke="#5a3808" stroke-width="1"/>');
+      a('<circle cx="261" cy="' + (py+5) + '" r="3.5" fill="#777" stroke="#aaa" stroke-width="0.5"/>');
+    }
+
+    // Linha separadora headstock / pescoço
+    a('<line x1="15" y1="76" x2="275" y2="76" stroke="#5a3808" stroke-width="1.5"/>');
+
+    // Rótulos das cordas (na zona de transição, acima do nut)
+    for (var sn = 0; sn < 6; sn++) {
+      a('<text x="' + NUT_X[sn] + '" y="109"'
+        + ' text-anchor="middle" fill="#888" font-size="11" font-weight="600"'
+        + ' font-family="Poppins">' + SNAMES[sn] + '</text>');
+    }
+
+    // ── Pestanejo (nut) ───────────────────────────────────────────
+    a('<rect x="' + nx0 + '" y="' + (NUT_Y - 3) + '"'
+      + ' width="' + (nx5 - nx0) + '" height="6" rx="1" fill="#e8dcc8"/>');
+
+    // ── Trastes (espaçamento real de violão) ──────────────────────
+    for (var fw = 1; fw <= 12; fw++) {
+      var wy  = NUT_Y + FRET_Y[fw];
+      var tn  = FRET_Y[fw] / PLAY_H;
+      var wxL = Math.round(strX(0, tn));
+      var wxR = Math.round(strX(5, tn));
+      var wt  = fw === 12 ? 2 : 1.5;
+      a('<line x1="' + wxL + '" y1="' + wy + '" x2="' + wxR + '" y2="' + wy + '"'
+        + ' stroke="#999" stroke-width="' + wt + '"/>');
+    }
+
+    // ── Cordas (levemente divergentes, espessura variável) ────────
+    var ST = [2.5, 2.0, 1.6, 1.3, 1.0, 0.8];
+    for (var ss = 0; ss < 6; ss++) {
+      // na escala
+      a('<line x1="' + NUT_X[ss] + '" y1="' + NUT_Y + '"'
+        + ' x2="' + BOT_X[ss] + '" y2="' + endY + '"'
+        + ' stroke="#ccc" stroke-width="' + ST[ss] + '"/>');
+      // na zona de transição (headstock → nut)
+      a('<line x1="' + NUT_X[ss] + '" y1="76"'
+        + ' x2="' + NUT_X[ss] + '" y2="' + (NUT_Y - 3) + '"'
+        + ' stroke="#ccc" stroke-width="' + ST[ss] + '"/>');
+    }
+
+    // ── Marcadores de posição (inlays) ────────────────────────────
+    // Ponto único: centro entre cordas D e G (strings 2 e 3)
+    DOT_FRETS.forEach(function(df) {
+      var fm  = (FRET_Y[df - 1] + FRET_Y[df]) / 2;
+      var tm  = fm / PLAY_H;
+      var dx  = Math.round((strX(2, tm) + strX(3, tm)) / 2);
+      var dy  = Math.round(NUT_Y + fm);
+      a('<circle cx="' + dx + '" cy="' + dy + '" r="5" fill="#2c1600" stroke="#3c2400" stroke-width="1"/>');
+    });
+    // Casa 12: dois pontos
+    var m12 = (FRET_Y[11] + FRET_Y[12]) / 2, t12 = m12 / PLAY_H, d12y = Math.round(NUT_Y + m12);
+    a('<circle cx="' + Math.round(strX(1, t12)) + '" cy="' + d12y + '" r="5" fill="#2c1600" stroke="#3c2400" stroke-width="1"/>');
+    a('<circle cx="' + Math.round(strX(4, t12)) + '" cy="' + d12y + '" r="5" fill="#2c1600" stroke="#3c2400" stroke-width="1"/>');
+
+    // ── Números dos trastes (à esquerda da corda mais grossa) ─────
+    for (var fl = 1; fl <= 12; fl++) {
+      var fmn  = (FRET_Y[fl - 1] + FRET_Y[fl]) / 2;
+      var fmy  = Math.round(NUT_Y + fmn);
+      var flx  = Math.round(strX(0, fmn / PLAY_H)) - 13;
+      a('<text x="' + flx + '" y="' + (fmy + 4) + '" text-anchor="middle"'
+        + ' fill="#555" font-size="10" font-family="Poppins">' + fl + '</text>');
+    }
+    // "0" para corda solta
+    a('<text x="' + (nx0 - 13) + '" y="113" text-anchor="middle"'
+      + ' fill="#555" font-size="10" font-family="Poppins">0</text>');
+
+    // ── Círculos das notas selecionadas ───────────────────────────
+    var allNotes = {};
+    st.chord.notes.forEach(function(n) { allNotes[n] = true; });
+
+    Object.keys(st.sel).forEach(function(k) {
+      var pts = k.split('-').map(Number), sc = pts[0], fc = pts[1];
+      var nc = noteClass(sc, fc), inChord = allNotes[nc];
+
+      var cx, cy, fspace;
+      if (fc === 0) {
+        cx = NUT_X[sc];
+        cy = Math.round((76 + NUT_Y) / 2);
+        fspace = NUT_Y - 76;
+      } else {
+        var fmv = (FRET_Y[fc - 1] + FRET_Y[fc]) / 2;
+        cx = Math.round(strX(sc, fmv / PLAY_H));
+        cy = Math.round(NUT_Y + fmv);
+        fspace = FRET_Y[fc] - FRET_Y[fc - 1];
+      }
+
+      var r  = Math.min(16, Math.floor(fspace * 0.44));
+      var fs = r >= 13 ? '10' : '9';
+
+      var fill, tf, stroke;
+      if (st.phase === 'result') {
+        fill = inChord ? '#4caf50' : '#f44336';
+        tf = '#fff'; stroke = inChord ? '#1a3d1a' : '#3d1a1a';
+      } else {
+        fill = '#F5A623'; tf = '#111'; stroke = '#000';
+      }
+
+      a('<circle cx="' + cx + '" cy="' + cy + '" r="' + r + '"'
+        + ' fill="' + fill + '" stroke="' + stroke + '" stroke-width="2"/>');
+      a('<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle"'
+        + ' fill="' + tf + '" font-size="' + fs + '" font-weight="700"'
+        + ' font-family="Poppins">' + NNAMES[nc] + '</text>');
+    });
+
+    // ── Células clicáveis transparentes ───────────────────────────
+    // f=0: zona de transição (corda solta)
+    for (var cs0 = 0; cs0 < 6; cs0++) {
+      a('<rect x="' + COL_EDGES[cs0] + '" y="76"'
+        + ' width="' + (COL_EDGES[cs0 + 1] - COL_EDGES[cs0]) + '" height="' + (NUT_Y - 76) + '"'
+        + ' fill="transparent" class="fc" data-k="' + cs0 + '-0"/>');
+    }
+    // f=1..12
+    for (var cs = 0; cs < 6; cs++) {
+      for (var cf = 1; cf <= 12; cf++) {
+        var ry = NUT_Y + FRET_Y[cf - 1];
+        var rh = FRET_Y[cf] - FRET_Y[cf - 1];
+        a('<rect x="' + COL_EDGES[cs] + '" y="' + ry + '"'
+          + ' width="' + (COL_EDGES[cs + 1] - COL_EDGES[cs]) + '" height="' + rh + '"'
+          + ' fill="transparent" class="fc" data-k="' + cs + '-' + cf + '"/>');
+      }
+    }
+
+    a('</svg>');
+    return o;
+  }
+
+  // ── Ações ─────────────────────────────────────────────────────────
+  function doConfirm() {
+    st.ok = validate(); st.phase = 'result';
+    var keys = Object.keys(st.sel);
+    if (keys.length) playCells(keys);
+    render();
+  }
+  function doClear() { st.sel = {}; render(); }
+  function doPlay()  { playCells(Object.keys(st.sel)); }
+  function doNext()  {
+    st.ci = (st.ci + 1) % CHORDS.length;
+    st.chord = CHORDS[st.ci]; st.sel = {}; st.phase = 'play'; st.ok = false;
+    render();
+  }
+
+  // ── Render ────────────────────────────────────────────────────────
+  function render() {
+    var chord = st.chord, selKeys = Object.keys(st.sel), hasNotes = selKeys.length > 0;
+
+    var notesList = chord.notes.map(function(n) {
+      return NNAMES[n] + (chord.opt5 && n === chord.fifth ? '*' : '');
+    }).join(', ');
+
+    var resultHTML = st.phase === 'result'
+      ? '<div class="result-msg ' + (st.ok ? 'correct' : 'wrong') + '">'
+        + (st.ok ? '✓ Correto!' : '✗ Notas erradas em vermelho') + '</div>'
+      : '<div class="result-msg"></div>';
+
+    var instrText = st.phase === 'play'
+      ? 'Toque nas casas onde estão as notas do acorde'
+      : (st.ok ? 'Todas as notas certas!' : 'Verifique as notas em vermelho.');
+
+    var btnsHTML = '';
+    if (st.phase === 'play') {
+      if (hasNotes) {
+        btnsHTML += '<button class="btn" onclick="doConfirm()">Confirmar</button>';
+        btnsHTML += '<button class="btn btn-sec" onclick="doPlay()">▶ Ouvir</button>';
+        btnsHTML += '<button class="btn btn-sec" onclick="doClear()">Limpar</button>';
+      }
+    } else {
+      btnsHTML += '<button class="btn" onclick="doNext()">Próximo →</button>';
+      if (hasNotes) btnsHTML += '<button class="btn btn-sec" onclick="doPlay()">▶ Ouvir</button>';
+    }
+
+    var opt5hint = chord.opt5 ? ' <span>(* 5ª pode ser omitida)</span>' : '';
+
+    document.getElementById('app').innerHTML =
+      '<div class="chord-name">' + chord.name + '</div>' +
+      '<p class="instruction">' + instrText + '</p>' +
+      resultHTML +
+      '<div class="fb-wrap">' + buildSVG() + '</div>' +
+      '<p class="notes-hint">Notas: ' + notesList + opt5hint + '</p>' +
+      '<div class="btns">' + btnsHTML + '</div>';
+
+    document.querySelectorAll('.fc').forEach(function(el) {
+      el.addEventListener('click', function() {
+        if (st.phase === 'result') return;
+        var k = el.dataset.k, parts = k.split('-').map(Number);
+        if (st.sel[k]) { delete st.sel[k]; }
+        else { st.sel[k] = true; playNote(OPEN[parts[0]] + parts[1]); }
+        render();
+      });
+    });
+  }
+
+  render();
+  </script>
+</body>
+</html>

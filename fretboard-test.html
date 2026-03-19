@@ -111,7 +111,26 @@ SAMPLE_NOTES.forEach(function(n){
 });
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce(function(a,b){return Math.abs(b-m)<Math.abs(a-m)?b:a;});}
+
+// Compressor dinâmico — mesmo do app principal, evita distorção em acordes
+var _compInit=false;
+function initCompressor(){
+  if(_compInit||!Howler.ctx) return;
+  _compInit=true;
+  var ctx=Howler.ctx;
+  var comp=ctx.createDynamicsCompressor();
+  comp.threshold.value=-18;
+  comp.knee.value=6;
+  comp.ratio.value=8;
+  comp.attack.value=0.003;
+  comp.release.value=0.25;
+  Howler.masterGain.disconnect();
+  Howler.masterGain.connect(comp);
+  comp.connect(ctx.destination);
+}
+
 function playMidiNote(midi){
+  initCompressor();
   var sn=nearestSample(midi);
   var ratio=midiToFreq(midi)/midiToFreq(sn);
   var id=howls[sn].play();

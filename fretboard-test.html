@@ -13,6 +13,11 @@
     @keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
     @keyframes scoreCount{0%{transform:scale(2);color:#F5A623}100%{transform:scale(1)}}
     @keyframes feedbackPop{0%{opacity:0;transform:scale(.5)}60%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+    @keyframes correctFlash{0%{background:#111}20%{background:#1a2e1a}100%{background:#111}}
+    @keyframes wrongFlash{0%{background:#111}15%{background:#3d0a0a}100%{background:#111}}
+    @keyframes fadeOut{0%{opacity:1}100%{opacity:0}}
+    body.flash-correct{animation:correctFlash .5s ease}
+    body.flash-wrong{animation:wrongFlash .5s ease}
 
     body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh;-webkit-tap-highlight-color:transparent;display:flex;flex-direction:column;align-items:center;padding:16px 12px 80px}
 
@@ -336,11 +341,25 @@ function buildSVG(){
   return o;
 }
 
+// ── Feedback visual (igual à Jornada) ────────────────────────
+function showFeedback(ok){
+  document.body.classList.add(ok?'flash-correct':'flash-wrong');
+  setTimeout(function(){document.body.classList.remove('flash-correct','flash-wrong');},500);
+  var color=ok?'#4caf50':'#f44336';
+  var label=ok?'✓ Correto! +10 XP':'✗ Errado!';
+  var overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:center;justify-content:center;';
+  overlay.innerHTML='<div style="font-size:1.5rem;font-weight:900;color:'+color+';background:rgba(0,0,0,.8);border:2.5px solid '+color+'88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px '+color+'55;animation:feedbackPop .35s ease,fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">'+label+'</div>';
+  document.body.appendChild(overlay);
+  setTimeout(function(){overlay.remove();},1500);
+}
+
 // ── Ações ────────────────────────────────────────────────────
 function doConfirm(){
   var ok=validate();
   st.phase='result'; st.total++;
   playSelChord();
+  showFeedback(ok);
   if(ok){
     st.correct++; st.streak++; st.totalXp+=10;
     var sv=document.getElementById('s-xp');

@@ -3,130 +3,32 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>KaiserPlay — Braço Interativo</title>
+  <title>KaiserPlay — Braço (Protótipo)</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: #111; color: #fff; font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
-
-    /* ── Header ──────────────────────────────────────────────────── */
-    .header {
-      width: 100%; max-width: 520px;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 10px 16px;
-      background: #111;
-      border-bottom: 2px solid #222;
-    }
-    .header img { height: 40px; object-fit: contain; }
-    .header-right { display: flex; align-items: center; gap: 14px; }
-    .hstat { display: flex; flex-direction: column; align-items: center; }
-    .hstat-val { font-family: 'Fredoka One', cursive; font-size: 20px; color: #F5A623; line-height: 1; }
-    .hstat-lbl { font-size: 9px; color: #666; text-transform: uppercase; letter-spacing: .5px; }
-    .streak-val { color: #ff6b35; }
-
-    /* ── XP Bar ───────────────────────────────────────────────────── */
-    .xp-wrap { width: 100%; max-width: 520px; padding: 6px 16px 0; }
-    .xp-row { display: flex; align-items: center; gap: 8px; }
-    .xp-lbl { font-size: 11px; color: #555; white-space: nowrap; }
-    .xp-track { flex: 1; height: 8px; background: #222; border-radius: 4px; overflow: hidden; }
-    .xp-fill { height: 100%; background: #F5A623; border-radius: 4px; transition: width .3s; }
-
-    /* ── Game content ─────────────────────────────────────────────── */
-    .game-area {
-      width: 100%; max-width: 520px;
-      padding: 18px 16px 0;
-      display: flex; flex-direction: column; align-items: center;
-    }
-    .chord-name {
-      font-family: 'Fredoka One', cursive;
-      font-size: 80px; color: #fff; line-height: 1;
-      text-align: center; margin-bottom: 4px;
-    }
-    .instruction {
-      color: #888; font-size: 13px; text-align: center;
-      padding: 0 20px; margin-bottom: 10px; min-height: 20px;
-    }
-    .result-msg {
-      font-size: 20px; font-weight: 700; text-align: center;
-      min-height: 30px; margin-bottom: 10px;
-    }
+    body { background: #111; color: #fff; font-family: 'Poppins', sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 0 60px; }
+    h1 { font-family: 'Fredoka One', cursive; color: #F5A623; font-size: 26px; margin-bottom: 2px; }
+    .subtitle { color: #555; font-size: 12px; margin-bottom: 20px; }
+    .chord-name { font-family: 'Fredoka One', cursive; font-size: 72px; color: #fff; line-height: 1; margin-bottom: 6px; text-align: center; }
+    .instruction { color: #999; font-size: 13px; text-align: center; padding: 0 20px; margin-bottom: 10px; min-height: 20px; }
+    .result-msg { font-size: 22px; font-weight: 700; text-align: center; min-height: 34px; margin-bottom: 10px; }
     .result-msg.correct { color: #4caf50; }
     .result-msg.wrong   { color: #f44336; }
-
-    /* ── Botões ───────────────────────────────────────────────────── */
-    .btns {
-      display: flex; flex-wrap: wrap; justify-content: center;
-      gap: 10px; width: 100%; margin-bottom: 16px;
-    }
-    .btn {
-      background: #F5A623; color: #111;
-      border: 3px solid #000; box-shadow: 3px 3px 0 #000;
-      font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px;
-      padding: 11px 26px; border-radius: 12px;
-      cursor: pointer; -webkit-tap-highlight-color: transparent;
-      touch-action: manipulation;
-    }
-    .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
-    .btn-sec {
-      background: #222; color: #ccc;
-      border-color: #444; box-shadow: 3px 3px 0 #444;
-    }
-    .btn-sec:active { box-shadow: 1px 1px 0 #444; }
-
-    /* ── Fretboard ────────────────────────────────────────────────── */
-    .fb-wrap { width: 100%; max-width: 520px; display: flex; justify-content: center; }
-    .fb-wrap svg { display: block; width: 100%; height: auto; }
-
-    /* ── Notes hint ───────────────────────────────────────────────── */
-    .notes-hint {
-      font-size: 12px; color: #555; text-align: center;
-      padding: 12px 16px 32px; max-width: 520px;
-    }
+    .fb-wrap { width: 100%; display: flex; justify-content: center; margin-bottom: 16px; }
+    .notes-hint { font-size: 12px; color: #555; text-align: center; margin-bottom: 20px; padding: 0 16px; }
     .notes-hint span { color: #777; }
-
-    /* ── Clickable cells ──────────────────────────────────────────── */
+    .btns { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; padding: 0 16px; }
+    .btn { background: #F5A623; color: #111; border: 3px solid #000; box-shadow: 3px 3px 0 #000; font-family: 'Poppins', sans-serif; font-weight: 700; font-size: 15px; padding: 11px 28px; border-radius: 12px; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+    .btn:active { transform: translate(2px,2px); box-shadow: 1px 1px 0 #000; }
+    .btn-sec { background: #222; color: #ccc; border-color: #444; box-shadow: 3px 3px 0 #444; }
     .fc { cursor: pointer; touch-action: manipulation; }
   </style>
 </head>
 <body>
-
-  <!-- Header -->
-  <div class="header">
-    <img src="LOGO-APP-2.png" alt="KaiserPlay"
-      onerror="this.style.display='none'">
-    <div class="header-right">
-      <div class="hstat">
-        <div class="hstat-val streak-val" id="h-streak">0</div>
-        <div class="hstat-lbl">streak</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-val" id="h-pts">0</div>
-        <div class="hstat-lbl">pontos</div>
-      </div>
-      <div class="hstat">
-        <div class="hstat-val" id="h-lvl">1</div>
-        <div class="hstat-lbl">nível</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- XP Bar -->
-  <div class="xp-wrap">
-    <div class="xp-row">
-      <div class="xp-lbl" id="h-xp">XP 0</div>
-      <div class="xp-track"><div class="xp-fill" id="h-xpfill" style="width:0%"></div></div>
-      <div class="xp-lbl" id="h-xpmax">/ 200</div>
-    </div>
-  </div>
-
-  <!-- Game area -->
-  <div class="game-area" id="game-area"></div>
-
-  <!-- Fretboard -->
-  <div class="fb-wrap" id="fb-wrap"></div>
-
-  <!-- Notes hint -->
-  <div class="notes-hint" id="notes-hint"></div>
+  <h1>KaiserPlay</h1>
+  <p class="subtitle">Protótipo — Braço Interativo</p>
+  <div id="app"></div>
 
   <script>
   // ── Audio ──────────────────────────────────────────────────────
@@ -152,10 +54,7 @@
     osc.start(t); osc.stop(t + 2.3);
   }
   function playCells(cells) {
-    cells.forEach(function(k) {
-      var p = k.split('-').map(Number);
-      playNote(OPEN[p[0]] + p[1]);
-    });
+    cells.forEach(function(k) { var p = k.split('-').map(Number); playNote(OPEN[p[0]] + p[1]); });
   }
 
   // ── Constantes musicais ────────────────────────────────────────
@@ -183,19 +82,18 @@
   ];
 
   // ── Layout do braço ───────────────────────────────────────────
-  var SVG_W   = 224;
+  // 10% mais largo que a versão anterior (SVG_W 220→242, CW_NUT 30→33)
+  var SVG_W   = 242;
   var NUT_Y   = 90;
   var HEAD_Y  = 46;
 
-  // Margem lateral = 12px → strings usam ~196px de 224px (87%)
-  var CW_NUT  = 40;              // espaçamento entre cordas no nut
-  var CW_BOT  = CW_NUT * 1.10;  // 10% mais largo no fret 12
+  var CW_NUT  = 33;
+  var CW_BOT  = CW_NUT * 1.10;
 
-  // Proporção fret 1 = 2.5:1  →  PLAY_H = 2.5 × CW_NUT / (2 × (1 - 2^(-1/12)))
-  var PLAY_H = Math.round(2.5 * CW_NUT / (2 * (1 - Math.pow(2, -1 / 12))));
-  // ≈ 891px
+  var PLAY_H = Math.round(3 * CW_NUT / (2 * (1 - Math.pow(2, -1 / 12))));
+  // ≈ 882px
 
-  var CENTER = Math.round(SVG_W / 2); // 112
+  var CENTER = Math.round(SVG_W / 2);  // 121
   var NUT_X  = [];
   var BOT_X  = [];
   for (var _s = 0; _s < 6; _s++) {
@@ -214,7 +112,6 @@
 
   var SVG_H = NUT_Y + PLAY_H + 24;
 
-  // Bordas de coluna para hit-testing
   var COL_EDGES = [0];
   for (var _ci = 0; _ci < 5; _ci++) {
     COL_EDGES.push(Math.round((NUT_X[_ci] + NUT_X[_ci + 1]) / 2));
@@ -222,11 +119,7 @@
   COL_EDGES.push(SVG_W);
 
   // ── Estado ────────────────────────────────────────────────────
-  var st = {
-    ci: 0, chord: CHORDS[0], sel: {}, phase: 'play', ok: false,
-    pts: 0, streak: 0, xp: 0, lvl: 1
-  };
-  var XP_PER_LVL = 200;
+  var st = { ci:0, chord:CHORDS[0], sel:{}, phase:'play', ok:false };
 
   // ── Validação ─────────────────────────────────────────────────
   function noteClass(s, f) { return (OPEN[s] + f) % 12; }
@@ -238,9 +131,7 @@
       var p = k.split('-').map(Number);
       got[noteClass(p[0], p[1])] = true;
     });
-    var req = chord.notes.filter(function(n) {
-      return !(chord.opt5 && n === chord.fifth);
-    });
+    var req = chord.notes.filter(function(n) { return !(chord.opt5 && n === chord.fifth); });
     for (var i = 0; i < req.length; i++) { if (!got[req[i]]) return false; }
     var all = {};
     chord.notes.forEach(function(n) { all[n] = true; });
@@ -249,18 +140,18 @@
     return true;
   }
 
-  // ── SVG do braço ──────────────────────────────────────────────
+  // ── SVG ───────────────────────────────────────────────────────
   function buildSVG() {
     var o = '';
     function a(s) { o += s; }
 
-    a('<svg viewBox="0 0 ' + SVG_W + ' ' + SVG_H
-      + '" xmlns="http://www.w3.org/2000/svg">');
+    a('<svg width="' + SVG_W + '" height="' + SVG_H
+      + '" viewBox="0 0 ' + SVG_W + ' ' + SVG_H
+      + '" xmlns="http://www.w3.org/2000/svg" style="display:block">');
 
-    // Fundo
     a('<rect width="' + SVG_W + '" height="' + SVG_H + '" fill="#111"/>');
 
-    // Headstock — duas diagonais + linha horizontal
+    // Headstock
     var hL = NUT_X[0] - 18;
     var hR = NUT_X[5] + 18;
     a('<line x1="' + NUT_X[0] + '" y1="' + NUT_Y + '" x2="' + hL + '" y2="' + HEAD_Y + '" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
@@ -270,10 +161,7 @@
     // Nomes das cordas
     var labelY = HEAD_Y - 10;
     for (var sn = 0; sn < 6; sn++) {
-      a('<text x="' + NUT_X[sn] + '" y="' + labelY + '"'
-        + ' text-anchor="middle" dominant-baseline="alphabetic"'
-        + ' fill="#ccc" font-size="13" font-weight="600"'
-        + ' font-family="Poppins,sans-serif">' + SNAMES[sn] + '</text>');
+      a('<text x="' + NUT_X[sn] + '" y="' + labelY + '" text-anchor="middle" dominant-baseline="alphabetic" fill="#ccc" font-size="13" font-weight="600" font-family="Poppins,sans-serif">' + SNAMES[sn] + '</text>');
     }
 
     // Cordas no headstock
@@ -282,10 +170,10 @@
       a('<line x1="' + NUT_X[sh] + '" y1="' + HEAD_Y + '" x2="' + NUT_X[sh] + '" y2="' + NUT_Y + '" stroke="#fff" stroke-width="' + ST[sh] + '" stroke-linecap="round"/>');
     }
 
-    // Pestanejo (nut)
+    // Pestanejo
     a('<line x1="' + NUT_X[0] + '" y1="' + NUT_Y + '" x2="' + NUT_X[5] + '" y2="' + NUT_Y + '" stroke="#fff" stroke-width="5" stroke-linecap="round"/>');
 
-    // Bordas laterais (levemente divergentes)
+    // Bordas laterais
     a('<line x1="' + NUT_X[0] + '" y1="' + NUT_Y + '" x2="' + BOT_X[0] + '" y2="' + (NUT_Y + PLAY_H) + '" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
     a('<line x1="' + NUT_X[5] + '" y1="' + NUT_Y + '" x2="' + BOT_X[5] + '" y2="' + (NUT_Y + PLAY_H) + '" stroke="#fff" stroke-width="2" stroke-linecap="round"/>');
 
@@ -308,7 +196,7 @@
     for (var fl = 1; fl <= 12; fl++) {
       var fmid = (FRET_Y[fl - 1] + FRET_Y[fl]) / 2;
       var fmy  = Math.round(NUT_Y + fmid);
-      var flx  = Math.round(strX(0, fmid / PLAY_H)) - 10;
+      var flx  = Math.round(strX(0, fmid / PLAY_H)) - 13;
       a('<text x="' + flx + '" y="' + (fmy + 4) + '" text-anchor="middle" fill="#444" font-size="10" font-family="Poppins,sans-serif">' + fl + '</text>');
     }
 
@@ -332,8 +220,8 @@
         fspace  = FRET_Y[fc] - FRET_Y[fc - 1];
       }
 
-      var r  = Math.min(14, Math.floor(fspace * 0.40));
-      var fs = r >= 12 ? '10' : '9';
+      var r  = Math.min(13, Math.floor(fspace * 0.40));
+      var fs = r >= 11 ? '10' : '9';
 
       var fill, tf, stroke;
       if (st.phase === 'result') {
@@ -347,7 +235,7 @@
       a('<text x="' + cx + '" y="' + (cy + 4) + '" text-anchor="middle" fill="' + tf + '" font-size="' + fs + '" font-weight="700" font-family="Poppins,sans-serif">' + NNAMES[nc] + '</text>');
     });
 
-    // Células clicáveis transparentes
+    // Células clicáveis
     for (var cs0 = 0; cs0 < 6; cs0++) {
       a('<rect x="' + COL_EDGES[cs0] + '" y="' + HEAD_Y + '" width="' + (COL_EDGES[cs0 + 1] - COL_EDGES[cs0]) + '" height="' + (NUT_Y - HEAD_Y) + '" fill="transparent" class="fc" data-k="' + cs0 + '-0"/>');
     }
@@ -365,64 +253,36 @@
 
   // ── Ações ─────────────────────────────────────────────────────
   function doConfirm() {
-    st.ok = validate();
-    st.phase = 'result';
+    st.ok = validate(); st.phase = 'result';
     var keys = Object.keys(st.sel);
     if (keys.length) playCells(keys);
-    if (st.ok) {
-      st.streak++;
-      st.pts += 5 + st.streak;
-      st.xp  += 10;
-      if (st.xp >= XP_PER_LVL) { st.xp -= XP_PER_LVL; st.lvl++; }
-    } else {
-      st.streak = 0;
-    }
     render();
   }
   function doClear() { st.sel = {}; render(); }
   function doPlay()  { playCells(Object.keys(st.sel)); }
   function doNext()  {
-    st.ci    = (st.ci + 1) % CHORDS.length;
-    st.chord = CHORDS[st.ci];
-    st.sel   = {};
-    st.phase = 'play';
-    st.ok    = false;
+    st.ci = (st.ci + 1) % CHORDS.length;
+    st.chord = CHORDS[st.ci]; st.sel = {}; st.phase = 'play'; st.ok = false;
     render();
   }
 
   // ── Render ────────────────────────────────────────────────────
   function render() {
-    var chord    = st.chord;
-    var selKeys  = Object.keys(st.sel);
-    var hasNotes = selKeys.length > 0;
+    var chord = st.chord, selKeys = Object.keys(st.sel), hasNotes = selKeys.length > 0;
 
-    // Header stats
-    document.getElementById('h-streak').textContent = st.streak;
-    document.getElementById('h-pts').textContent    = st.pts;
-    document.getElementById('h-lvl').textContent    = st.lvl;
-    document.getElementById('h-xp').textContent     = 'XP ' + st.xp;
-    document.getElementById('h-xpmax').textContent  = '/ ' + XP_PER_LVL;
-    document.getElementById('h-xpfill').style.width = Math.min(100, st.xp / XP_PER_LVL * 100) + '%';
-
-    // Notes list for hint
     var notesList = chord.notes.map(function(n) {
       return NNAMES[n] + (chord.opt5 && n === chord.fifth ? '*' : '');
     }).join(', ');
-    var opt5hint = chord.opt5 ? ' <span>(* 5ª pode ser omitida)</span>' : '';
 
-    // Result / instruction
-    var resultHTML = '';
-    var instrText  = '';
-    if (st.phase === 'result') {
-      resultHTML = '<div class="result-msg ' + (st.ok ? 'correct' : 'wrong') + '">'
-        + (st.ok ? '✓ Correto! +' + (5 + st.streak) + ' pts' : '✗ Notas erradas em vermelho') + '</div>';
-      instrText = st.ok ? 'Todas as notas certas!' : 'Verifique as notas em vermelho.';
-    } else {
-      resultHTML = '<div class="result-msg"></div>';
-      instrText  = 'Marque as notas do acorde no braço';
-    }
+    var resultHTML = st.phase === 'result'
+      ? '<div class="result-msg ' + (st.ok ? 'correct' : 'wrong') + '">'
+        + (st.ok ? '✓ Correto!' : '✗ Notas erradas em vermelho') + '</div>'
+      : '<div class="result-msg"></div>';
 
-    // Buttons ABOVE the fretboard
+    var instrText = st.phase === 'play'
+      ? 'Toque nas casas onde estão as notas do acorde'
+      : (st.ok ? 'Todas as notas certas!' : 'Verifique as notas em vermelho.');
+
     var btnsHTML = '';
     if (st.phase === 'play') {
       if (hasNotes) {
@@ -435,15 +295,15 @@
       if (hasNotes) btnsHTML += '<button class="btn btn-sec" onclick="doPlay()">▶ Ouvir</button>';
     }
 
-    document.getElementById('game-area').innerHTML =
+    var opt5hint = chord.opt5 ? ' <span>(* 5ª pode ser omitida)</span>' : '';
+
+    document.getElementById('app').innerHTML =
       '<div class="chord-name">' + chord.name + '</div>' +
       '<p class="instruction">' + instrText + '</p>' +
       resultHTML +
+      '<div class="fb-wrap">' + buildSVG() + '</div>' +
+      '<p class="notes-hint">Notas: ' + notesList + opt5hint + '</p>' +
       '<div class="btns">' + btnsHTML + '</div>';
-
-    document.getElementById('fb-wrap').innerHTML = buildSVG();
-    document.getElementById('notes-hint').innerHTML =
-      'Notas: ' + notesList + opt5hint;
 
     document.querySelectorAll('.fc').forEach(function(el) {
       el.addEventListener('click', function() {

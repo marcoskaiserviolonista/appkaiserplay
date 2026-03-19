@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Cada usuário só lê e escreve seu próprio documento
+    match /players/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // Tudo o mais é bloqueado
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

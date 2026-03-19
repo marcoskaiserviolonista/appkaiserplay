@@ -129,15 +129,26 @@ function initCompressor(){
   comp.connect(ctx.destination);
 }
 
+// Rastreia notas em andamento para poder pará-las antes de retocar
+var _playingIds=[];
+function stopAllNotes(){
+  _playingIds.forEach(function(p){ try{p.howl.stop(p.id);}catch(e){} });
+  _playingIds=[];
+}
+
 function playMidiNote(midi){
-  initCompressor();
   var sn=nearestSample(midi);
   var ratio=midiToFreq(midi)/midiToFreq(sn);
   var id=howls[sn].play();
+  initCompressor(); // após play() — garante que Howler.ctx já existe
   if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
+  _playingIds.push({howl:howls[sn],id:id});
 }
+
 // Toca as notas selecionadas como acorde (arpegiado igual ao app)
+// Para tudo que está tocando antes de começar — evita o engasgo
 function playSelChord(){
+  stopAllNotes();
   var mids=Object.keys(st.sel).map(function(k){
     var p=k.split('-').map(Number); return OPEN[p[0]]+p[1];
   }).sort(function(a,b){return a-b;});

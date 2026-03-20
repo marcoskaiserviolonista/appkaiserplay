@@ -4439,7 +4439,7 @@ function saveProgress(){
     firstCardSeen:state.firstCardSeen,
     ratingDone:state.ratingDone,
     ratingSkippedAt:state.ratingSkippedAt,
-  }).catch(e=>{console.error('saveProgress error:',e);showToast('⚠️ Erro ao salvar progresso','Verifique sua conexão');});
+  }).catch(e=>console.error('saveProgress error:',e));
 }
 async function loadProgress(uid){
   try{

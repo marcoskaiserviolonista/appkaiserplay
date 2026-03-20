@@ -2272,7 +2272,7 @@ function goToTraining(){
   setTimeout(()=>playChord(state.chord),300);
 }
 
-function setTab(t){state.tab=t;render();}
+function setTab(t){state.tab=t;if(t==='ranking')loadRankingData();else render();}
 
 // ── 7. FUNÇÕES DE RENDERIZAÇÃO (UI) ──────────────────────────
 // Translates quality label based on current language
@@ -3871,20 +3871,16 @@ function closeNivelModal(){
   if(nivelModal){nivelModal.remove();nivelModal=null;}
 }
 
-// ── Ranking real-time ─────────────────────────────────────────
-let rankingUnsubscribe=null;
-function startRankingListener(){
-  if(rankingUnsubscribe)return;
-  rankingUnsubscribe=db.collection('players')
-    .orderBy('xp','desc')
-    .limit(10)
-    .onSnapshot(snap=>{
-      state.rankingData=snap.docs.map(d=>({uid:d.id,...d.data()}));
-      if(state.tab==='ranking')render();
-    },e=>console.error('ranking listener:',e));
-}
-function stopRankingListener(){
-  if(rankingUnsubscribe){try{rankingUnsubscribe();}catch(e){}rankingUnsubscribe=null;}
+// ── Ranking: leitura pontual (sem listener em tempo real) ─────
+function startRankingListener(){} // mantido para compatibilidade
+function stopRankingListener(){}
+async function loadRankingData(){
+  if(!state.user)return;
+  try{
+    const snap=await db.collection('players').orderBy('xp','desc').limit(10).get();
+    state.rankingData=snap.docs.map(d=>({uid:d.id,...d.data()}));
+    render();
+  }catch(e){console.error('ranking load:',e);}
 }
 
 // ── 8. RANKING ────────────────────────────────────────────────
@@ -4118,7 +4114,6 @@ function comprarItem(id){
 function saveStreak(){
   try{localStorage.setItem('kp_streak',state.streak);
       localStorage.setItem('kp_bestStreak',state.bestStreak);}catch(e){}
-  saveProgress();
 }
 function loadStreak(){
   try{
@@ -4444,7 +4439,7 @@ function saveProgress(){
     firstCardSeen:state.firstCardSeen,
     ratingDone:state.ratingDone,
     ratingSkippedAt:state.ratingSkippedAt,
-  }).catch(e=>console.error('saveProgress error:',e));
+  }).catch(e=>{console.error('saveProgress error:',e);showToast('⚠️ Erro ao salvar progresso','Verifique sua conexão');});
 }
 async function loadProgress(uid){
   try{

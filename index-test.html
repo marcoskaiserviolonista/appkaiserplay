@@ -1355,6 +1355,8 @@ function buildFbSVG(){
   const isWrong=isAnswered&&state.result?.ok===false;
   const expCls={};
   state.chord.midi.map(m=>m%12).forEach(c=>{expCls[c]=true;});
+  // classes de nota que o usuário cobriu corretamente
+  const coveredCls=new Set();
   Object.keys(state.fbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
     const nc=fbNoteClass(sc,fc),inChord=!!expCls[nc];
@@ -1363,21 +1365,25 @@ function buildFbSVG(){
     else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
     const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
     let fill,tf,stroke;
-    if(isAnswered){fill=inChord?'#4caf50':'#f44336';tf='#fff';stroke=inChord?'#1a3d1a':'#3d1a1a';}
-    else{fill='#60dcff';tf='#111';stroke='#0a2030';}
+    if(isAnswered){
+      if(inChord){fill='#4caf50';stroke='#1a3d1a';coveredCls.add(nc);}
+      else{fill='#f44336';stroke='#3d1a1a';}
+      tf='#fff';
+    }else{fill='#60dcff';tf='#111';stroke='#0a2030';}
     o+=`<circle cx="${cx2}" cy="${cy2}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
     o+=`<text x="${cx2}" y="${cy2+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
   });
-  // Posições corretas em vermelho (sobrepõe após erro)
+  // Notas corretas que faltaram → laranja
   if(isWrong){
-    getChordPositions(state.chord).forEach(({s,f,midi})=>{
+    getChordPositions(state.chord).forEach(({s,f})=>{
+      const nc=fbNoteClass(s,f);
+      if(coveredCls.has(nc))return;
       let cx3,cy3,fspace;
       if(f===0){cx3=FB_NUT_X[s];cy3=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
       else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx3=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy3=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}
       const r=Math.min(16,Math.floor(fspace*0.45))+2,fs=r>=14?'12':r>=11?'11':'10';
-      const nc=fbNoteClass(s,f);
-      o+=`<circle cx="${cx3}" cy="${cy3}" r="${r}" fill="#ef4444" stroke="#fff" stroke-width="2.5"/>`;
-      o+=`<text x="${cx3}" y="${cy3+4}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
+      o+=`<circle cx="${cx3}" cy="${cy3}" r="${r}" fill="#F5A623" stroke="#7a4a00" stroke-width="2"/>`;
+      o+=`<text x="${cx3}" y="${cy3+4}" text-anchor="middle" fill="#111" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
     });
   }
   // Células clicáveis
@@ -3281,8 +3287,7 @@ function renderTreinoFocado(){
     choicesHtml=`
       <div class="fb-action-row">
         ${answered
-          ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+          ? `<button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
              <button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
           : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFocusedFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
              <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
@@ -3708,8 +3713,7 @@ function renderGame(){
       ${state.isFretboard ? `
         <div class="fb-action-row">
           ${state.phase==='answered'
-            ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
-               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+            ? `<button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
                <button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
             : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
                <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>

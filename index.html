@@ -1391,7 +1391,7 @@ function getAudioCtx(){
 
 const howls = {};
 SAMPLE_NOTES.forEach(n => {
-  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.85});
+  howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.5});
 });
 
 // Compressor dinâmico — evita distorção quando várias notas somam volume
@@ -1401,11 +1401,11 @@ function initCompressor() {
   _compressorInit = true;
   const ctx = Howler.ctx;
   const comp = ctx.createDynamicsCompressor();
-  comp.threshold.value = -18;  // começa a comprimir a partir de -18dB
-  comp.knee.value = 6;         // transição suave
-  comp.ratio.value = 4;        // compressão 4:1
-  comp.attack.value = 0.003;   // reage rápido ao pico
-  comp.release.value = 0.25;   // solta gradual
+  comp.threshold.value = -24;  // começa a comprimir a partir de -24dB
+  comp.knee.value = 4;         // transição suave
+  comp.ratio.value = 12;       // compressão 12:1 (quase limiter)
+  comp.attack.value = 0.001;   // reage em 1ms — pega transientes graves
+  comp.release.value = 0.20;   // solta gradual
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(comp);
   comp.connect(ctx.destination);
@@ -1439,7 +1439,7 @@ function playChord(chord){
   });
   const totalDur=(chord.midi.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
-    _playingIds.forEach(({howl,id})=>{try{howl.fade(0.85,0,FADE_DURATION,id);}catch(e){}});
+    _playingIds.forEach(({howl,id})=>{try{howl.fade(0.5,0,FADE_DURATION,id);}catch(e){}});
   },totalDur-FADE_DURATION);
   _playTimer=setTimeout(()=>{
     _playTimer=null;state.playing=false;
@@ -1984,7 +1984,7 @@ function playFbNoteClick(midi){
   const ratio=midiToFreq(midi)/midiToFreq(sn);
   const id=howls[sn].play();
   if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
-  setTimeout(()=>{try{howls[sn].fade(howls[sn].volume()||0.85,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
+  setTimeout(()=>{try{howls[sn].fade(howls[sn].volume()||0.5,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
 
 // ── Fretboard: confirmar resposta ─────────────────────────────

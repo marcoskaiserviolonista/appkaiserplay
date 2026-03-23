@@ -1375,9 +1375,11 @@ function buildFbSVG(){
   });
   // Notas corretas que faltaram → laranja
   if(isWrong){
+    const usedStrings=new Set(Object.keys(state.fbSel).map(k=>parseInt(k.split('-')[0])));
     getChordPositions(state.chord).forEach(({s,f})=>{
       const nc=fbNoteClass(s,f);
       if(coveredCls.has(nc))return;
+      if(usedStrings.has(s))return; // corda já ocupada — não mostrar posição impossível
       let cx3,cy3,fspace;
       if(f===0){cx3=FB_NUT_X[s];cy3=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
       else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx3=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy3=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}

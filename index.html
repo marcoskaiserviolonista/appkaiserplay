@@ -2838,11 +2838,20 @@ function genFocusedQ(){
     setTimeout(()=>playChord(state.chord),120);return;
   }
 
+  // Fretboard exercise: pula toda lógica de qualidade/switches
+  if(state.fretboardExercise){
+    const ans=pool[Math.floor(Math.random()*pool.length)];
+    state.chord=ans;state.isQuality=false;state.qualityAnswer=null;state.qualityPair=null;
+    state.choices=[];state.selected=null;state.qualitySelected=null;state.result=null;
+  }
+
   // Verificar se todos os switches ativos são de qualidade
   const activeKeys=Object.entries(state.focusedSwitches).filter(([,v])=>v).map(([k])=>k);
-  const allQuality=activeKeys.every(k=>isQualitySwitch(k));
+  const allQuality=activeKeys.length>0&&activeKeys.every(k=>isQualitySwitch(k));
 
-  if(allQuality){
+  if(state.fretboardExercise){
+    // já tratado acima, cai no bloco de ativação do fretboard
+  } else if(allQuality){
     // Escolher aleatoriamente um dos switches ativos e gerar pergunta de qualidade
     const key=activeKeys[Math.floor(Math.random()*activeKeys.length)];
     const pair=FOCUSED_QUALITY_PAIRS[key];
@@ -3174,11 +3183,11 @@ function renderTreinoFocadoMenu(){
 </div>`:''}
     <div class="section-title" style="--sc:#F5A623">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
     <div style="width:100%;max-width:520px;background:#1a1400;border:2px solid #F5A62333;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="font-size:.84rem;color:#ddd;line-height:1.5;margin-bottom:.85rem">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
+      <div style="font-size:.84rem;color:#ddd;line-height:1.5;margin-bottom:.85rem;text-align:center">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
       <button
-        style="width:100%;background:linear-gradient(180deg,#1a1000,#0f0900);border:3px solid ${paywall?'#F5A62344':'#F5A62388'};border-radius:14px;box-shadow:4px 4px 0 #0a0600;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${paywall?'#F5A62366':'#F5A623'};letter-spacing:.01em"
+        style="width:100%;background:linear-gradient(180deg,#1a1000,#0f0900);border:3px solid ${paywall?'#F5A62344':'#F5A62388'};border-radius:14px;box-shadow:4px 4px 0 #0a0600;cursor:pointer;padding:.75rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${paywall?'#F5A62366':'#F5A623'};letter-spacing:.01em;text-align:center"
         onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
-        <span style="font-size:1.2rem">${paywall?'🔒':'🎸'}</span> ${state.lang==='en'?'Start Exercise':'Começar Exercício'}
+        ${paywall?'🔒 ':''}${state.lang==='en'?'Start Exercise':'Começar Exercício'}
       </button>
     </div>
     <div class="section-title">${t('train_by_quality')}</div>

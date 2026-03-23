@@ -1986,7 +1986,7 @@ function playFbNoteClick(midi){
   const sn=nearestSample(midi);
   const ratio=midiToFreq(midi)/midiToFreq(sn);
   const id=howls[sn].play();
-  howls[sn].volume(0.9,id); // nota isolada — volume máximo
+  howls[sn].volume(0.9,id);
   if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
   setTimeout(()=>{try{howls[sn].fade(0.9,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
@@ -3496,7 +3496,7 @@ function renderGame(){
       </div>
     </div>
     <div class="play-area"
-      style="${state.isBonus?'background:linear-gradient(135deg,#04101e,#081a30);border:3px solid #60dcff;box-shadow:0 0 28px rgba(96,220,255,.16),4px 4px 0 #010608;':''}"
+      style="${state.isBonus?'background:linear-gradient(135deg,#04101e,#081a30);border:3px solid #60dcff;box-shadow:0 0 28px rgba(96,220,255,.16),4px 4px 0 #010608;':''}${state.isFretboard?'padding-bottom:.6rem;':''}"
       ${state.phase==='answered'?'onclick="if(state.phase===\'answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ();}"':''}>
       <button class="play-btn ${state.playing?'playing':''}"
         style="${state.isBonus?'background:transparent;border:2px solid #60dcff;color:#60dcff;text-shadow:none;box-shadow:none;':''}"
@@ -3504,8 +3504,8 @@ function renderGame(){
         ${state.playing?t('listening'):t('listen_chord')}
       </button>
       <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
-      <div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
-        ${state.isFretboard ? '' : state.isQuality ? (() => {
+      ${state.isFretboard ? '' : `<div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
+        ${state.isQuality ? (() => {
           const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
           const opts=pair.opts.map((q,i)=>({q,label:_translateQualityLabel(q,pair.labels[i])}));
           return opts.map(o=>{
@@ -3532,8 +3532,7 @@ function renderGame(){
           return `<button class="${cls}" style="${diamondStyle}height:4rem" onclick="handleAnswer(${ch.id},this)">
             <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang==='en'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
           </button>`;
-        }).join('')}
-      </div>
+        }).join('')}</div>`}
     </div>
     ${state.isFretboard ? `
       <div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>

@@ -1796,7 +1796,7 @@ const state={
   questionCount:0,
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
-  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
+  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false,construcao_acorde:false},
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
   fullAccess:true,
@@ -1898,7 +1898,15 @@ function genQ(){
 
   let pool;
   if(state.isBonus){
-    pool=CHORDS_DIAMOND;
+    if(state.isFretboard){
+      const _lIdxFb=getLvlIdx(state.xp);
+      const _lvlNFb=LEVELS[_lIdxFb].n;
+      pool=_lvlNFb<30
+        ? CHORDS.filter(c=>c.quality==='maior'||c.quality==='menor')
+        : CHORDS_DIAMOND;
+    } else {
+      pool=CHORDS_DIAMOND;
+    }
   } else {
     const lIdx=getLvlIdx(state.xp);
     const lvlPool=LEVELS[lIdx].pool;
@@ -2008,6 +2016,81 @@ function playFbSelChord(){
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
     },i*30);
   });
+}
+
+// ── Fretboard: confirmar resposta no Treino Focado ─────────────
+function doFocusedFretboardConfirm(){
+  if(!state.isFretboard||state.phase!=='treino_focado_question')return;
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  const ok=fbValidate();
+  state.result={ok};
+  state.phase='treino_focado_answered';
+
+  const btn=document.getElementById('fb-confirm-btn');
+  const rect=btn?btn.getBoundingClientRect():{left:window.innerWidth/2,top:window.innerHeight/2,width:0,height:0};
+  const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+  const cl=(window.innerWidth-520)/2;
+
+  if(ok){
+    state.focusedStreak++;
+    const bonus=state.focusedStreak>=2?state.focusedStreak:0;
+    const pontos=5+bonus;
+    const xpBefore=state.xp;
+    state.xp+=pontos;
+    state.xpDisplay=xpBefore;
+    state.notas+=pontos;
+    state.focusedSessionScore+=pontos;
+    state.focusedSessionCorrect++;
+    state.focusedSessionTotal++;
+    const color=getFocusedColor(state.focusedStreak);
+    playSfx(getFocusedSound(state.focusedStreak));
+    particles.push(...makeParticles(cx-cl,cy,12,false));
+    const app=document.getElementById('app');
+    if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
+    const pontosTxt=bonus===0?`+5 ${t('points')}`:`5 + ${bonus} ${t('points')}`;
+    const xpPopup=document.createElement('div');
+    xpPopup.textContent=pontosTxt;
+    xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy}px;transform:translate(-50%,-100%);font-size:1.25rem;font-weight:900;color:${color};text-shadow:0 0 18px ${color};pointer-events:none;white-space:nowrap;`;
+    document.body.appendChild(xpPopup);
+    xpPopup.animate([{opacity:0,transform:'translate(-50%,-60%) scale(.5)'},{opacity:1,transform:'translate(-50%,-130%) scale(1)',offset:.15},{opacity:0,transform:'translate(-50%,-160%) scale(.9)'}],{duration:1400,easing:'ease-out'}).onfinish=()=>xpPopup.remove();
+    setTimeout(()=>animateXPGain(xpBefore,state.xp),100);
+  } else {
+    const xpBefore=state.xp;
+    state.xp=Math.max(0,state.xp-5);
+    state.xpDisplay=xpBefore;
+    state.notas=Math.max(0,state.notas-5);
+    state.focusedStreak=0;
+    state.focusedSessionTotal++;
+    playSfx('wrong');
+    const app=document.getElementById('app');
+    if(app){app.classList.add('flash-wrong');setTimeout(()=>app.classList.remove('flash-wrong'),350);}
+    const pa=document.querySelector('.play-area');
+    if(pa){pa.classList.add('shake');setTimeout(()=>pa.classList.remove('shake'),400);}
+    const wrongPop=document.createElement('div');
+    wrongPop.textContent='-5 XP';
+    wrongPop.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy}px;transform:translate(-50%,-100%);font-size:1.1rem;font-weight:900;color:#ff9999;text-shadow:0 0 14px #ff999966;pointer-events:none;white-space:nowrap;`;
+    document.body.appendChild(wrongPop);
+    wrongPop.animate([{opacity:1,transform:'translate(-50%,-100%) translateY(0)'},{opacity:0,transform:'translate(-50%,-100%) translateY(-24px)'}],{duration:900,easing:'ease-out'}).onfinish=()=>wrongPop.remove();
+    setTimeout(()=>animateXPGain(xpBefore,state.xp),100);
+  }
+  saveProgress();
+  render();
+  autoTimer=setTimeout(()=>{
+    if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+    if(state.lvlUpPending){
+      const lvlNow=LEVELS[getLvlIdx(state.xp)];
+      const grupoNow=NIVEL_GROUPS.find(g=>lvlNow.n>=g.range[0]&&lvlNow.n<=g.range[1])||NIVEL_GROUPS[0];
+      const isNewGroup=lvlNow.n===grupoNow.range[0];
+      state.lvlUpIsNewGroup=isNewGroup;
+      state.firstCardSeen=true;
+      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+      else{playSfx('correct2');}
+      state.lvlUpPending=false;
+      state.lvlUpFromFocused=true;
+      state.phase='levelup';render();return;
+    }
+    genFocusedQ();state.phase='treino_focado_question';render();
+  },1400);
 }
 
 // ── Fretboard: confirmar resposta ─────────────────────────────
@@ -2602,6 +2685,7 @@ const FOCUSED_SWITCH_POOLS = {
     // Xm7M(9) e X6(9) novos
     ...CHORDS_DIAMOND.filter(c=>[184,185,186,187,188,189,190,191].includes(c.id)),
   ],
+  construcao_acorde:      ()=>[...CHORDS,...CHORDS_DIAMOND],
 };
 
 // Switch labels are now resolved via t() at render time
@@ -2613,6 +2697,7 @@ function getFocusedSwitchLabel(key){
     tetrades_maiores:'Tétrades Maiores (7M)', tetrades_menores:'Tétrades Menores (m7)',
     inversoes:'Inversões', dissonantes:'Dissonantes', extensoes:'Extensões',
     xm7M:'Menor Maior 7ª (m7M)', bossa_jazz:'Bossa Nova & Jazz',
+    construcao_acorde:'Construção de Acorde',
   };
   const en={
     maior_menor:'Major / Minor', menor_diminuto:'Minor / Diminished',
@@ -2621,6 +2706,7 @@ function getFocusedSwitchLabel(key){
     tetrades_maiores:'Major Tetrads (7M)', tetrades_menores:'Minor Tetrads (m7)',
     inversoes:'Inversions', dissonantes:'Dissonant Chords', extensoes:'Extensions',
     xm7M:'Minor Major 7th (mMaj7)', bossa_jazz:'Bossa Nova & Jazz',
+    construcao_acorde:'Chord Building',
   };
   return (state.lang==='en'?en:pt)[key]||key;
 }
@@ -2638,6 +2724,7 @@ const FOCUSED_SWITCH_LABELS = {
   extensoes:'Extensões',
   xm7M:'Menor Maior 7ª (m7M)',
   bossa_jazz:'Bossa Nova & Jazz',
+  construcao_acorde:'Construção de Acorde',
 };
 
 // Switches que geram perguntas de qualidade (2 botões) em vez de 4 choices
@@ -2798,6 +2885,11 @@ function genFocusedQ(){
     state.qualitySelected=null;
     state.result=null;
   }
+
+  // Fretboard mode para Construção de Acorde
+  const _fbActive=state.focusedSwitches['construcao_acorde'];
+  state.isFretboard=_fbActive?true:false;
+  if(_fbActive)state.fbSel={};
 
   setTimeout(()=>playChord(state.chord),120);
 }
@@ -3024,11 +3116,12 @@ function renderTreinoFocadoMenu(){
     {key:'extensoes'},
     {key:'xm7M'},
     {key:'bossa_jazz'},
+    {key:'construcao_acorde'},
   ];
   const makeSwitch=({key})=>{
     const on=state.focusedSwitches[key];
     const unlocked=isSwitchUnlocked(key);
-    const gold=key==='bossa_jazz';
+    const gold=key==='bossa_jazz'||key==='construcao_acorde';
     return `<div class="tf-switch-row${on?' active':''}" style="${gold?`background:#1a1400;border-color:${on?'#F5A62388':'#F5A62333'};`:''}" onclick="toggleFocusedSwitch('${key}')">
       <span class="tf-switch-label" style="${gold?'color:#F5A623;':''}">${getFocusedSwitchLabel(key)}</span>
       <span style="display:flex;align-items:center;flex-shrink:0">
@@ -3110,7 +3203,20 @@ function renderTreinoFocado(){
     .filter(([,v])=>v).map(([k])=>getFocusedSwitchLabel(k));
 
   let choicesHtml;
-  if(state.isQuality){
+  if(state.isFretboard){
+    choicesHtml=`
+      <div class="fb-action-row">
+        ${answered
+          ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+          : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFocusedFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+             <button class="fb-ghost-btn" onclick="playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>
+             <button class="fb-ghost-btn" onclick="state.fbSel={};render()">↺ ${state.lang==='en'?'Clear':'Limpar'}</button>`
+        }
+      </div>
+      <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>`;
+  } else if(state.isQuality){
     const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
     choicesHtml=`<div style="display:flex;gap:1rem;justify-content:center;">` +
       pair.opts.map((q,i)=>{
@@ -3174,13 +3280,14 @@ function renderTreinoFocado(){
         <div class="stat-lbl">${t('correct_answers')}</div>
       </div>
     </div>
-    <div class="play-area" ${answered?'onclick="if(state.phase===\'treino_focado_answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}genFocusedQ();state.phase=\'treino_focado_question\';render();playChord(state.chord);}"':''}>
+    <div class="play-area" style="${state.isFretboard?'padding-bottom:.4rem;':''}" ${answered&&!state.isFretboard?'onclick="if(state.phase===\'treino_focado_answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}genFocusedQ();state.phase=\'treino_focado_question\';render();playChord(state.chord);}"':''}>
       <button class="play-btn ${state.playing?'playing':''}" onclick="playClickSfx('soft');playChord(state.chord)">
         ${state.playing?t('listening'):t('listen_chord')}
       </button>
-      <div class="label-sm mt">${state.isQuality?t('what_quality'):t('what_chord')}</div>
+      <div class="label-sm mt">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
       ${choicesHtml}
     </div>
+    ${state.isFretboard?`<div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>`:''}
   `;
 }
 
@@ -4778,7 +4885,8 @@ auth.onAuthStateChanged(async user=>{
 
 // ── Fretboard: delegação de clique (registrado uma vez, nunca dentro do render) ──
 document.getElementById('content').addEventListener('click',function(e){
-  if(!state.isFretboard||state.phase!=='question')return;
+  if(!state.isFretboard)return;
+  if(state.phase!=='question'&&state.phase!=='treino_focado_question')return;
   let el=e.target;
   while(el&&!el.dataset.fbk&&el!==this)el=el.parentElement;
   if(!el||!el.dataset.fbk)return;

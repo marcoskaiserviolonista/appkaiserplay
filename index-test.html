@@ -1428,18 +1428,21 @@ function playChord(chord){
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=110;
+  // Volume por nota: 1/N garante que a soma de N notas nunca ultrapasse 1.0
+  const noteVol=Math.min(0.9, 1/chord.midi.length);
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
       const id=howls[sn].play();
+      howls[sn].volume(noteVol,id);
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
-      _playingIds.push({howl:howls[sn],id});
+      _playingIds.push({howl:howls[sn],id,vol:noteVol});
     },i*noteDelay);
   });
   const totalDur=(chord.midi.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
-    _playingIds.forEach(({howl,id})=>{try{howl.fade(0.5,0,FADE_DURATION,id);}catch(e){}});
+    _playingIds.forEach(({howl,id,vol})=>{try{howl.fade(vol,0,FADE_DURATION,id);}catch(e){}});
   },totalDur-FADE_DURATION);
   _playTimer=setTimeout(()=>{
     _playTimer=null;state.playing=false;
@@ -1983,8 +1986,9 @@ function playFbNoteClick(midi){
   const sn=nearestSample(midi);
   const ratio=midiToFreq(midi)/midiToFreq(sn);
   const id=howls[sn].play();
+  howls[sn].volume(0.9,id); // nota isolada — volume máximo
   if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
-  setTimeout(()=>{try{howls[sn].fade(howls[sn].volume()||0.5,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
+  setTimeout(()=>{try{howls[sn].fade(0.9,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
 
 // ── Fretboard: confirmar resposta ─────────────────────────────

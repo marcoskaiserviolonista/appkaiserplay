@@ -3441,6 +3441,7 @@ function renderComprar(){
 
 let _saveTimer=null;
 function render(){
+  window.scrollTo(0,0);
   // Remove any leftover guest popup overlays
   const oldOverlay=document.getElementById('guest-popup-overlay');
   if(oldOverlay)oldOverlay.remove();

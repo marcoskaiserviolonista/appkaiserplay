@@ -1991,6 +1991,25 @@ function playFbNoteClick(midi){
   setTimeout(()=>{try{howls[sn].fade(0.9,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
 
+// ── Fretboard: toca notas montadas pelo usuário ────────────────
+function playFbSelChord(){
+  const keys=Object.keys(state.fbSel);
+  if(!keys.length)return;
+  initCompressor();
+  const noteVol=Math.min(0.9,1/keys.length);
+  keys.forEach((k,i)=>{
+    const parts=k.split('-').map(Number);
+    const midi=FB_OPEN[parts[0]]+parts[1];
+    const sn=nearestSample(midi);
+    const ratio=midiToFreq(midi)/midiToFreq(sn);
+    setTimeout(()=>{
+      const id=howls[sn].play();
+      howls[sn].volume(noteVol,id);
+      if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
+    },i*30);
+  });
+}
+
 // ── Fretboard: confirmar resposta ─────────────────────────────
 function doFretboardConfirm(){
   if(!state.isFretboard||state.phase!=='question')return;
@@ -3496,7 +3515,7 @@ function renderGame(){
       </div>
     </div>
     <div class="play-area"
-      style="${state.isBonus?'background:linear-gradient(135deg,#04101e,#081a30);border:3px solid #60dcff;box-shadow:0 0 28px rgba(96,220,255,.16),4px 4px 0 #010608;':''}${state.isFretboard?'padding-bottom:.6rem;':''}"
+      style="${state.isBonus?'background:linear-gradient(135deg,#04101e,#081a30);border:3px solid #60dcff;box-shadow:0 0 28px rgba(96,220,255,.16),4px 4px 0 #010608;':''}${state.isFretboard?'padding-bottom:.4rem;':''}"
       ${state.phase==='answered'?'onclick="if(state.phase===\'answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ();}"':''}>
       <button class="play-btn ${state.playing?'playing':''}"
         style="${state.isBonus?'background:transparent;border:2px solid #60dcff;color:#60dcff;text-shadow:none;box-shadow:none;':''}"
@@ -3504,7 +3523,19 @@ function renderGame(){
         ${state.playing?t('listening'):t('listen_chord')}
       </button>
       <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
-      ${state.isFretboard ? '' : `<div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
+      ${state.isFretboard ? `
+        <div class="fb-action-row">
+          ${state.phase==='answered'
+            ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
+               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+            : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
+               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+               <button class="fb-ghost-btn" onclick="playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>
+               <button class="fb-ghost-btn" onclick="state.fbSel={};render()">↺ ${state.lang==='en'?'Clear':'Limpar'}</button>`
+          }
+        </div>
+        <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
+      ` : `<div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
         ${state.isQuality ? (() => {
           const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
           const opts=pair.opts.map((q,i)=>({q,label:_translateQualityLabel(q,pair.labels[i])}));
@@ -3536,16 +3567,6 @@ function renderGame(){
     </div>
     ${state.isFretboard ? `
       <div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>
-      <div class="fb-action-row">
-        ${state.phase==='answered'
-          ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
-          : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
-             <button class="fb-ghost-btn" onclick="state.fbSel={};render()">↺ ${state.lang==='en'?'Clear':'Limpar'}</button>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
-        }
-      </div>
-      <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
     ` : ''}
   `;
 }

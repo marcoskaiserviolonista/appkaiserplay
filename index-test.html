@@ -3241,7 +3241,7 @@ function renderTreinoFocadoMenu(){
       <div style="display:flex;gap:.85rem;align-items:center">
         <img src="guitarra-eletrica.png" style="width:25%;flex-shrink:0;border-radius:8px">
         <div style="flex:1;display:flex;flex-direction:column;gap:.6rem">
-          <div style="font-size:.84rem;color:#ddd;line-height:1.5">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
+          <div style="font-size:.84rem;color:#ddd;line-height:1.5;text-align:center">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
           <button
             style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${paywall?'#60dcff44':'#60dcff88'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${paywall?'#60dcff66':'#60dcff'};letter-spacing:.01em;text-align:center"
             onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">

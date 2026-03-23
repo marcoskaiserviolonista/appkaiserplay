@@ -1353,20 +1353,20 @@ function buildFbSVG(){
   // Bolinhas selecionadas
   const isAnswered=state.phase==='answered'||state.phase==='treino_focado_answered';
   const isWrong=isAnswered&&state.result?.ok===false;
-  const expCls={};
-  state.chord.midi.map(m=>m%12).forEach(c=>{expCls[c]=true;});
+  const expClsRem={};
+  state.chord.midi.map(m=>m%12).forEach(c=>{expClsRem[c]=(expClsRem[c]||0)+1;});
   // classes de nota que o usuário cobriu corretamente
   const coveredCls=new Set();
   Object.keys(state.fbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
-    const nc=fbNoteClass(sc,fc),inChord=!!expCls[nc];
+    const nc=fbNoteClass(sc,fc),inChord=(expClsRem[nc]||0)>0;
     let cx2,cy2,fspace;
     if(fc===0){cx2=FB_NUT_X[sc];cy2=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
     else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
     const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
     let fill,tf,stroke;
     if(isAnswered){
-      if(inChord){fill='#4caf50';stroke='#1a3d1a';coveredCls.add(nc);}
+      if(inChord){fill='#4caf50';stroke='#1a3d1a';expClsRem[nc]--;coveredCls.add(nc);}
       else{fill='#f44336';stroke='#3d1a1a';}
       tf='#fff';
     }else{fill='#60dcff';tf='#111';stroke='#0a2030';}
@@ -2146,7 +2146,7 @@ function nextFocusedFretboardQ(){
     state.lvlUpFromFocused=true;
     state.phase='levelup';render();return;
   }
-  genFocusedQ();state.phase='treino_focado_question';render();playChord(state.chord);
+  genFocusedQ();state.phase='treino_focado_question';render();
 }
 
 // ── Fretboard: confirmar resposta ─────────────────────────────
@@ -4423,7 +4423,6 @@ function afterLvlUp(){
     state.lvlUpFromFocused=false;
     genFocusedQ();
     state.phase='treino_focado_question';render();
-    setTimeout(()=>playChord(state.chord),300);
     return;
   }
   genQ();state.phase='question';render();

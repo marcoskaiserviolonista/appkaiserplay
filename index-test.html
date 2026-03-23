@@ -1819,6 +1819,7 @@ const state={
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
+  fretboardSwitches:{fb_triades:false,fb_tetrades:false,fb_complexos:false},
   fretboardExercise:false,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
@@ -2742,6 +2743,13 @@ const FOCUSED_SWITCH_POOLS = {
   construcao_acorde:      ()=>[...CHORDS,...CHORDS_DIAMOND],
 };
 
+const FB_TRIAD_IDS=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,56,57,58,59,60,156,163]);
+const FRETBOARD_SWITCH_POOLS={
+  fb_triades:  ()=>CHORDS.filter(c=>FB_TRIAD_IDS.has(c.id)),
+  fb_tetrades: ()=>CHORDS.filter(c=>!FB_TRIAD_IDS.has(c.id)),
+  fb_complexos:()=>[...CHORDS_DIAMOND],
+};
+
 // Switch labels are now resolved via t() at render time
 function getFocusedSwitchLabel(key){
   const pt={
@@ -2829,6 +2837,15 @@ function toggleFocusedSwitch(key){
   render();
 }
 
+function hasFretboardSwitch(){
+  return Object.values(state.fretboardSwitches).some(Boolean);
+}
+function toggleFretboardSwitch(key){
+  state.fretboardSwitches[key]=!state.fretboardSwitches[key];
+  playClickSfx(state.fretboardSwitches[key]?'switch_on':'switch_off');
+  render();
+}
+
 function startFocusedSession(){
   if(!hasFocusedSwitch()) return;
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
@@ -2851,7 +2868,14 @@ function startFretboardSession(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.isSmartSession=false;
   state.fretboardExercise=true;
-  state.focusedPool=[...CHORDS];
+  let pool=[];
+  const sw=state.fretboardSwitches;
+  if(sw.fb_triades)  pool.push(...FRETBOARD_SWITCH_POOLS.fb_triades());
+  if(sw.fb_tetrades) pool.push(...FRETBOARD_SWITCH_POOLS.fb_tetrades());
+  if(sw.fb_complexos)pool.push(...FRETBOARD_SWITCH_POOLS.fb_complexos());
+  if(pool.length<2)  pool=[...CHORDS,...CHORDS_DIAMOND];
+  const seen=new Set();
+  state.focusedPool=pool.filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});
   state.focusedStreak=0;state.focusedSessionScore=0;
   state.focusedSessionTotal=0;state.focusedSessionCorrect=0;
   state.result=null;state.selected=null;state.qualitySelected=null;
@@ -3205,6 +3229,23 @@ function renderTreinoFocadoMenu(){
   };
   const enabled=hasFocusedSwitch();
   const paywall=!state.fullAccess;
+  const fbSwitchLabels={
+    fb_triades: state.lang==='en'?'Triads':'Tríades',
+    fb_tetrades:state.lang==='en'?'Simple Tetrads':'Tétrades Simples',
+    fb_complexos:state.lang==='en'?'Complex Chords':'Acordes Complexos',
+  };
+  const fbSwitchesHtml=['fb_triades','fb_tetrades','fb_complexos'].map(key=>{
+    const on=state.fretboardSwitches[key];
+    const lbl=fbSwitchLabels[key];
+    const clickAct=paywall?`playClickSfx('click');state.phase='comprar';render()`:`toggleFretboardSwitch('${key}')`;
+    return `<div class="tf-switch-row${on?' active':''}" style="border-color:${on?'#60dcff88':'#60dcff22'};background:${on?'#0e2030':'#0a1520'}" onclick="${clickAct}">
+      <span class="tf-switch-label" style="color:#60dcff">${lbl}</span>
+      <span style="display:flex;align-items:center;flex-shrink:0">
+        ${paywall?`<span style="font-size:1.05rem;line-height:1">🔒</span>`:`<span class="tf-switch${on?' on':''}"></span>`}
+      </span>
+    </div>`;
+  }).join('');
+  const fbEnabled=!paywall&&hasFretboardSwitch();
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:1rem;gap:.75rem">
       <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
@@ -3238,20 +3279,6 @@ function renderTreinoFocadoMenu(){
     ${section1.map(makeSwitch).join('')}
     <div class="section-title">${t('train_by_type')}</div>
     ${section2.map(makeSwitch).join('')}
-    <div class="section-title" style="--sc:#60dcff">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
-    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="display:flex;gap:.85rem;align-items:center">
-        <img src="mao.png" style="width:25%;flex-shrink:0;border-radius:8px">
-        <div style="flex:1;display:flex;flex-direction:column;gap:.6rem">
-          <div style="font-size:.84rem;color:#ddd;line-height:1.5;text-align:center">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
-          <button
-            style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${paywall?'#60dcff44':'#60dcff88'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${paywall?'#60dcff66':'#60dcff'};letter-spacing:.01em;text-align:center"
-            onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
-            ${paywall?'🔒 ':''}${state.lang==='en'?'Start Exercise':'Começar Exercício'}
-          </button>
-        </div>
-      </div>
-    </div>
     <button
       style="width:100%;max-width:520px;margin-top:1.25rem;
         ${enabled
@@ -3261,6 +3288,21 @@ function renderTreinoFocadoMenu(){
       onclick="startFocusedSession()">
       ${enabled?'<span style="font-size:1.3rem">🎯</span> '+t('start_training'):t('activate_one')}
     </button>
+    <div class="section-title" style="--sc:#60dcff;margin-top:1.5rem">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
+    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+      <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
+        <img src="mao.png" style="width:25%;flex-shrink:0;border-radius:8px">
+        <div style="font-size:.84rem;color:#ddd;line-height:1.5">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
+      </div>
+      <div style="border-top:1px solid #60dcff22;margin-bottom:.65rem"></div>
+      ${fbSwitchesHtml}
+      <button
+        style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
+        ${fbEnabled?'':`disabled`}
+        onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
+        ${paywall?'🔒 ':''}${state.lang==='en'?'Start Chord Building':'Iniciar Treino de Construção'}
+      </button>
+    </div>
     ${paywall?`
     <div style="width:100%;max-width:520px;background:linear-gradient(160deg,#061208,#0d1f10);border:2px solid #22c55e55;border-radius:16px;padding:1.4rem 1.2rem;margin-top:1.5rem;text-align:center;box-shadow:0 0 16px #22c55e14">
       <div style="font-size:1.15rem;font-weight:900;color:#fff;margin-bottom:.5rem;letter-spacing:.01em">${t('unlock_all_trainings')}</div>

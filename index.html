@@ -3299,7 +3299,8 @@ function renderTreinoFocado(){
              <button class="fb-ghost-btn" onclick="state.fbSel={};render()">↺ ${state.lang==='en'?'Clear':'Limpar'}</button>`
         }
       </div>
-      <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>`;
+      <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
+      ${answered?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}`;
   } else if(state.isQuality){
     const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
     choicesHtml=`<div style="display:flex;gap:1rem;justify-content:center;">` +
@@ -3726,6 +3727,7 @@ function renderGame(){
           }
         </div>
         <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
+        ${state.phase==='answered'?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}
       ` : `<div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
         ${state.isQuality ? (() => {
           const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};

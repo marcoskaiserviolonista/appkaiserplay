@@ -1796,7 +1796,8 @@ const state={
   questionCount:0,
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
-  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false,construcao_acorde:false},
+  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
+  fretboardExercise:false,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
   fullAccess:true,
@@ -2014,7 +2015,7 @@ function playFbSelChord(){
       const id=howls[sn].play();
       howls[sn].volume(noteVol,id);
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
-    },i*30);
+    },i*110);
   });
 }
 
@@ -2694,19 +2695,17 @@ function getFocusedSwitchLabel(key){
     maior_menor:'Maior ou Menor', menor_diminuto:'Menor ou Diminuto',
     diminuto_meio_diminuto:'Diminuto ou Meio Diminuto', diminuto_aumentado:'Diminuto ou Aumentado',
     triades_maiores:'Tríades Maiores', triades_menores:'Tríades Menores',
-    tetrades_maiores:'Tétrades Maiores (7M)', tetrades_menores:'Tétrades Menores (m7)',
+    tetrades_maiores:'Tétrades Maiores', tetrades_menores:'Tétrades Menores',
     inversoes:'Inversões', dissonantes:'Dissonantes', extensoes:'Extensões',
-    xm7M:'Menor Maior 7ª (m7M)', bossa_jazz:'Bossa Nova & Jazz',
-    construcao_acorde:'Construção de Acorde',
+    bossa_jazz:'Bossa Nova & Jazz',
   };
   const en={
     maior_menor:'Major / Minor', menor_diminuto:'Minor / Diminished',
     diminuto_meio_diminuto:'Diminished / Half-Dim.', diminuto_aumentado:'Diminished / Augmented',
     triades_maiores:'Major Triads', triades_menores:'Minor Triads',
-    tetrades_maiores:'Major Tetrads (7M)', tetrades_menores:'Minor Tetrads (m7)',
+    tetrades_maiores:'Major Tetrads', tetrades_menores:'Minor Tetrads',
     inversoes:'Inversions', dissonantes:'Dissonant Chords', extensoes:'Extensions',
-    xm7M:'Minor Major 7th (mMaj7)', bossa_jazz:'Bossa Nova & Jazz',
-    construcao_acorde:'Chord Building',
+    bossa_jazz:'Bossa Nova & Jazz',
   };
   return (state.lang==='en'?en:pt)[key]||key;
 }
@@ -2717,14 +2716,12 @@ const FOCUSED_SWITCH_LABELS = {
   diminuto_aumentado:'Diminuto ou Aumentado',
   triades_maiores:'Tríades Maiores',
   triades_menores:'Tríades Menores',
-  tetrades_maiores:'Tétrades Maiores (7M)',
-  tetrades_menores:'Tétrades Menores (m7)',
+  tetrades_maiores:'Tétrades Maiores',
+  tetrades_menores:'Tétrades Menores',
   inversoes:'Inversões',
   dissonantes:'Dissonantes',
   extensoes:'Extensões',
-  xm7M:'Menor Maior 7ª (m7M)',
   bossa_jazz:'Bossa Nova & Jazz',
-  construcao_acorde:'Construção de Acorde',
 };
 
 // Switches que geram perguntas de qualidade (2 botões) em vez de 4 choices
@@ -2783,6 +2780,7 @@ function startFocusedSession(){
   if(!hasFocusedSwitch()) return;
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.isSmartSession=false;
+  state.fretboardExercise=false;
   state.focusedPool=buildFocusedPool();
   state.focusedStreak=0;
   state.focusedSessionScore=0;
@@ -2796,8 +2794,22 @@ function startFocusedSession(){
   render();
 }
 
+function startFretboardSession(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.isSmartSession=false;
+  state.fretboardExercise=true;
+  state.focusedPool=[...CHORDS,...CHORDS_DIAMOND];
+  state.focusedStreak=0;state.focusedSessionScore=0;
+  state.focusedSessionTotal=0;state.focusedSessionCorrect=0;
+  state.result=null;state.selected=null;state.qualitySelected=null;
+  genFocusedQ();
+  state.phase='treino_focado_question';
+  render();
+}
+
 function startSmartSession(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.fretboardExercise=false;
   const allChords=[...CHORDS,...CHORDS_DIAMOND];
   const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
   const specificWeak=Object.entries(state.chordStats)
@@ -2887,8 +2899,8 @@ function genFocusedQ(){
   }
 
   // Fretboard mode para Construção de Acorde
-  const _fbActive=state.focusedSwitches['construcao_acorde'];
-  state.isFretboard=_fbActive?true:false;
+  const _fbActive=state.fretboardExercise;
+  state.isFretboard=_fbActive;
   if(_fbActive)state.fbSel={};
 
   setTimeout(()=>playChord(state.chord),120);
@@ -3114,14 +3126,12 @@ function renderTreinoFocadoMenu(){
     {key:'tetrades_menores'},
     {key:'dissonantes'},
     {key:'extensoes'},
-    {key:'xm7M'},
     {key:'bossa_jazz'},
-    {key:'construcao_acorde'},
   ];
   const makeSwitch=({key})=>{
     const on=state.focusedSwitches[key];
     const unlocked=isSwitchUnlocked(key);
-    const gold=key==='bossa_jazz'||key==='construcao_acorde';
+    const gold=key==='bossa_jazz';
     return `<div class="tf-switch-row${on?' active':''}" style="${gold?`background:#1a1400;border-color:${on?'#F5A62388':'#F5A62333'};`:''}" onclick="toggleFocusedSwitch('${key}')">
       <span class="tf-switch-label" style="${gold?'color:#F5A623;':''}">${getFocusedSwitchLabel(key)}</span>
       <span style="display:flex;align-items:center;flex-shrink:0">
@@ -3162,6 +3172,15 @@ function renderTreinoFocadoMenu(){
     <span style="font-size:1.2rem">${paywall?'🔒':'🎯'}</span> ${t('train_weak_points')}
   </button>
 </div>`:''}
+    <div class="section-title" style="--sc:#F5A623">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
+    <div style="width:100%;max-width:520px;background:#1a1400;border:2px solid #F5A62333;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+      <div style="font-size:.84rem;color:#ddd;line-height:1.5;margin-bottom:.85rem">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
+      <button
+        style="width:100%;background:linear-gradient(180deg,#1a1000,#0f0900);border:3px solid ${paywall?'#F5A62344':'#F5A62388'};border-radius:14px;box-shadow:4px 4px 0 #0a0600;cursor:pointer;padding:.75rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${paywall?'#F5A62366':'#F5A623'};letter-spacing:.01em"
+        onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
+        <span style="font-size:1.2rem">${paywall?'🔒':'🎸'}</span> ${state.lang==='en'?'Start Exercise':'Começar Exercício'}
+      </button>
+    </div>
     <div class="section-title">${t('train_by_quality')}</div>
     ${section1.map(makeSwitch).join('')}
     <div class="section-title">${t('train_by_type')}</div>
@@ -3199,8 +3218,9 @@ function renderTreinoFocado(){
   const streakColor=state.focusedStreak>=3?`color:${color};text-shadow:0 0 14px ${color}99`:'';
   const streakSize=state.focusedStreak>=10?'font-size:2.2rem':state.focusedStreak>=5?'font-size:2rem':'font-size:1.7rem';
   const answered=state.phase==='treino_focado_answered';
-  const activeLabels=Object.entries(state.focusedSwitches)
-    .filter(([,v])=>v).map(([k])=>getFocusedSwitchLabel(k));
+  const activeLabels=state.fretboardExercise
+    ?[state.lang==='en'?'Chord Building':'Construção de Acorde']
+    :Object.entries(state.focusedSwitches).filter(([,v])=>v).map(([k])=>getFocusedSwitchLabel(k));
 
   let choicesHtml;
   if(state.isFretboard){

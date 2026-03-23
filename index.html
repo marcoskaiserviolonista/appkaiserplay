@@ -546,6 +546,18 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 /* ── Gold Coin ── */
 .gc{display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;background:radial-gradient(circle at 35% 35%,#ffe566,#F5A623 55%,#c47a00);border:2px solid #a36000;border-radius:50%;box-shadow:0 2px 0 #7a4500,inset 0 1px 2px rgba(255,255,255,.5);font-style:normal;font-size:.85em;vertical-align:middle;flex-shrink:0}
 .gc::after{content:'$';font-weight:900;color:#a36000;font-size:.6em;font-family:var(--font-body);line-height:1}
+/* ── Fretboard Exercise ── */
+.fb-wrap{width:100%;max-width:520px;display:flex;justify-content:center;margin-top:.6rem;margin-bottom:4px}
+.fb-wrap svg{display:block}
+.fb-fc{cursor:pointer;touch-action:manipulation}
+.fb-action-row{display:flex;flex-wrap:wrap;gap:.4rem;justify-content:center;margin:.5rem 0 .25rem;width:100%;max-width:520px}
+.fb-confirm-btn{font-family:var(--font-body);font-size:.88rem;font-weight:700;padding:.55rem 1.2rem;border-radius:12px;border:2px solid #111;background:linear-gradient(180deg,#ffbe4f,#e8931a);color:#fff;box-shadow:3px 3px 0 #111;cursor:pointer;touch-action:manipulation;text-shadow:0 1px 3px rgba(0,0,0,.45)}
+.fb-confirm-btn:disabled{opacity:.38;cursor:default}
+.fb-confirm-btn:active:not(:disabled){transform:translate(2px,2px);box-shadow:1px 1px 0 #111}
+.fb-ghost-btn{font-family:var(--font-body);font-size:.82rem;font-weight:700;padding:.5rem .9rem;border-radius:12px;border:2px solid #2a4a6a;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);color:#60dcff;box-shadow:3px 3px 0 #0a1520;cursor:pointer;touch-action:manipulation}
+.fb-ghost-btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 #0a1520}
+.fb-note-count{font-size:.7rem;color:#60dcff88;text-align:center;margin-bottom:.25rem;width:100%;max-width:520px;font-weight:600}
+.fb-result-hint{font-size:.88rem;font-weight:800;text-align:center;padding:.3rem 0;width:100%}
 </style>
 
 </head>
@@ -725,7 +737,7 @@ const STRINGS = {
     guest_popup_create:'Criar conta', guest_popup_later:'Deixar para depois',
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
-    what_quality:'Qual é a qualidade deste acorde?', back_btn:'← Voltar',
+    what_quality:'Qual é a qualidade deste acorde?', build_chord_fretboard:'Monte o acorde no braço do violão', back_btn:'← Voltar',
     continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada',
     train_ear:'Treine seu Ouvido',
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
@@ -915,7 +927,7 @@ const STRINGS = {
     guest_popup_create:'Create account', guest_popup_later:'Maybe later',
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
-    what_quality:'What is the quality of this chord?', back_btn:'← Back',
+    what_quality:'What is the quality of this chord?', build_chord_fretboard:'Build the chord on the fretboard', back_btn:'← Back',
     continue_journey:'Continue Journey', start_journey:'Start Journey',
     train_ear:'Train your Ear',
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
@@ -1282,6 +1294,89 @@ const VIOLOES = [
 
 
 const SAMPLE_NOTES = [40, 41, 43, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 59, 60, 62, 64, 65, 66, 67, 68, 69, 71, 73, 76];
+
+// ── Fretboard constants ───────────────────────────────────────
+const FB_OPEN=[40,45,50,55,59,64];
+const FB_SNAMES=['E','A','D','G','B','e'];
+const FB_NNAMES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const FB_SVG_W=242,FB_NUT_Y=99,FB_HEAD_Y=51,FB_CW_NUT=39;
+const FB_CW_BOT=FB_CW_NUT*1.10;
+const FB_PLAY_H=Math.round(2*FB_CW_NUT/(2*(1-Math.pow(2,-1/12))));
+const FB_CENTER=Math.round(FB_SVG_W/2);
+const FB_NUT_X=[],FB_BOT_X=[];
+for(let _s=0;_s<6;_s++){
+  FB_NUT_X.push(Math.round(FB_CENTER-5*FB_CW_NUT/2+_s*FB_CW_NUT));
+  FB_BOT_X.push(Math.round(FB_CENTER-5*FB_CW_BOT/2+_s*FB_CW_BOT));
+}
+function fbStrX(s,t){return FB_NUT_X[s]+(FB_BOT_X[s]-FB_NUT_X[s])*t;}
+const FB_FRET_Y=[0];
+for(let _fi=1;_fi<=12;_fi++) FB_FRET_Y.push(Math.round(2*FB_PLAY_H*(1-Math.pow(2,-_fi/12))));
+const FB_SVG_H=FB_NUT_Y+FB_PLAY_H+24;
+const FB_COL_EDGES=[0];
+for(let _ci=0;_ci<5;_ci++) FB_COL_EDGES.push(Math.round((FB_NUT_X[_ci]+FB_NUT_X[_ci+1])/2));
+FB_COL_EDGES.push(FB_SVG_W);
+
+function fbNoteClass(s,f){return(FB_OPEN[s]+f)%12;}
+function fbValidate(){
+  const keys=Object.keys(state.fbSel);
+  if(keys.length!==state.chord.midi.length)return false;
+  const got=keys.map(k=>{const p=k.split('-').map(Number);return fbNoteClass(p[0],p[1]);}).sort((a,b)=>a-b);
+  const exp=state.chord.midi.map(m=>m%12).sort((a,b)=>a-b);
+  for(let i=0;i<exp.length;i++){if(got[i]!==exp[i])return false;}
+  return true;
+}
+function buildFbSVG(){
+  let o='';
+  const ST=[2.2,1.8,1.4,1.1,0.9,0.7];
+  const hL=FB_NUT_X[0]-20,hR=FB_NUT_X[5]+20;
+  o+=`<svg width="${FB_SVG_W}" height="${FB_SVG_H}" viewBox="0 0 ${FB_SVG_W} ${FB_SVG_H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`;
+  o+=`<rect width="${FB_SVG_W}" height="${FB_SVG_H}" fill="#111"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${hL}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[5]}" y1="${FB_NUT_Y}" x2="${hR}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${hL}" y1="${FB_HEAD_Y}" x2="${hR}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  for(let sn=0;sn<6;sn++) o+=`<text x="${FB_NUT_X[sn]}" y="${FB_HEAD_Y-9}" text-anchor="middle" dominant-baseline="alphabetic" fill="#ccc" font-size="17" font-weight="700" font-family="Poppins,sans-serif">${FB_SNAMES[sn]}</text>`;
+  for(let sh=0;sh<6;sh++) o+=`<line x1="${FB_NUT_X[sh]}" y1="${FB_HEAD_Y}" x2="${FB_NUT_X[sh]}" y2="${FB_NUT_Y}" stroke="#fff" stroke-width="${ST[sh]}" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${FB_NUT_X[5]}" y2="${FB_NUT_Y}" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${FB_BOT_X[0]}" y2="${FB_NUT_Y+FB_PLAY_H}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[5]}" y1="${FB_NUT_Y}" x2="${FB_BOT_X[5]}" y2="${FB_NUT_Y+FB_PLAY_H}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  for(let ss=1;ss<=4;ss++) o+=`<line x1="${FB_NUT_X[ss]}" y1="${FB_NUT_Y}" x2="${FB_BOT_X[ss]}" y2="${FB_NUT_Y+FB_PLAY_H}" stroke="#fff" stroke-width="${ST[ss]}" stroke-linecap="round"/>`;
+  for(let fw=1;fw<=12;fw++){
+    const wy=FB_NUT_Y+FB_FRET_Y[fw],tn=FB_FRET_Y[fw]/FB_PLAY_H;
+    const wxL=Math.round(fbStrX(0,tn)),wxR=Math.round(fbStrX(5,tn));
+    o+=`<line x1="${wxL}" y1="${wy}" x2="${wxR}" y2="${wy}" stroke="#fff" stroke-width="${fw===12?2.5:1.5}" stroke-linecap="round"/>`;
+  }
+  for(let fl=1;fl<=12;fl++){
+    const fmid=(FB_FRET_Y[fl-1]+FB_FRET_Y[fl])/2,fmy=Math.round(FB_NUT_Y+fmid);
+    const flx=Math.round(fbStrX(0,fmid/FB_PLAY_H))-14;
+    o+=`<text x="${flx}" y="${fmy+4}" text-anchor="middle" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
+  }
+  // Bolinhas selecionadas
+  const expCls={};
+  state.chord.midi.map(m=>m%12).forEach(c=>{expCls[c]=true;});
+  Object.keys(state.fbSel).forEach(k=>{
+    const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
+    const nc=fbNoteClass(sc,fc),inChord=!!expCls[nc];
+    let cx2,cy2,fspace;
+    if(fc===0){cx2=FB_NUT_X[sc];cy2=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
+    else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
+    const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
+    let fill,tf,stroke;
+    if(state.phase==='answered'){fill=inChord?'#4caf50':'#f44336';tf='#fff';stroke=inChord?'#1a3d1a':'#3d1a1a';}
+    else{fill='#60dcff';tf='#111';stroke='#0a2030';}
+    o+=`<circle cx="${cx2}" cy="${cy2}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+    o+=`<text x="${cx2}" y="${cy2+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
+  });
+  // Células clicáveis
+  for(let cs0=0;cs0<6;cs0++) o+=`<rect x="${FB_COL_EDGES[cs0]}" y="${FB_HEAD_Y}" width="${FB_COL_EDGES[cs0+1]-FB_COL_EDGES[cs0]}" height="${FB_NUT_Y-FB_HEAD_Y}" fill="transparent" class="fb-fc" data-fbk="${cs0}-0"/>`;
+  for(let cs=0;cs<6;cs++){
+    for(let cf=1;cf<=12;cf++){
+      const ry=FB_NUT_Y+FB_FRET_Y[cf-1],rh=FB_FRET_Y[cf]-FB_FRET_Y[cf-1];
+      o+=`<rect x="${FB_COL_EDGES[cs]}" y="${ry}" width="${FB_COL_EDGES[cs+1]-FB_COL_EDGES[cs]}" height="${rh}" fill="transparent" class="fb-fc" data-fbk="${cs}-${cf}"/>`;
+    }
+  }
+  o+='</svg>';
+  return o;
+}
 
 // ── 2. SISTEMA DE ÁUDIO ───────────────────────────────────────
 // ── AudioContext único compartilhado ──────────────────────────
@@ -1688,6 +1783,9 @@ const state={
   violoesComprados:['violao_basico'],
   coinPopAnim:false,
   isBonus:false,
+  isFretboard:false,
+  fbSel:{},
+  diamondToggle:0,
   isQuality:false,
   qualityAnswer:null,
   qualitySelected:null,
@@ -1740,6 +1838,9 @@ function genQ(){
   state.questionCount++;
   const threshold=Math.floor(Math.random()*5)+6;
   state.isBonus=(state.questionCount%threshold===0);
+  if(state.isBonus){state.diamondToggle++;state.isFretboard=(state.diamondToggle%2===0);}
+  else{state.isFretboard=false;}
+  state.fbSel={};
   state.isQuality=false;
   state.qualityAnswer=null;
   state.qualitySelected=null;
@@ -1873,6 +1974,106 @@ function _pickWrong(ans,pool){
     result.push(...rest.slice(0,3-result.length));
   }
   return result.slice(0,3);
+}
+
+// ── Fretboard: toca nota individual via Howler ────────────────
+const FB_CLICK_SUSTAIN=2000,FB_CLICK_FADE=600;
+function playFbNoteClick(midi){
+  initCompressor();
+  const sn=nearestSample(midi);
+  const ratio=midiToFreq(midi)/midiToFreq(sn);
+  const id=howls[sn].play();
+  if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
+  setTimeout(()=>{try{howls[sn].fade(howls[sn].volume()||0.85,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
+}
+
+// ── Fretboard: confirmar resposta ─────────────────────────────
+function doFretboardConfirm(){
+  if(!state.isFretboard||state.phase!=='question')return;
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  const ok=fbValidate();
+  const ns=ok?state.streak+1:0;
+  state.streak=ns;
+  if(ns>state.bestStreak)state.bestStreak=ns;
+  saveStreak();
+  state.stats.t++;
+  if(!state.chordStats[state.chord.id])state.chordStats[state.chord.id]={c:0,e:0};
+  if(ok){state.stats.c++;state.chordStats[state.chord.id].c++;}
+  else{state.chordStats[state.chord.id].e++;}
+  const violaoAtual=VIOLOES.find(v=>v.id===state.violaoEquipado)||VIOLOES[0];
+  const violaoPct=violaoAtual.pct||0;
+  let gain=0,msg=null,diamondGained=0;
+  const prevMult=comboMultiplier(Math.max(1,ns-1));
+  const newMult=comboMultiplier(ns);
+  const multLevelUp=ok&&ns>1&&newMult>prevMult;
+  if(ok){
+    const diamGain=violaoAtual.doubleDiamonds?2:1;
+    diamondGained=diamGain;state.diamantes+=diamGain;
+    const baseCombo=comboPoints(ns);
+    gain=Math.round((baseCombo*2)*(1+violaoPct));
+    msg=violaoAtual.doubleDiamonds?`💎💎 ${state.lang==='en'?'Double Diamond! ×2':'Diamante Duplo! ×2'}`:`💎 ×2 ${state.lang==='en'?'in Combo!':'no Combo!'}`;
+    playSfx('diamond');
+    state.notas+=gain;
+    const xpBefore=state.xp;
+    state.score+=gain;state.xp+=gain;state.xpDisplay=xpBefore;
+    const lvlBefore=getLvlIdx(state.xp-gain);
+    if(getLvlIdx(state.xp)>lvlBefore){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
+    const app=document.getElementById('app');
+    if(app){app.style.transition='background .15s';app.style.background='#0a1a2e';setTimeout(()=>{app.style.background='';app.style.transition='';},500);}
+    // Popup de pontos
+    setTimeout(()=>{
+      const btnEl=document.getElementById('fb-confirm-btn');
+      if(btnEl){
+        const rect=btnEl.getBoundingClientRect();
+        const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
+        const cl=(window.innerWidth-520)/2;
+        particles.push(...makeParticles(cx-cl,cy,28,true));
+        const xpPopup=document.createElement('div');
+        xpPopup.textContent=`💎 +${gain} ${t('points')}`;
+        xpPopup.style.cssText=`position:fixed;z-index:9999;left:${rect.left+rect.width/2}px;top:${rect.top}px;transform:translate(-50%,-100%);font-size:1.6rem;font-weight:900;color:#60dcff;text-shadow:0 0 18px #60dcff,0 0 40px #60dcff66;pointer-events:none;white-space:nowrap;`;
+        document.body.appendChild(xpPopup);
+        xpPopup.animate([
+          {opacity:0,transform:'translate(-50%,-60%) scale(.5)'},
+          {opacity:1,transform:'translate(-50%,-120%) scale(1.2)',offset:.15},
+          {opacity:1,transform:'translate(-50%,-130%) scale(1)',offset:.78},
+          {opacity:0,transform:'translate(-50%,-160%) scale(.9)'}
+        ],{duration:1500,easing:'ease-out'}).onfinish=()=>xpPopup.remove();
+      }
+      animateXPGain(xpBefore,state.xp);
+    },50);
+  }else{
+    state.notas=Math.max(0,state.notas-10);
+    gain=-10;state.xp=Math.max(0,state.xp-10);
+    playSfx('wrong');
+    const app=document.getElementById('app');
+    if(app){app.classList.add('flash-wrong');setTimeout(()=>app.classList.remove('flash-wrong'),500);}
+    document.querySelector('.play-area')?.classList.add('shake');
+    setTimeout(()=>document.querySelector('.play-area')?.classList.remove('shake'),400);
+    setTimeout(()=>{
+      const btnEl=document.getElementById('fb-confirm-btn');
+      if(btnEl){
+        const wrect=btnEl.getBoundingClientRect();
+        const wrongXp=document.createElement('div');
+        wrongXp.textContent=`-10 ${t('points')}`;
+        wrongXp.style.cssText=`position:fixed;z-index:9999;left:${wrect.left+wrect.width/2}px;top:${wrect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
+        document.body.appendChild(wrongXp);
+        wrongXp.animate([
+          {opacity:0,transform:'translate(-50%,-30%) scale(.6)'},
+          {opacity:1,transform:'translate(-50%,-100%) scale(1.05)',offset:.15},
+          {opacity:1,transform:'translate(-50%,-110%) scale(1)',offset:.78},
+          {opacity:0,transform:'translate(-50%,-140%) scale(.85)'}
+        ],{duration:750,easing:'ease-out'}).onfinish=()=>wrongXp.remove();
+      }
+    },50);
+  }
+  state.result={ok,gain,msg,chordName:state.chord.name,diamondGained,multLevelUp};
+  state.phase='answered';
+  if(state.isGuest){
+    state.guestExerciseCount++;
+    if(state.guestExerciseCount===state.guestNextPrompt)state.showGuestPopup=true;
+  }
+  try{render();}catch(e){console.error('render error:',e);}
+  autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1800);
 }
 
 function handleAnswer(choiceId,btnEl){
@@ -3298,9 +3499,9 @@ function renderGame(){
         onclick="playClickSfx('soft');playChord(state.chord)">
         ${state.playing?t('listening'):t('listen_chord')}
       </button>
-      <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isQuality?t('what_quality'):t('what_chord')}</div>
+      <div class="label-sm mt" style="${state.isBonus?'color:#c8ecff;font-weight:700;':''}">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
       <div class="choices" style="${state.isQuality?'display:flex;gap:1rem;justify-content:center;':''}">
-        ${state.isQuality ? (() => {
+        ${state.isFretboard ? '' : state.isQuality ? (() => {
           const pair=state.qualityPair||{opts:['maior','menor'],labels:['Maior','Menor']};
           const opts=pair.opts.map((q,i)=>({q,label:_translateQualityLabel(q,pair.labels[i])}));
           return opts.map(o=>{
@@ -3330,6 +3531,19 @@ function renderGame(){
         }).join('')}
       </div>
     </div>
+    ${state.isFretboard ? `
+      <div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>
+      <div class="fb-action-row">
+        ${state.phase==='answered'
+          ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+          : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
+             <button class="fb-ghost-btn" onclick="state.fbSel={};render()">↺ ${state.lang==='en'?'Clear':'Limpar'}</button>
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+        }
+      </div>
+      <div class="fb-note-count">${Object.keys(state.fbSel).length} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
+    ` : ''}
   `;
 }
 
@@ -4536,6 +4750,18 @@ auth.onAuthStateChanged(async user=>{
     if(!state.isGuest){state.phase='login';}
   }
   try{render();}catch(e){console.error('render error:',e);}
+});
+
+// ── Fretboard: delegação de clique (registrado uma vez, nunca dentro do render) ──
+document.getElementById('content').addEventListener('click',function(e){
+  if(!state.isFretboard||state.phase!=='question')return;
+  let el=e.target;
+  while(el&&!el.dataset.fbk&&el!==this)el=el.parentElement;
+  if(!el||!el.dataset.fbk)return;
+  const k=el.dataset.fbk,parts=k.split('-').map(Number);
+  if(state.fbSel[k]){delete state.fbSel[k];}
+  else{state.fbSel[k]=true;playFbNoteClick(FB_OPEN[parts[0]]+parts[1]);}
+  render();
 });
 </script>
 

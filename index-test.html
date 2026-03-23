@@ -2119,22 +2119,24 @@ function doFocusedFretboardConfirm(){
   }
   saveProgress();
   render();
-  autoTimer=setTimeout(()=>{
-    if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
-    if(state.lvlUpPending){
-      const lvlNow=LEVELS[getLvlIdx(state.xp)];
-      const grupoNow=NIVEL_GROUPS.find(g=>lvlNow.n>=g.range[0]&&lvlNow.n<=g.range[1])||NIVEL_GROUPS[0];
-      const isNewGroup=lvlNow.n===grupoNow.range[0];
-      state.lvlUpIsNewGroup=isNewGroup;
-      state.firstCardSeen=true;
-      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
-      else{playSfx('correct2');}
-      state.lvlUpPending=false;
-      state.lvlUpFromFocused=true;
-      state.phase='levelup';render();return;
-    }
-    genFocusedQ();state.phase='treino_focado_question';render();
-  },1400);
+  // fretboard: sem avanço automático — usuário clica "Próximo"
+}
+
+// ── Fretboard: próxima questão (Treino Focado) ─────────────────
+function nextFocusedFretboardQ(){
+  if(state.lvlUpPending){
+    const lvlNow=LEVELS[getLvlIdx(state.xp)];
+    const grupoNow=NIVEL_GROUPS.find(g=>lvlNow.n>=g.range[0]&&lvlNow.n<=g.range[1])||NIVEL_GROUPS[0];
+    const isNewGroup=lvlNow.n===grupoNow.range[0];
+    state.lvlUpIsNewGroup=isNewGroup;
+    state.firstCardSeen=true;
+    if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+    else{playSfx('correct2');}
+    state.lvlUpPending=false;
+    state.lvlUpFromFocused=true;
+    state.phase='levelup';render();return;
+  }
+  genFocusedQ();state.phase='treino_focado_question';render();playChord(state.chord);
 }
 
 // ── Fretboard: confirmar resposta ─────────────────────────────
@@ -2223,7 +2225,7 @@ function doFretboardConfirm(){
     if(state.guestExerciseCount===state.guestNextPrompt)state.showGuestPopup=true;
   }
   try{render();}catch(e){console.error('render error:',e);}
-  autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1800);
+  // fretboard: sem avanço automático — usuário clica "Próximo"
 }
 
 function handleAnswer(choiceId,btnEl){
@@ -3280,7 +3282,8 @@ function renderTreinoFocado(){
       <div class="fb-action-row">
         ${answered
           ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+             <button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
           : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFocusedFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
              <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
              <button class="fb-ghost-btn" onclick="playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>
@@ -3695,7 +3698,7 @@ function renderGame(){
     </div>
     <div class="play-area"
       style="${state.isBonus?'background:linear-gradient(135deg,#04101e,#081a30);border:3px solid #60dcff;box-shadow:0 0 28px rgba(96,220,255,.16),4px 4px 0 #010608;':''}${state.isFretboard?'padding-bottom:.4rem;':''}"
-      ${state.phase==='answered'?'onclick="if(state.phase===\'answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ();}"':''}>
+      ${state.phase==='answered'&&!state.isFretboard?'onclick="if(state.phase===\'answered\'){if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ();}"':''}>
       <button class="play-btn ${state.playing?'playing':''}"
         style="${state.isBonus?'background:transparent;border:2px solid #60dcff;color:#60dcff;text-shadow:none;box-shadow:none;':''}"
         onclick="playClickSfx('soft');playChord(state.chord)">
@@ -3706,7 +3709,8 @@ function renderGame(){
         <div class="fb-action-row">
           ${state.phase==='answered'
             ? `<div class="fb-result-hint" style="color:${state.result?.ok?'#4ade80':'#f87171'}">${state.result?.ok?('💎 '+(state.lang==='en'?'Perfect!':'Perfeito!')):(state.lang==='en'?'Almost! Check the notes 👀':'Quase! Veja as notas 👀')}</div>
-               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>`
+               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
+               <button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
             : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
                <button class="fb-ghost-btn" onclick="playClickSfx('soft');playChord(state.chord)">▶ ${t('listen_chord')}</button>
                <button class="fb-ghost-btn" onclick="playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>

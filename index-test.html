@@ -1351,6 +1351,8 @@ function buildFbSVG(){
     o+=`<text x="${flx}" y="${fmy+4}" text-anchor="middle" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
   }
   // Bolinhas selecionadas
+  const isAnswered=state.phase==='answered'||state.phase==='treino_focado_answered';
+  const isWrong=isAnswered&&state.result?.ok===false;
   const expCls={};
   state.chord.midi.map(m=>m%12).forEach(c=>{expCls[c]=true;});
   Object.keys(state.fbSel).forEach(k=>{
@@ -1361,11 +1363,23 @@ function buildFbSVG(){
     else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
     const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
     let fill,tf,stroke;
-    if(state.phase==='answered'){fill=inChord?'#4caf50':'#f44336';tf='#fff';stroke=inChord?'#1a3d1a':'#3d1a1a';}
+    if(isAnswered){fill=inChord?'#4caf50':'#f44336';tf='#fff';stroke=inChord?'#1a3d1a':'#3d1a1a';}
     else{fill='#60dcff';tf='#111';stroke='#0a2030';}
     o+=`<circle cx="${cx2}" cy="${cy2}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
     o+=`<text x="${cx2}" y="${cy2+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
   });
+  // Posições corretas em vermelho (sobrepõe após erro)
+  if(isWrong){
+    getChordPositions(state.chord).forEach(({s,f,midi})=>{
+      let cx3,cy3,fspace;
+      if(f===0){cx3=FB_NUT_X[s];cy3=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
+      else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx3=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy3=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}
+      const r=Math.min(16,Math.floor(fspace*0.45))+2,fs=r>=14?'12':r>=11?'11':'10';
+      const nc=fbNoteClass(s,f);
+      o+=`<circle cx="${cx3}" cy="${cy3}" r="${r}" fill="#ef4444" stroke="#fff" stroke-width="2.5"/>`;
+      o+=`<text x="${cx3}" y="${cy3+4}" text-anchor="middle" fill="#fff" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
+    });
+  }
   // Células clicáveis
   for(let cs0=0;cs0<6;cs0++) o+=`<rect x="${FB_COL_EDGES[cs0]}" y="${FB_HEAD_Y}" width="${FB_COL_EDGES[cs0+1]-FB_COL_EDGES[cs0]}" height="${FB_NUT_Y-FB_HEAD_Y}" fill="transparent" class="fb-fc" data-fbk="${cs0}-0"/>`;
   for(let cs=0;cs<6;cs++){
@@ -2014,15 +2028,14 @@ function playFbNoteClick(midi){
   setTimeout(()=>{try{howls[sn].fade(0.9,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
 
-// ── Fretboard: toca notas montadas pelo usuário ────────────────
+// ── Fretboard: toca notas montadas pelo usuário (grave→agudo) ──
 function playFbSelChord(){
   const keys=Object.keys(state.fbSel);
   if(!keys.length)return;
   initCompressor();
+  const notes=keys.map(k=>{const p=k.split('-').map(Number);return{k,midi:FB_OPEN[p[0]]+p[1]};}).sort((a,b)=>a.midi-b.midi);
   const noteVol=Math.min(0.9,1/keys.length);
-  keys.forEach((k,i)=>{
-    const parts=k.split('-').map(Number);
-    const midi=FB_OPEN[parts[0]]+parts[1];
+  notes.forEach(({midi},i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
@@ -2031,6 +2044,22 @@ function playFbSelChord(){
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
     },i*110);
   });
+}
+
+// ── Fretboard: posições corretas de um acorde no braço ─────────
+function getChordPositions(chord){
+  const positions=[];
+  const usedStrings=new Set();
+  for(const midi of chord.midi){
+    let best=null,bestFret=99;
+    for(let s=0;s<6;s++){
+      if(usedStrings.has(s))continue;
+      const f=midi-FB_OPEN[s];
+      if(f>=0&&f<=12&&f<bestFret){best={s,f};bestFret=f;}
+    }
+    if(best){positions.push({s:best.s,f:best.f,midi});usedStrings.add(best.s);}
+  }
+  return positions;
 }
 
 // ── Fretboard: confirmar resposta no Treino Focado ─────────────

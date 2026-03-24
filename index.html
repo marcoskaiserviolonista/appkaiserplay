@@ -767,7 +767,7 @@ const STRINGS = {
     // Focused Training menu
     evolve_faster:'EVOLUA MAIS RÁPIDO.', choose_chords:'Escolha os acordes e monte o seu treino.',
     train_by_quality:'Treine por qualidade', train_by_type:'Treine por tipo de acorde',
-    start_training:'Iniciar Treino', activate_one:'Ative ao menos um exercício',
+    start_training:'Iniciar Treino', activate_one:'Ative ao menos um exercício', loading:'Carregando...',
     // Paywall
     unlock_all_trainings:'Desbloqueie todos os treinos',
     unlock_all_desc:'Acelere sua evolução identificando suas fraquezas e criando treinos personalizados!',
@@ -957,7 +957,7 @@ const STRINGS = {
     // Focused Training menu
     evolve_faster:'EVOLVE FASTER.', choose_chords:'Choose chords and build your training.',
     train_by_quality:'Train by quality', train_by_type:'Train by chord type',
-    start_training:'Start Training', activate_one:'Activate at least one exercise',
+    start_training:'Start Training', activate_one:'Activate at least one exercise', loading:'Loading...',
     // Paywall
     unlock_all_trainings:'Unlock all trainings',
     unlock_all_desc:'Accelerate your progress by identifying your weaknesses and creating personalized training sessions!',
@@ -3326,7 +3326,7 @@ function renderTreinoFocadoMenu(){
 
 // ── RENDER: Treino Focado Question ────────────────────────────
 function renderTreinoFocado(){
-  if(!state.chord) return '<div style="color:#666;text-align:center;padding:2rem">Carregando...</div>';
+  if(!state.chord) return `<div style="color:#666;text-align:center;padding:2rem">${t('loading')}</div>`;
   const acc=state.focusedSessionTotal>0?Math.round(state.focusedSessionCorrect/state.focusedSessionTotal*100):0;
   const color=getFocusedColor(state.focusedStreak);
   const streakColor=state.focusedStreak>=3?`color:${color};text-shadow:0 0 14px ${color}99`:'';

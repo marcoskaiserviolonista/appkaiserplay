@@ -2885,6 +2885,7 @@ function startFretboardSession(){
   state.result=null;state.selected=null;state.qualitySelected=null;
   genFocusedQ();
   state.phase='treino_focado_question';
+  window.scrollTo(0,0);
   render();
 }
 
@@ -3445,7 +3446,6 @@ function renderComprar(){
 
 let _saveTimer=null;
 function render(){
-  window.scrollTo(0,0);
   // Remove any leftover guest popup overlays
   const oldOverlay=document.getElementById('guest-popup-overlay');
   if(oldOverlay)oldOverlay.remove();

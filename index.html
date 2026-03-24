@@ -3255,10 +3255,6 @@ function renderTreinoFocadoMenu(){
       <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
       <span style="font-size:1.05rem;font-weight:900;color:#60dcff;letter-spacing:.01em">${t('focused_training')}</span>
     </div>
-    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:1rem">
-      <div style="font-size:.85rem;color:#60dcff;font-weight:900;letter-spacing:.12em;margin-bottom:.35rem">${t('evolve_faster')}</div>
-      <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">${t('choose_chords')}</div>
-    </div>
     ${hasHistory&&hasSmartData?`
 <div class="section-title" style="--sc:#60dcff">${t('training_suggestion')}</div>
 <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
@@ -3279,12 +3275,12 @@ function renderTreinoFocadoMenu(){
     <span style="font-size:1.2rem">${paywall?'🔒':'🎯'}</span> ${t('train_weak_points')}
   </button>
 </div>`:''}
-    <div class="section-title">${t('train_by_quality')}</div>
-    ${section1.map(makeSwitch).join('')}
-    <div class="section-title">${t('train_by_type')}</div>
-    ${section2.map(makeSwitch).join('')}
+    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
+      <div style="font-size:.85rem;color:#60dcff;font-weight:900;letter-spacing:.12em;margin-bottom:.35rem">${t('evolve_faster')}</div>
+      <div style="font-size:.88rem;color:#ddd;line-height:1.5;font-weight:500">${t('choose_chords')}</div>
+    </div>
     <button
-      style="width:100%;max-width:520px;margin-top:1.25rem;
+      style="width:100%;max-width:520px;margin-bottom:1.25rem;
         ${enabled
           ? 'background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff66;width:100%'
           : 'padding:1rem;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:14px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#444;cursor:default;box-shadow:none;letter-spacing:.02em'}"
@@ -3292,6 +3288,10 @@ function renderTreinoFocadoMenu(){
       onclick="startFocusedSession()">
       ${enabled?'<span style="font-size:1.3rem">🎯</span> '+t('start_training'):t('activate_one')}
     </button>
+    <div class="section-title">${t('train_by_quality')}</div>
+    ${section1.map(makeSwitch).join('')}
+    <div class="section-title">${t('train_by_type')}</div>
+    ${section2.map(makeSwitch).join('')}
     <div class="section-title" style="--sc:#60dcff;margin-top:1.5rem">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">

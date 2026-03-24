@@ -471,6 +471,7 @@ background:#111;border-color:#333;color:#555;cursor:not-allowed;font-size:.8rem;
 .nivel-card--locked{opacity:.6;}
 .nivel-card-img-area{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0a0a;position:relative;}
 .nivel-card-img{width:78%;height:78%;object-fit:contain;display:block;transition:transform .3s ease;filter:drop-shadow(0 6px 20px rgba(0,0,0,.9));}
+#nivel-carousel::-webkit-scrollbar{display:none;}
 .nivel-card:hover .nivel-card-img{transform:scale(1.07);}
 .nivel-card-info{padding:.5rem .7rem .65rem;}
 .nivel-card-name{font-size:.8rem;font-weight:900;line-height:1.2;letter-spacing:-.01em;}
@@ -3492,7 +3493,7 @@ function render(){
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
   if(state.phase==='inventario'){c.innerHTML=renderInventario();return;}
-  if(state.phase==='niveis'){c.innerHTML=renderNiveis();return;}
+  if(state.phase==='niveis'){c.innerHTML=renderNiveis();nivelCarouselInit();return;}
   if(state.phase==='treino_focado_menu'){c.innerHTML=renderTreinoFocadoMenu();return;}
   if(state.phase==='comprar'){c.innerHTML=renderComprar();return;}
   if(state.phase==='treino_focado_question'||state.phase==='treino_focado_answered'){c.innerHTML=renderTreinoFocado();return;}
@@ -4189,7 +4190,6 @@ function renderNiveis(){
     return{...g,status,idx:i};
   });
 
-  // ── Barra de progresso até a próxima categoria ──
   const currentGroup=groups.find(g=>g.status==='current')||groups[0];
   const nextGroup=groups.find(g=>g.status==='locked');
   const cgStart=LEVEL_XP_START[currentGroup.range[0]-1];
@@ -4199,9 +4199,9 @@ function renderNiveis(){
   const cor=currentGroup.cor;
 
   const progressHeader=`
-    <div style="width:100%;max-width:520px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.1rem 1.2rem;margin-bottom:1rem;box-shadow:4px 4px 0 #151515">
+    <div style="width:100%;max-width:520px;background:#1a1a1a;border:3px solid #2a2a2a;border-radius:18px;padding:1.1rem 1.2rem;margin-bottom:1.25rem;box-shadow:4px 4px 0 #151515">
       <div style="display:flex;align-items:center;gap:.75rem;margin-bottom:.75rem">
-        <img src="${_nivelImg(currentGroup.title)}" style="width:40px;height:40px;object-fit:contain;flex-shrink:0" onerror="this.style.display='none'">
+        <img src="${_nivelImg(currentGroup.title)}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;flex-shrink:0" onerror="this.style.display='none'">
         <div style="flex:1">
           <div style="font-size:.62rem;color:#888;text-transform:uppercase;letter-spacing:.1em;font-weight:700">${t('current_category')}</div>
           <div style="font-size:1rem;font-weight:900;color:${cor}">${currentGroup.title}</div>
@@ -4210,8 +4210,7 @@ function renderNiveis(){
         <div style="font-size:.6rem;color:#666;text-align:right">
           <div style="font-weight:700;color:#888">${t('next_category')}</div>
           <div style="font-weight:900;color:${nextGroup.cor}">${nextGroup.title}</div>
-        </div>`:
-        `<div style="font-size:.72rem;font-weight:900;color:#fbbf24">${t('max_badge')}</div>`}
+        </div>`:`<div style="font-size:.72rem;font-weight:900;color:#fbbf24">${t('max_badge')}</div>`}
       </div>
       <div style="height:10px;background:#111;border-radius:99px;overflow:hidden;border:2px solid #2a2a2a;margin-bottom:.5rem">
         <div style="height:100%;width:${cgPct}%;background:linear-gradient(90deg,${cor}88,${cor},#fff8);border-radius:99px;transition:width .8s ease;box-shadow:0 0 8px ${cor}66"></div>
@@ -4219,10 +4218,62 @@ function renderNiveis(){
       <div style="display:flex;justify-content:space-between;font-size:.68rem;font-weight:700">
         <span style="color:#666">${state.xp-cgStart} ${t('xp_in_category')}</span>
         ${nextGroup
-          ? `<span style="color:${cor}">${t('missing_points')} ${xpFaltando.toLocaleString()} ${t('points')}</span>`
-          : `<span style="color:#4ade80">${t('max_category')}</span>`}
+          ?`<span style="color:${cor}">${t('missing_points')} ${xpFaltando.toLocaleString()} ${t('points')}</span>`
+          :`<span style="color:#4ade80">${t('max_category')}</span>`}
       </div>
     </div>`;
+
+  const initialIdx=groups.findIndex(g=>g.status==='current');
+  window._nivelIdx=initialIdx>=0?initialIdx:0;
+
+  const cardsHtml=groups.map((g,i)=>{
+    const img=_nivelImg(g.title);
+    const isDone=g.status==='done';
+    const isCurrent=g.status==='current';
+    const isLocked=g.status==='locked';
+    const gc=g.cor;
+    const unlocked=isDone||isCurrent;
+
+    const xpBar=isCurrent?`
+      <div style="margin-bottom:.85rem">
+        <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#bbb;margin-bottom:.35rem;font-weight:700">
+          <span>${t('step_progress')}</span><span style="color:${gc}">${cgPct}%</span>
+        </div>
+        <div style="height:7px;background:#1a1a1a;border-radius:99px;overflow:hidden;border:1.5px solid #2a2a2a">
+          <div style="height:100%;width:${cgPct}%;background:linear-gradient(90deg,${gc}88,${gc});border-radius:99px"></div>
+        </div>
+      </div>`:'';
+
+    const statusBadge=isDone
+      ?`<div style="font-size:.6rem;font-weight:800;border-radius:20px;padding:.18rem .55rem;background:#22c55e;color:#fff;border:1.5px solid rgba(255,255,255,.15)">${t('done_badge')}</div>`
+      :isCurrent
+      ?`<div style="font-size:.6rem;font-weight:800;border-radius:20px;padding:.18rem .55rem;background:${gc};color:#111;border:1.5px solid rgba(255,255,255,.15)">${t('here_badge')}</div>`
+      :`<div style="font-size:.6rem;font-weight:800;border-radius:20px;padding:.18rem .55rem;background:#1e1e1e;color:#555;border:1.5px solid #333">🔒 ${t('level')} ${g.range[0]}+</div>`;
+
+    const rangeBadge=`<div style="font-size:.6rem;font-weight:800;color:${isLocked?'#555':gc};background:#0e0e0e;border:1.5px solid ${isLocked?'#2a2a2a':gc+'44'};border-radius:20px;padding:.18rem .55rem">${g.range[0]}${g.range[1]!==g.range[0]?'–'+g.range[1]:''}</div>`;
+
+    const downloadBtn=unlocked
+      ?`<a href="${img}" download="${g.title}.png" onclick="playClickSfx('soft')" style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.75rem;background:linear-gradient(180deg,#1a2a1a,#0d1a0d);border:2.5px solid #22c55e66;border-radius:14px;font-family:var(--font-body);font-size:.88rem;font-weight:900;color:#4ade80;text-decoration:none;box-shadow:4px 4px 0 #080808;cursor:pointer;letter-spacing:.01em">⬇ ${state.lang==='en'?'Download Card':'Baixar Carta'}</a>`
+      :`<div style="display:flex;align-items:center;justify-content:center;gap:.5rem;width:100%;padding:.75rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.88rem;font-weight:900;color:#2a2a2a;letter-spacing:.01em">🔒 ${state.lang==='en'?'Locked':'Bloqueado'}</div>`;
+
+    return `
+    <div style="flex-shrink:0;width:82%;scroll-snap-align:center;background:#0e0e0e;border-radius:20px;border:2.5px solid ${isCurrent?gc:'#222'};overflow:hidden;box-shadow:${isCurrent?`5px 5px 0 #060606,0 0 28px ${gc}33`:'4px 4px 0 #080808'}">
+      <div style="position:relative;width:100%;aspect-ratio:3/4;overflow:hidden;background:#0a0a0a">
+        <img src="${img}" style="width:100%;height:100%;object-fit:cover;display:block" onerror="this.style.display='none'">
+        ${isLocked?`<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:2"><div style="font-size:3.5rem;filter:drop-shadow(0 4px 16px rgba(0,0,0,.95))">🔒</div></div>`:''}
+        ${isCurrent?`<div style="position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,transparent,${gc},transparent);z-index:2"></div>`:''}
+      </div>
+      <div style="padding:.9rem 1rem 1rem">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem">${statusBadge}${rangeBadge}</div>
+        <div style="font-size:1.15rem;font-weight:900;color:${isLocked?'#555':gc};margin-bottom:.3rem;letter-spacing:-.01em">${g.title}</div>
+        <div style="font-size:.78rem;color:${isLocked?'#333':'#777'};line-height:1.6;font-style:italic;margin-bottom:.85rem">"${g.desc}"</div>
+        ${xpBar}
+        ${downloadBtn}
+      </div>
+    </div>`;
+  }).join('');
+
+  const dotsHtml=groups.map((g,i)=>`<div class="nivel-dot" style="height:7px;border-radius:99px;background:#333;transition:all .3s ease;cursor:pointer" onclick="nivelCarouselGo(${i})"></div>`).join('');
 
   return `
     <div class="back-row">
@@ -4232,40 +4283,65 @@ function renderNiveis(){
 
     ${progressHeader}
 
-    <div class="section-title">${t('categories')}</div>
+    <div style="position:relative;width:100%;max-width:520px;margin-bottom:.75rem">
+      <button onclick="nivelCarouselNav(-1)" style="position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:10;background:rgba(10,10,10,.85);border:1.5px solid #333;border-radius:50%;width:36px;height:36px;color:#ccc;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">‹</button>
+      <button onclick="nivelCarouselNav(1)" style="position:absolute;right:0;top:50%;transform:translateY(-50%);z-index:10;background:rgba(10,10,10,.85);border:1.5px solid #333;border-radius:50%;width:36px;height:36px;color:#ccc;font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;backdrop-filter:blur(4px)">›</button>
+      <div id="nivel-carousel" onscroll="nivelCarouselOnScroll()" style="display:flex;overflow-x:scroll;scroll-snap-type:x mandatory;scroll-behavior:smooth;gap:.75rem;padding:0 9%;scrollbar-width:none;-webkit-overflow-scrolling:touch">
+        ${cardsHtml}
+      </div>
+    </div>
 
-    <div class="shop-cards-grid" style="margin-bottom:1.5rem">
-      ${groups.map(g=>{
-        const img=_nivelImg(g.title);
-        const isDone=g.status==='done';
-        const isCurrent=g.status==='current';
-        const isLocked=g.status==='locked';
-        const cor=g.cor;
-        const badgeBg=isDone?'#22c55e':isCurrent?cor:'rgba(180,180,200,.15)';
-        const badgeColor=isDone?'#fff':isCurrent?'#111':'#aaa';
-
-        return `
-        <div class="nivel-card ${isLocked?'nivel-card--locked':''}" style="${isCurrent?`border-color:${cor};box-shadow:3px 3px 0 #0a0a0a,0 0 18px ${cor}44`:''}" onclick="openNivelModal(${g.idx})">
-          ${isCurrent||isDone?`<div style="position:absolute;top:.5rem;left:.5rem;z-index:3;font-size:.58rem;font-weight:800;border-radius:20px;padding:.18rem .5rem;background:${isDone?'#22c55e':cor};color:${isDone?'#fff':'#111'};border:1.5px solid rgba(255,255,255,.15)">${isCurrent?t('here_badge'):t('done_badge')}</div>`:''}
-          <div style="position:absolute;top:.5rem;right:.5rem;z-index:3;font-size:.58rem;font-weight:800;color:${isLocked?'#777':cor};background:#0e0e0e;border:1.5px solid ${isLocked?'#2a2a2a':cor+'44'};border-radius:20px;padding:.18rem .5rem">${g.range[0]}${g.range[1]!==g.range[0]?'–'+g.range[1]:''}</div>
-
-          <div class="nivel-card-img-area">
-            <img src="${img}" class="nivel-card-img" onerror="this.src='violao.png';this.style.opacity='.2'">
-            ${isLocked?`<div style="position:absolute;inset:0;z-index:2;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.5)"><div style="font-size:2rem;filter:drop-shadow(0 2px 8px rgba(0,0,0,.9))">🔒</div></div>`:''}
-            ${isCurrent?`<div style="position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,${cor},transparent);z-index:2"></div>`:''}
-          </div>
-
-          <div class="nivel-card-info">
-            <div class="nivel-card-name" style="color:${isLocked?'#999':cor}">${g.title}</div>
-            <div class="nivel-card-range">${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}</div>
-            ${isCurrent?`<div class="nivel-card-tag" style="background:${cor}18;border-color:${cor}44;color:${cor}">${t('in_progress_badge')}</div>`:''}
-            ${isDone?`<div class="nivel-card-tag" style="background:#22c55e18;border-color:#22c55e44;color:#4ade80">${t('done_badge')}</div>`:''}
-            ${isLocked?`<div class="nivel-card-tag" style="background:#1e1e1e;border-color:#333;color:#666">🔒 ${t('level')} ${g.range[0]}+</div>`:''}
-          </div>
-        </div>`;
-      }).join('')}
+    <div style="display:flex;align-items:center;justify-content:center;gap:.4rem;padding:.5rem 0 1.5rem">
+      ${dotsHtml}
     </div>
   `;
+}
+
+function nivelCarouselInit(){
+  requestAnimationFrame(()=>{
+    const c=document.getElementById('nivel-carousel');
+    if(!c)return;
+    const idx=window._nivelIdx||0;
+    const card=c.children[idx];
+    if(card)card.scrollIntoView({behavior:'instant',inline:'center',block:'nearest'});
+    _nivelUpdateDots();
+  });
+}
+function nivelCarouselNav(dir){
+  playClickSfx('soft');
+  const c=document.getElementById('nivel-carousel');
+  if(!c)return;
+  const n=c.children.length;
+  window._nivelIdx=Math.max(0,Math.min(n-1,(window._nivelIdx||0)+dir));
+  c.children[window._nivelIdx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  _nivelUpdateDots();
+}
+function nivelCarouselGo(idx){
+  const c=document.getElementById('nivel-carousel');
+  if(!c)return;
+  window._nivelIdx=idx;
+  c.children[idx].scrollIntoView({behavior:'smooth',inline:'center',block:'nearest'});
+  _nivelUpdateDots();
+}
+function nivelCarouselOnScroll(){
+  const c=document.getElementById('nivel-carousel');
+  if(!c)return;
+  const cx=c.getBoundingClientRect().left+c.clientWidth/2;
+  let best=0,bestD=Infinity;
+  Array.from(c.children).forEach((el,i)=>{
+    const r=el.getBoundingClientRect();
+    const d=Math.abs(r.left+r.width/2-cx);
+    if(d<bestD){bestD=d;best=i;}
+  });
+  window._nivelIdx=best;
+  _nivelUpdateDots();
+}
+function _nivelUpdateDots(){
+  const idx=window._nivelIdx||0;
+  document.querySelectorAll('.nivel-dot').forEach((d,i)=>{
+    d.style.background=i===idx?NIVEL_GROUPS[i].cor:'#333';
+    d.style.width=i===idx?'18px':'7px';
+  });
 }
 
 // ── Modal de Nível ────────────────────────────────────────────

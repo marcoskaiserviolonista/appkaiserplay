@@ -3273,14 +3273,8 @@ function renderTreinoFocadoMenu(){
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff22;border-radius:16px;padding:1rem 1rem 1.1rem;margin-bottom:1.25rem">
       <div style="font-size:.72rem;color:#60dcff;font-weight:900;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.2rem">${t('evolve_faster')}</div>
       <div style="font-size:.82rem;color:#aaa;margin-bottom:.9rem">${t('choose_chords')}</div>
-      <div style="border-top:1px solid #60dcff15;margin-bottom:.75rem"></div>
-      <div style="font-size:.65rem;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem">${t('train_by_quality')}</div>
-      ${section1.map(makeSwitch).join('')}
-      <div style="font-size:.65rem;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:.75rem 0 .45rem">${t('train_by_type')}</div>
-      ${section2.map(makeSwitch).join('')}
-      <div style="border-top:1px solid #60dcff15;margin:.9rem 0 .75rem"></div>
       <button
-        style="width:100%;
+        style="width:100%;margin-bottom:.9rem;
           ${enabled
             ? 'background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:14px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff66'
             : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em'}"
@@ -3288,6 +3282,11 @@ function renderTreinoFocadoMenu(){
         onclick="startFocusedSession()">
         ${enabled?'<span style="font-size:1.3rem">🎯</span> '+t('start_training'):t('activate_one')}
       </button>
+      <div style="border-top:1px solid #60dcff15;margin-bottom:.75rem"></div>
+      <div style="font-size:.65rem;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem">${t('train_by_quality')}</div>
+      ${section1.map(makeSwitch).join('')}
+      <div style="font-size:.65rem;color:#555;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:.75rem 0 .45rem">${t('train_by_type')}</div>
+      ${section2.map(makeSwitch).join('')}
     </div>
 
     <div class="section-title" style="--sc:#60dcff;margin-top:.25rem">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>

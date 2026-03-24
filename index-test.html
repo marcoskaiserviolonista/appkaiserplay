@@ -2881,7 +2881,6 @@ function startFretboardSession(){
   state.result=null;state.selected=null;state.qualitySelected=null;
   genFocusedQ();
   state.phase='treino_focado_question';
-  window.scrollTo(0,0);
   render();
 }
 
@@ -3441,7 +3440,16 @@ function renderComprar(){
 
 
 let _saveTimer=null;
+const _NAV_PHASES=new Set(['start','login','signup','forgot_password','set_display_name','perfil','levelup','desempenho','loja','inventario','niveis','treino_focado_menu','comprar']);
+let _lastPhase=null;
 function render(){
+  const _cur=state.phase;
+  if(_cur!==_lastPhase){
+    const _prev=_lastPhase;_lastPhase=_cur;
+    if(_NAV_PHASES.has(_cur)||(_cur==='question'&&_prev!=='answered')||(_cur==='treino_focado_question'&&_prev!=='treino_focado_answered')){
+      window.scrollTo(0,0);
+    }
+  }
   // Remove any leftover guest popup overlays
   const oldOverlay=document.getElementById('guest-popup-overlay');
   if(oldOverlay)oldOverlay.remove();

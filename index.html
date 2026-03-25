@@ -3273,7 +3273,8 @@ function renderTreinoFocadoMenu(){
 
     ${hasHistory&&hasSmartData?`
     <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
-      <div style="font-size:.68rem;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.65rem">${t('training_suggestion')}</div>
+      <div style="font-size:.68rem;color:#aaa;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:${paywall?'.3rem':'.65rem'}">${t('training_suggestion')}</div>
+      ${paywall?`<div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-bottom:.65rem">${state.lang==='en'?'Find out which chords you miss the most and train exactly your weak points.':'Saiba quais são os acordes que você mais erra e treine exatamente seus pontos fracos.'}</div>`:''}
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem">
         ${topErrors.map(c=>`
           <div style="background:#111;border:2px solid #333;border-radius:12px;padding:.75rem .5rem;text-align:center">

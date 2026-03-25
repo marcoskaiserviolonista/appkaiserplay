@@ -621,7 +621,7 @@ const STRINGS = {
     // Auth - Login
     sign_in:'Entrar', create_account:'Criar conta', forgot_password:'Esqueci minha senha',
     email:'E-mail', password:'Senha', play_as_guest:'Jogar sem conta',
-    already_have_account:'← Já tenho conta', back_to_signin:'← Voltar ao login',
+    already_have_account:'Já tenho conta', back_to_signin:'← Voltar ao login',
     // Auth - Signup
     signup_title:'Criar conta', display_name:'Nome de exibição',
     display_name_hint:'Este nome aparecerá no jogo e no ranking.',
@@ -759,7 +759,7 @@ const STRINGS = {
     equipment_section:'Equipamento', equipped_guitar_label:'Violão Equipado',
     swap_in_shop:'Trocar na Loja', available_guitars:'Violões disponíveis',
     no_other_guitars:'Nenhum outro violão adquirido.', no_items_yet:'Nenhum item adquirido ainda.',
-    download_btn:'⬇ Baixar', coupon_btn:'🏷️ Ver Código',
+    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ Ver Código',
     coupon_toast_title:'Código copiado!', coupon_toast_body:'Cole esse código ao finalizar a compra.',
     download_error_title:'Erro no download', download_error_body:'Não foi possível baixar. Tente novamente.',
     // Profile stats
@@ -811,7 +811,7 @@ const STRINGS = {
     // Auth - Login
     sign_in:'Sign In', create_account:'Create account', forgot_password:'Forgot my password',
     email:'E-mail', password:'Password', play_as_guest:'Play as guest',
-    already_have_account:'← I already have an account', back_to_signin:'← Back to sign in',
+    already_have_account:'I already have an account', back_to_signin:'← Back to sign in',
     // Auth - Signup
     signup_title:'Create account', display_name:'Display name',
     display_name_hint:'This name will appear in the game and in the ranking.',
@@ -949,7 +949,7 @@ const STRINGS = {
     equipment_section:'Equipment', equipped_guitar_label:'Equipped Guitar',
     swap_in_shop:'Swap in Shop', available_guitars:'Available Guitars',
     no_other_guitars:'No other guitars owned.', no_items_yet:'No items purchased yet.',
-    download_btn:'⬇ Download', coupon_btn:'🏷️ View Code',
+    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ View Code',
     coupon_toast_title:'Code copied!', coupon_toast_body:'Paste this code when checking out.',
     download_error_title:'Download error', download_error_body:'Could not download the file. Please try again.',
     // Profile stats
@@ -1379,7 +1379,7 @@ function buildFbSVG(){
     const usedStrings=new Set(Object.keys(state.fbSel).map(k=>parseInt(k.split('-')[0])));
     getChordPositions(state.chord).forEach(({s,f})=>{
       const nc=fbNoteClass(s,f);
-      if(coveredCls.has(nc))return;
+      if(coveredCls.has(nc))return; // usuário já acertou essa nota
       if(usedStrings.has(s))return; // corda já ocupada — não mostrar posição impossível
       let cx3,cy3,fspace;
       if(f===0){cx3=FB_NUT_X[s];cy3=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
@@ -1803,7 +1803,7 @@ const state={
   stats:{t:0,c:0},
   chordStats:{},
   playing:false,lvlUpPending:false,lvlUpFromFocused:false,
-  notas:500,moedas:500,diamantes:0,
+  notas:500,moedas:500,diamantes:10,
   inventario:[],
   violaoEquipado:'violao_basico',
   violoesComprados:['violao_basico'],
@@ -1892,10 +1892,13 @@ function genQ(){
     const _lvlNFb=LEVELS[getLvlIdx(state.xp)].n;
     let pool;
     if(_lvlNFb<20){
+      // só tríades maiores e menores básicas
       pool=CHORDS.filter(c=>c.quality==='maior'||c.quality==='menor');
     }else if(_lvlNFb<40){
+      // + dominantes (C7–B7)
       pool=CHORDS.filter(c=>c.quality==='maior'||c.quality==='menor'||[14,15,16,17,18,19,20].includes(c.id));
     }else{
+      // todos os acordes
       pool=[...CHORDS,...CHORDS_DIAMOND];
     }
     const _prevFb=state.chord?.id;
@@ -2043,6 +2046,7 @@ function playFbSelChord(){
   const keys=Object.keys(state.fbSel);
   if(!keys.length)return;
   initCompressor();
+  // ordenar do grave para o agudo (igual ao playChord)
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return{k,midi:FB_OPEN[p[0]]+p[1]};}).sort((a,b)=>a.midi-b.midi);
   const noteVol=Math.min(0.9,1/keys.length);
   notes.forEach(({midi},i)=>{
@@ -3338,9 +3342,9 @@ function renderTreinoFocado(){
     choicesHtml=`
       <div class="fb-action-row">
         ${answered
-          ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
+          ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${state.lang==='en'?'Next':'Próximo'} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
           : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFocusedFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
         }
       </div>
       ${answered?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}`;
@@ -3770,9 +3774,9 @@ function renderGame(){
       ${state.isFretboard ? `
         <div class="fb-action-row">
           ${state.phase==='answered'
-            ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${state.lang==='en'?'Next →':'Próximo →'}</button>`
+            ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${state.lang==='en'?'Next':'Próximo'} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
             : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
-               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>▶ ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
+               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
           }
         </div>
         ${state.phase==='answered'?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}
@@ -4234,6 +4238,7 @@ function renderNiveis(){
     const gc=g.cor;
     const unlocked=isDone||isCurrent;
 
+    // XP progress bar (current only)
     const xpBar=isCurrent?`
       <div style="margin-bottom:.85rem">
         <div style="display:flex;justify-content:space-between;font-size:.65rem;color:#bbb;margin-bottom:.35rem;font-weight:700">
@@ -4479,7 +4484,7 @@ function renderRanking(){
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

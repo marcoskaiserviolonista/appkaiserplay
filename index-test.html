@@ -730,7 +730,7 @@ const STRINGS = {
     lvl_aprendiz:'Aprendiz', lvl_estudante:'Estudante', lvl_bardo:'Bardo',
     lvl_trovador:'Trovador', lvl_virtuose:'Virtuose', lvl_alquimista:'Alquimista Harmônico',
     lvl_mago:'Mago do Som', lvl_guardiao:'Guardião da Harmonia',
-    lvl_arcanista:'Arcanista da Harmonia', lvl_lenda:'Lenda da Música', lvl_mestre:'Mestre Supremo',
+    lvl_arcanista:'Arcanista das Cordas', lvl_lenda:'Lenda da Música', lvl_mestre:'Mestre Supremo',
     // Guest popup
     guest_popup_title:'Crie sua conta grátis',
     guest_popup_b1:'Salvar seu progresso no jogo',
@@ -930,7 +930,7 @@ const STRINGS = {
     lvl_aprendiz:'Apprentice', lvl_estudante:'Student', lvl_bardo:'Bard',
     lvl_trovador:'Troubadour', lvl_virtuose:'Virtuoso', lvl_alquimista:'Harmonic Alchemist',
     lvl_mago:'Sound Wizard', lvl_guardiao:'Guardian of Harmony',
-    lvl_arcanista:'Harmony Arcanist', lvl_lenda:'Music Legend', lvl_mestre:'Supreme Master',
+    lvl_arcanista:'Arcanist of Strings', lvl_lenda:'Music Legend', lvl_mestre:'Supreme Master',
     // Guest popup
     guest_popup_title:'Create your free account',
     guest_popup_b1:'Save your game progress',
@@ -1223,7 +1223,7 @@ function _titleForLvl(n){
   if(n<=60)return"Alquimista Harmônico";
   if(n<=70)return"Guardião da Harmonia";
   if(n<=80)return"Mago do Som";
-  if(n<=90)return"Arcanista da Harmonia";
+  if(n<=90)return"Arcanista das Cordas";
   if(n<=99)return"Lenda da Música";
   return"Mestre Supremo";
 }
@@ -4267,7 +4267,7 @@ const NIVEL_GROUPS = [
   {range:[51,60],  title:"Alquimista Harmônico",  desc:"Transformas sons em emoções. A harmonia obedece à sua vontade.",                     cor:'#F5A623'},
   {range:[61,70],  title:"Guardião da Harmonia",   desc:"Protetor da tradição e da inovação. Seu legado já começa a ser escrito.",            cor:'#f472b6'},
   {range:[71,80],  title:"Mago do Som",           desc:"O ouvido tornou-se instrumento. Você ouve o que outros não conseguem perceber.",     cor:'#fb923c'},
-  {range:[81,90],  title:"Arcanista da Harmonia", desc:"Domínio quase mítico das harmonias. A teoria e o instinto se fundem em você.",       cor:'#c084fc'},
+  {range:[81,90],  title:"Arcanista das Cordas",  desc:"Domínio quase mítico das harmonias. A teoria e o instinto se fundem em você.",       cor:'#c084fc'},
   {range:[91,99],  title:"Lenda da Música",       desc:"Nome reverenciado. Sua jornada inspira todos que ainda estão no começo.",            cor:'#fbbf24'},
   {range:[100,100],title:"Mestre Supremo",        desc:"O ápice. Quem chega aqui não apenas aprendeu — transcendeu.",                       cor:'#60dcff'},
 ];

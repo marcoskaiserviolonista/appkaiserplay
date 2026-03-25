@@ -4194,7 +4194,7 @@ function renderInventario(){
 
   const violaoExtra = violaoEq.pct>0 ? `+${Math.round(violaoEq.pct*100)}% ${state.lang==='en'?'XP per correct answer':'de XP por acerto'}` : (state.lang==='en'?'No bonus':'Sem bônus');
 
-  const eduItems = state.inventario.filter(id=>LOJA_ITEMS[id]);
+  const eduItems = state.inventario.filter(id=>LOJA_ITEMS.find(x=>x.id===id));
 
   return `
     <div class="back-row">
@@ -4234,7 +4234,7 @@ function renderInventario(){
     ${eduItems.length===0
       ? `<div style="color:#444;font-size:.8rem;padding:.5rem 0">${t('no_items_yet')}</div>`
       : eduItems.map(id=>{
-          const item=LOJA_ITEMS[id];
+          const item=LOJA_ITEMS.find(x=>x.id===id);
           const isCupom=!!item.cupom;
           return `<div class="loja-item">
             <div class="item-icon"><img src="${item.img}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.outerHTML='<span>${item.icon}</span>'"></div>
@@ -4767,7 +4767,7 @@ function downloadMaterial(itemId){
 }
 
 function comprarItem(id){
-  const item=LOJA_ITEMS[id];
+  const item=LOJA_ITEMS.find(x=>x.id===id);
   if(!item)return;
   if(state.moedas<item.preco){showToast(t('not_enough_coins'),t('not_enough_coins_detail')+'🪙 '+item.preco+' '+t('coins').toLowerCase());return;}
   if(state.inventario.includes(id)){showToast(t('item_already_owned'),t('check_inventory'));return;}

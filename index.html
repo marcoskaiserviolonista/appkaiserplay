@@ -804,6 +804,12 @@ const STRINGS = {
     step_progress:'Progresso nesta etapa',
     // renderComprar
     comprar_title:'Plano Vitalício', comprar_desc:'Desbloqueie todos os modos de Treino Focado e aprimore seu ouvido ao máximo.',
+    unlock_popup_title:'Desbloqueie tudo e evolua mais rápido.',
+    unlock_popup_b1:'Todos os grupos de acordes desbloqueados',
+    unlock_popup_b2:'Exercícios para tríades, tétrades, dominantes e tensões',
+    unlock_popup_b3:'Compra única, acesso para sempre',
+    unlock_popup_cta:'Desbloquear tudo',
+    unlock_popup_dismiss:'Agora não',
   },
   en: {
     // Navigation
@@ -994,6 +1000,12 @@ const STRINGS = {
     step_progress:'Progress in this stage',
     // renderComprar
     comprar_title:'Lifetime Plan', comprar_desc:'Unlock all Focused Training modes and sharpen your ear to the fullest.',
+    unlock_popup_title:'Unlock everything and evolve faster.',
+    unlock_popup_b1:'All chord groups unlocked',
+    unlock_popup_b2:'Exercises for triads, tetrads, dominants and tensions',
+    unlock_popup_b3:'One-time purchase, access forever',
+    unlock_popup_cta:'Unlock everything',
+    unlock_popup_dismiss:'Not now',
   }
 };
 function t(key){
@@ -3498,7 +3510,43 @@ function render(){
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
   if(state.phase==='inventario'){c.innerHTML=renderInventario();return;}
   if(state.phase==='niveis'){c.innerHTML=renderNiveis();nivelCarouselInit();return;}
-  if(state.phase==='treino_focado_menu'){c.innerHTML=renderTreinoFocadoMenu();return;}
+  if(state.phase==='treino_focado_menu'){
+    c.innerHTML=renderTreinoFocadoMenu();
+    if(!state.fullAccess){
+      const overlay=document.createElement('div');
+      overlay.id='unlock-popup-overlay';
+      overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
+      overlay.innerHTML=`
+        <div style="background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+          <div style="font-size:1.15rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:1.2rem;line-height:1.3">${t('unlock_popup_title')}</div>
+          <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
+            <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+              <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+              <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎯</span>
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.65rem">
+              <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">♾️</span>
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b3')}</span>
+            </div>
+          </div>
+          <button onclick="document.getElementById('unlock-popup-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
+            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem;letter-spacing:.01em">
+            ${t('unlock_popup_cta')}
+          </button>
+          <button onclick="document.getElementById('unlock-popup-overlay').remove()"
+            style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
+            ${t('unlock_popup_dismiss')}
+          </button>
+        </div>
+      `;
+      document.body.appendChild(overlay);
+    }
+    return;
+  }
   if(state.phase==='comprar'){c.innerHTML=renderComprar();return;}
   if(state.phase==='treino_focado_question'||state.phase==='treino_focado_answered'){c.innerHTML=renderTreinoFocado();return;}
   c.innerHTML=renderGame();

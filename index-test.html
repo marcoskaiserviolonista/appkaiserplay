@@ -1819,7 +1819,7 @@ const state={
   stats:{t:0,c:0},
   chordStats:{},
   playing:false,lvlUpPending:false,lvlUpFromFocused:false,
-  notas:500,moedas:500,diamantes:10,
+  notas:500,moedas:10000,diamantes:10,
   inventario:[],
   violaoEquipado:'violao_basico',
   violoesComprados:['violao_basico'],
@@ -4566,7 +4566,7 @@ function renderRanking(){
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:10000,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

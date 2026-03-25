@@ -804,7 +804,8 @@ const STRINGS = {
     step_progress:'Progresso nesta etapa',
     // renderComprar
     comprar_title:'Plano Vitalício', comprar_desc:'Desbloqueie todos os modos de Treino Focado e aprimore seu ouvido ao máximo.',
-    unlock_popup_title:'Desbloqueie tudo e evolua mais rápido.',
+    unlock_popup_headline:'Libere o acesso completo',
+    unlock_popup_sub:'Evolua mais rápido',
     unlock_popup_b1:'Todos os grupos de acordes desbloqueados',
     unlock_popup_b2:'Exercícios para tríades, tétrades, dominantes e tensões',
     unlock_popup_b3:'Compra única, acesso para sempre',
@@ -1000,7 +1001,8 @@ const STRINGS = {
     step_progress:'Progress in this stage',
     // renderComprar
     comprar_title:'Lifetime Plan', comprar_desc:'Unlock all Focused Training modes and sharpen your ear to the fullest.',
-    unlock_popup_title:'Unlock everything and evolve faster.',
+    unlock_popup_headline:'Unlock full access',
+    unlock_popup_sub:'Evolve faster',
     unlock_popup_b1:'All chord groups unlocked',
     unlock_popup_b2:'Exercises for triads, tetrads, dominants and tensions',
     unlock_popup_b3:'One-time purchase, access forever',
@@ -3518,7 +3520,10 @@ function render(){
       overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
       overlay.innerHTML=`
         <div style="background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
-          <div style="font-size:1.15rem;font-weight:900;color:#fff;font-family:var(--font-title);margin-bottom:1.2rem;line-height:1.3">${t('unlock_popup_title')}</div>
+          <div style="margin-bottom:1.2rem;line-height:1.25">
+            <div style="font-size:1.05rem;font-weight:900;color:#4ade80;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em">${t('unlock_popup_headline')}</div>
+            <div style="font-size:.9rem;font-weight:700;color:#aaa;font-family:var(--font-body);margin-top:.25rem">${t('unlock_popup_sub')}</div>
+          </div>
           <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
             <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
               <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
@@ -3534,8 +3539,8 @@ function render(){
             </div>
           </div>
           <button onclick="document.getElementById('unlock-popup-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
-            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem;letter-spacing:.01em">
-            ${t('unlock_popup_cta')}
+            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 2px 4px rgba(0,0,0,.4);margin-bottom:.6rem;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:.5rem">
+            🔓 ${t('unlock_popup_cta')}
           </button>
           <button onclick="document.getElementById('unlock-popup-overlay').remove()"
             style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">

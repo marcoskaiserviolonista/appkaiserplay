@@ -1259,12 +1259,12 @@ function _poolForLvl(n){
   if(n===4) return MAIORES;                            // todos maiores
   if(n===5) return [...MAIORES,8,12];                  // + Dm Am
   if(n<=7)  return MENORES;                            // só menores
-  if(n<=9)  return [...MAIORES,...MENORES];             // maiores + menores
-  if(n===10)return [...MAIORES,...MENORES,...VOICE_M,...VOICE_m]; // + voicings (nível 10+)
+  if(n<=10) return [...MAIORES,...MENORES];             // maiores + menores (sem voicings)
   if(n===11)return DOM7;                               // só dominantes
-  if(n<=16) return [...MAIORES,...MENORES,...DOM7,...VOICE_M,...VOICE_m,...VOICE_D7];
-  if(n===17)return [...SET7M,...VOICE_7M];             // só tétrades maiores + voicing
-  if(n<=21) return [...MAIORES,...MENORES,...DOM7,...SET7M,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M];
+  if(n<=16) return [...MAIORES,...MENORES,...DOM7];
+  if(n===17)return SET7M;                              // só tétrades maiores
+  if(n<=19) return [...MAIORES,...MENORES,...DOM7,...SET7M];
+  if(n<=21) return [...MAIORES,...MENORES,...DOM7,...SET7M,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M]; // voicings entram no nível 20
   if(n===22)return [...MENORES,...MENOR7,...VOICE_m,...VOICE_m7]; // menores tríade + m7 + voicings
   if(n<=26) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7,...EXTRAS,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M,...VOICE_m7];
   return 'ALL';                                         // todos CHORDS + CHORDS_DIAMOND

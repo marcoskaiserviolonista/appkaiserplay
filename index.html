@@ -1876,6 +1876,13 @@ function comboEmoji(streak){
 function getAcc(){return state.stats.t>0?Math.round(state.stats.c/state.stats.t*100):0;}
 
 
+function _fretboardInterval(lvlN){
+  if(lvlN<=20) return 5;
+  if(lvlN<=40) return 4;
+  if(lvlN<=60) return 3;
+  return 2;
+}
+
 function _qualityChance(lvlN){
   const cat=Math.ceil(lvlN/10); // categoria 1-10
   if(cat>=10)return 0;          // categoria 10 (níveis 91-100): zero
@@ -1907,9 +1914,9 @@ function genQ(){
 
   // ── 2. Pergunta de Fretboard (1 a cada 5 perguntas comuns) ─
   state.commonQCount++;
-  if(state.commonQCount%5===0){
+  const _lvlNFb=LEVELS[getLvlIdx(state.xp)].n;
+  if(state.commonQCount%_fretboardInterval(_lvlNFb)===0){
     state.isFretboard=true;
-    const _lvlNFb=LEVELS[getLvlIdx(state.xp)].n;
     let pool;
     if(_lvlNFb<20){
       // só tríades maiores e menores básicas

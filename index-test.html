@@ -4523,51 +4523,58 @@ function closeNivelModal(){
   if(nivelModal){nivelModal.remove();nivelModal=null;}
 }
 
-function downloadNivelCard(imgSrc, titulo, categoria){
+async function downloadNivelCard(imgSrc, titulo, categoria){
   playClickSfx('soft');
   const userName=state.user?.displayName||state.user?.email?.split('@')[0]||'Jogador';
-  const img=new Image();
-  img.crossOrigin='anonymous';
-  img.onload=function(){
-    const c=document.createElement('canvas');
-    c.width=img.naturalWidth; c.height=img.naturalHeight;
-    const ctx=c.getContext('2d');
-    ctx.drawImage(img,0,0);
-    // gradiente escuro na parte inferior
-    const barH=img.naturalHeight*0.22;
-    const grd=ctx.createLinearGradient(0,img.naturalHeight-barH,0,img.naturalHeight);
-    grd.addColorStop(0,'rgba(0,0,0,0)');
-    grd.addColorStop(1,'rgba(0,0,0,0.78)');
-    ctx.fillStyle=grd;
-    ctx.fillRect(0,img.naturalHeight-barH,img.naturalWidth,barH);
-    // sombra para ambas as linhas
-    ctx.shadowColor='rgba(0,0,0,0.9)';
-    ctx.shadowBlur=10;
-    ctx.shadowOffsetY=2;
-    ctx.textAlign='center';
-    // nome do usuário
-    const fs1=Math.round(img.naturalWidth*0.075);
-    ctx.font=`900 ${fs1}px 'Fredoka One', sans-serif`;
-    ctx.fillStyle='#ffffff';
-    ctx.fillText(userName,img.naturalWidth/2,img.naturalHeight-barH*0.42);
-    // nome da categoria
-    const fs2=Math.round(img.naturalWidth*0.055);
-    ctx.font=`700 ${fs2}px 'Fredoka One', sans-serif`;
-    ctx.fillStyle='rgba(255,255,255,0.82)';
-    ctx.fillText(categoria,img.naturalWidth/2,img.naturalHeight-barH*0.13);
-    ctx.shadowBlur=0;
-    c.toBlob(blob=>{
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement('a');
-      a.href=url; a.download=titulo+'.png'; a.click();
-      URL.revokeObjectURL(url);
-    },'image/png');
-  };
-  img.onerror=function(){
+  await document.fonts.ready;
+  const img=await new Promise((res,rej)=>{
+    const i=new Image();
+    i.crossOrigin='anonymous';
+    i.onload=()=>res(i);
+    i.onerror=()=>rej();
+    i.src=imgSrc;
+  }).catch(()=>null);
+  if(!img){
     const a=document.createElement('a');
     a.href=imgSrc; a.download=titulo+'.png'; a.click();
-  };
-  img.src=imgSrc;
+    return;
+  }
+  const c=document.createElement('canvas');
+  c.width=img.naturalWidth; c.height=img.naturalHeight;
+  const ctx=c.getContext('2d');
+  ctx.drawImage(img,0,0);
+  const W=c.width, H=c.height;
+  // vinheta suave na parte inferior
+  const vigH=H*0.36;
+  const grd=ctx.createLinearGradient(0,H-vigH,0,H);
+  grd.addColorStop(0,'rgba(0,0,0,0)');
+  grd.addColorStop(0.5,'rgba(0,0,0,0.28)');
+  grd.addColorStop(1,'rgba(0,0,0,0.62)');
+  ctx.fillStyle=grd;
+  ctx.fillRect(0,H-vigH,W,vigH);
+  const mb=H*0.09;   // margem inferior
+  const gap=H*0.064; // espaço entre as duas linhas
+  ctx.textAlign='center';
+  ctx.textBaseline='bottom';
+  // categoria — Poppins 400 itálico, branco quente
+  ctx.font=`400 italic ${Math.round(W*0.05)}px 'Poppins',sans-serif`;
+  ctx.fillStyle='rgba(255,242,210,0.82)';
+  ctx.shadowColor='rgba(0,0,0,0.92)';
+  ctx.shadowBlur=14;
+  ctx.shadowOffsetY=1;
+  ctx.fillText(categoria,W/2,H-mb);
+  // nome do usuário — Poppins 700, branco puro
+  ctx.font=`700 ${Math.round(W*0.072)}px 'Poppins',sans-serif`;
+  ctx.fillStyle='#ffffff';
+  ctx.shadowBlur=18;
+  ctx.fillText(userName,W/2,H-mb-gap);
+  ctx.shadowBlur=0;
+  c.toBlob(blob=>{
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url; a.download=titulo+'.png'; a.click();
+    URL.revokeObjectURL(url);
+  },'image/png');
 }
 
 // ── Ranking: leitura pontual (sem listener em tempo real) ─────

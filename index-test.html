@@ -4553,19 +4553,19 @@ async function downloadNivelCard(imgSrc, titulo, categoria){
   ctx.fillStyle=grd;
   ctx.fillRect(0,H-vigH,W,vigH);
   const mb=H*0.055;  // margem inferior
-  const gap=H*0.05;  // espaço entre as duas linhas
+  const gap=H*0.038; // espaço entre as duas linhas
   ctx.textAlign='center';
   ctx.textBaseline='bottom';
-  // categoria — Poppins 400 itálico, branco quente
-  ctx.font=`400 italic ${Math.round(W*0.05)}px 'Poppins',sans-serif`;
-  ctx.fillStyle='rgba(255,242,210,0.82)';
+  // categoria — Poppins 400 itálico, papel envelhecido suave
+  ctx.font=`400 italic ${Math.round(W*0.04)}px 'Poppins',sans-serif`;
+  ctx.fillStyle='rgba(240,224,176,0.78)';
   ctx.shadowColor='rgba(0,0,0,0.92)';
   ctx.shadowBlur=14;
   ctx.shadowOffsetY=1;
   ctx.fillText(categoria,W/2,H-mb);
-  // nome do usuário — Poppins 700, branco puro
-  ctx.font=`700 ${Math.round(W*0.072)}px 'Poppins',sans-serif`;
-  ctx.fillStyle='#ffffff';
+  // nome do usuário — Poppins 700, papel envelhecido
+  ctx.font=`700 ${Math.round(W*0.0576)}px 'Poppins',sans-serif`;
+  ctx.fillStyle='#F0E0B0';
   ctx.shadowBlur=18;
   ctx.fillText(userName,W/2,H-mb-gap);
   ctx.shadowBlur=0;

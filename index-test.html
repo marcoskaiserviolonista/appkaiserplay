@@ -761,6 +761,7 @@ const STRINGS = {
     no_other_guitars:'Nenhum outro violão adquirido.', no_items_yet:'Nenhum item adquirido ainda.',
     download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ Ver Código',
     coupon_toast_title:'Código copiado!', coupon_toast_body:'Cole esse código ao finalizar a compra.',
+    coupon_modal_subtitle:'Use este código ao finalizar sua compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'Copiado!', coupon_modal_visit:'Aprenda violão no', coupon_modal_click:'Clique para saber mais',
     download_error_title:'Erro no download', download_error_body:'Não foi possível baixar. Tente novamente.',
     // Profile stats
     most_missed_chord:'Acorde que mais errou', hits_and_misses:'Acertos e Erros por Acorde',
@@ -958,6 +959,7 @@ const STRINGS = {
     no_other_guitars:'No other guitars owned.', no_items_yet:'No items purchased yet.',
     download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ View Code',
     coupon_toast_title:'Code copied!', coupon_toast_body:'Paste this code when checking out.',
+    coupon_modal_subtitle:'Use this code when checking out:', coupon_modal_copy:'Copy', coupon_modal_copied:'Copied!', coupon_modal_visit:'Learn guitar at', coupon_modal_click:'Click to learn more',
     download_error_title:'Download error', download_error_body:'Could not download the file. Please try again.',
     // Profile stats
     most_missed_chord:'Most missed chord', hits_and_misses:'Hits and Misses by Chord',
@@ -1292,7 +1294,7 @@ const LOJA_ITEMS = [
   {id:1,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Greensleeves',    desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1bMpZ5ob_uLHSLbFZtLcqDsofbTH2Ughq'},
   {id:2,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Romance de Amor', desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1oLf88_0Lsr0bVrxGpfS_bePw-PlDABnm'},
   {id:3,img:'tablatura.png',           icon:'🎵',nome:'Tablatura de Abismo de Rosas', desc:'Partitura completa + tab',         preco:160,  file:'https://drive.google.com/uc?export=download&id=1r63XQkGkRBYqBORO8GINUg4N0ak4msmD'},
-  {id:5,img:'cupom.png',               icon:'🏷️',nome:'CUPOM 20% off — Plano Vitalício',desc:'Desconto exclusivo KaiserPlay', preco:1600, cupom:'KAISERPLAY20'},
+  {id:5,img:'cupom.png',               icon:'🏷️',nome:'CUPOM 20% off — Plano Vitalício',desc:'Desconto exclusivo KaiserPlay', preco:1600, cupom:'PERGAMINHOS'},
   {id:0,img:'livro_arte_auditiva.png', icon:'📖',nome:'EBOOK - A Arte Auditiva do Violão: Como Tirar Músicas de Ouvido', desc:'Como tirar músicas de ouvido', preco:22000,file:'https://drive.google.com/uc?export=download&id=1Od4y6XcnYXqPMSeZbM9fNVCpfJtiRdmQ'},
 ];
 
@@ -4714,14 +4716,52 @@ function confirmarCompra({nome, preco, img, icon, onConfirm}){
   playClickSfx('soft');
 }
 
+let cupomModal=null;
+function showCupomModal(item){
+  if(cupomModal) return;
+  const overlay=document.createElement('div');
+  overlay.id='cupom-modal-overlay';
+  overlay.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+  overlay.onclick=e=>{if(e.target===overlay)closeCupomModal();};
+  overlay.innerHTML=`
+    <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:20px;padding:1.5rem 1.3rem 1.25rem;width:100%;max-width:400px;box-shadow:0 0 32px rgba(245,166,35,.18),6px 6px 0 #111;text-align:center;position:relative">
+      <button onclick="closeCupomModal()" style="position:absolute;top:.75rem;right:.75rem;background:#252525;border:1.5px solid #3a3a3a;border-radius:50%;width:34px;height:34px;color:#aaa;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+      <div style="font-size:2.2rem;margin-bottom:.5rem">📜</div>
+      <div style="font-size:.95rem;font-weight:900;color:#e8e8e8;margin-bottom:.25rem">${itemName(item)}</div>
+      <div style="font-size:.75rem;color:#888;margin-bottom:1rem">${t('coupon_modal_subtitle')}</div>
+      <div style="background:#111;border:2px solid #F5A62366;border-radius:12px;padding:.8rem 1rem;display:flex;align-items:center;justify-content:space-between;gap:.75rem;margin-bottom:1.25rem">
+        <span style="font-family:'Fredoka One',sans-serif;font-size:1.5rem;font-weight:700;color:#F5A623;letter-spacing:.06em">${item.cupom}</span>
+        <button id="cupom-copy-btn" onclick="copyCupomCode('${item.cupom}')" style="background:#F5A623;border:2px solid #1a1a1a;border-radius:9px;padding:.4rem .85rem;color:#111;font-weight:900;font-size:.78rem;cursor:pointer;flex-shrink:0;box-shadow:2px 2px 0 #1a1a1a">${t('coupon_modal_copy')}</button>
+      </div>
+      <a href="https://kaiserplay.com.br" target="_blank" rel="noopener" onclick="playClickSfx('nav')"
+         style="display:flex;flex-direction:column;align-items:center;gap:.3rem;text-decoration:none;border-top:1.5px solid #2a2a2a;padding-top:1rem">
+        <div style="font-size:.85rem;font-weight:700;color:#e8e8e8">${t('coupon_modal_visit')}</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:.65rem;width:100%">
+          <span style="font-size:1.1rem;color:#F5A623">→</span>
+          <img src="logo-kaiserplay-transp.png" style="width:52%;object-fit:contain;display:block">
+          <span style="font-size:1.1rem;color:#F5A623">←</span>
+        </div>
+        <div style="font-size:.7rem;font-weight:600;color:#888">${t('coupon_modal_click')}</div>
+      </a>
+    </div>`;
+  document.body.appendChild(overlay);
+  cupomModal=overlay;
+  playClickSfx('soft');
+}
+function closeCupomModal(){
+  if(cupomModal){cupomModal.remove();cupomModal=null;}
+}
+function copyCupomCode(code){
+  navigator.clipboard.writeText(code).catch(()=>{});
+  const btn=document.getElementById('cupom-copy-btn');
+  if(btn){btn.textContent=t('coupon_modal_copied');btn.style.background='#22c55e';}
+  setTimeout(()=>{if(btn){btn.textContent=t('coupon_modal_copy');btn.style.background='#F5A623';}},2000);
+}
+
 function downloadMaterial(itemId){
   const item=LOJA_ITEMS.find(x=>x.id===itemId);
   if(!item) return;
-  if(item.cupom){
-    navigator.clipboard.writeText(item.cupom).catch(()=>{});
-    showToast(t('coupon_toast_title')+' '+item.cupom, t('coupon_toast_body'));
-    return;
-  }
+  if(item.cupom){showCupomModal(item);return;}
   if(!item.file){showToast(t('coming_soon'),t('coming_soon_body'));return;}
   window.open(item.file,'_blank');
 }

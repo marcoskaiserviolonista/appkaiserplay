@@ -1836,7 +1836,7 @@ const state={
   qualityAnswer:null,
   qualitySelected:null,
   qualityPair:null,
-  questionCount:0,
+  questionCount:0,nextDiamondAt:0,
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
@@ -1899,9 +1899,10 @@ function genQ(){
   state.qualityPair=null;
 
   // ── 1. Pergunta Diamante (a cada 6–10 perguntas) ──────────
-  const threshold=Math.floor(Math.random()*5)+6;
-  state.isBonus=(state.questionCount%threshold===0);
+  if(!state.nextDiamondAt) state.nextDiamondAt=Math.floor(Math.random()*5)+6;
+  state.isBonus=(state.questionCount>=state.nextDiamondAt);
   if(state.isBonus){
+    state.nextDiamondAt=state.questionCount+Math.floor(Math.random()*5)+6;
     const pool=CHORDS_DIAMOND;
     const _prev=state.chord?.id;
     let ans=pool[Math.floor(Math.random()*pool.length)];
@@ -1944,7 +1945,7 @@ function genQ(){
     const PAIRS=[
       {opts:['maior','menor'],      labels:['Maior','Menor'],          ids:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,163]},
       {opts:['menor','diminuto'],   labels:['Menor','Diminuto'],       ids:[7,8,9,10,11,12,13,163]},
-      {opts:['diminuto','aumentado'],labels:['Diminuto','Aumentado'], ids:[]},
+      {opts:['diminuto','aumentado'],labels:['Diminuto','Aumentado'], ids:[]}, // ids não usados — pool construído dinamicamente nas linhas abaixo
     ];
     const dimPool=[...CHORDS_DIAMOND.filter(c=>c.quality==='diminuto'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];
     const augPool=[...CHORDS.filter(c=>c.quality==='aumentado'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];

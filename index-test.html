@@ -762,6 +762,7 @@ const STRINGS = {
     download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ Ver Código',
     coupon_toast_title:'Código copiado!', coupon_toast_body:'Cole esse código ao finalizar a compra.',
     coupon_modal_subtitle:'Use este código ao finalizar sua compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'Copiado!', coupon_modal_visit:'Aprenda violão no', coupon_modal_click:'Clique para saber mais',
+    bought_modal_title:'Item adicionado ao inventário', bought_modal_equipped:'Seu item foi automaticamente equipado', bought_modal_go_shop:'Ir à loja', bought_modal_later:'Ver depois',
     download_error_title:'Erro no download', download_error_body:'Não foi possível baixar. Tente novamente.',
     // Profile stats
     most_missed_chord:'Acorde que mais errou', hits_and_misses:'Acertos e Erros por Acorde',
@@ -960,6 +961,7 @@ const STRINGS = {
     download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ View Code',
     coupon_toast_title:'Code copied!', coupon_toast_body:'Paste this code when checking out.',
     coupon_modal_subtitle:'Use this code when checking out:', coupon_modal_copy:'Copy', coupon_modal_copied:'Copied!', coupon_modal_visit:'Learn guitar at', coupon_modal_click:'Click to learn more',
+    bought_modal_title:'Item added to inventory', bought_modal_equipped:'Your item was automatically equipped', bought_modal_go_shop:'Go to shop', bought_modal_later:'View later',
     download_error_title:'Download error', download_error_body:'Could not download the file. Please try again.',
     // Profile stats
     most_missed_chord:'Most missed chord', hits_and_misses:'Hits and Misses by Chord',
@@ -2532,9 +2534,8 @@ function comprarViolao(id){
       state.moedas-=v.preco;
       state.violoesComprados.push(id);
       state.violaoEquipado=id;
-      playBuySfx();
-      showToast('✅ '+guitarName(v)+t('guitar_bought_toast'),t('bonus_activated').replace('{n}',Math.round((v.pct||0)*100)));
       render();
+      showBoughtModal({img:v.img, icon:'🎸', nome:guitarName(v), isEquipable:true});
     }
   });
 }
@@ -4751,6 +4752,40 @@ function showCupomModal(item){
 function closeCupomModal(){
   if(cupomModal){cupomModal.remove();cupomModal=null;}
 }
+
+let boughtModal=null;
+function showBoughtModal({img, icon, nome, isEquipable}){
+  if(boughtModal){boughtModal.remove();boughtModal=null;}
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9600;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:1.5rem;backdrop-filter:blur(4px);';
+  overlay.innerHTML=`
+    <div style="background:#1a1a1a;border:3px solid #22c55e;border-radius:22px;padding:2rem 1.5rem 1.5rem;width:100%;max-width:380px;box-shadow:0 0 40px rgba(34,197,94,.15),6px 6px 0 #111;text-align:center">
+      <div style="width:96px;height:96px;margin:0 auto 1.1rem;background:#111;border:3px solid #2a2a2a;border-radius:18px;display:flex;align-items:center;justify-content:center;overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.5)">
+        ${img
+          ? `<img src="${img}" style="width:80px;height:80px;object-fit:contain" onerror="this.outerHTML='<span style=\\'font-size:2.8rem\\'>${icon||'🎁'}</span>'">`
+          : `<span style="font-size:2.8rem">${icon||'🎁'}</span>`}
+      </div>
+      <div style="font-size:.7rem;font-weight:800;color:#22c55e;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem">✓ ${t('bought_modal_title')}</div>
+      <div style="font-size:1rem;font-weight:900;color:#f0f0f0;line-height:1.35;margin-bottom:${isEquipable?'.5rem':'1.4rem'}">${nome}</div>
+      ${isEquipable?`<div style="font-size:.78rem;color:#888;margin-bottom:1.4rem;font-weight:600">⚡ ${t('bought_modal_equipped')}</div>`:''}
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.65rem">
+        <button onclick="closeBoughtModal();state.phase='inventario';render()"
+          style="padding:.8rem;border-radius:13px;border:2px solid #2a2a2a;background:#252525;color:#ccc;font-family:var(--font-body);font-size:.88rem;font-weight:700;cursor:pointer;-webkit-tap-highlight-color:transparent">
+          ${t('bought_modal_later')}
+        </button>
+        <button onclick="closeBoughtModal();state.phase='loja';render()"
+          style="padding:.8rem;border-radius:13px;border:3px solid #1a1a1a;background:linear-gradient(180deg,#ffbe4f,#e8931a);color:#fff;font-family:var(--font-body);font-size:.88rem;font-weight:900;cursor:pointer;box-shadow:0 4px 0 #1a1a1a;text-shadow:0 2px 6px rgba(0,0,0,.4);-webkit-tap-highlight-color:transparent">
+          ${t('bought_modal_go_shop')}
+        </button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+  boughtModal=overlay;
+  playBuySfx();
+}
+function closeBoughtModal(){
+  if(boughtModal){boughtModal.remove();boughtModal=null;}
+}
 function copyCupomCode(code){
   navigator.clipboard.writeText(code).catch(()=>{});
   const btn=document.getElementById('cupom-copy-btn');
@@ -4781,9 +4816,8 @@ function comprarItem(id){
       if(state.inventario.includes(id)){showToast(t('item_already_owned'),t('check_inventory'));return;}
       state.moedas-=item.preco;
       state.inventario.push(id);
-      playBuySfx();
-      showToast(t('item_added_inventory'),itemName(item));
       render();
+      showBoughtModal({img:item.img, icon:item.icon, nome:itemName(item), isEquipable:false});
     }
   });
 }

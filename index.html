@@ -1369,10 +1369,18 @@ function buildFbSVG(){
     const wxL=Math.round(fbStrX(0,tn)),wxR=Math.round(fbStrX(5,tn));
     o+=`<line x1="${wxL}" y1="${wy}" x2="${wxR}" y2="${wy}" stroke="#fff" stroke-width="${fw===12?2.5:1.5}" stroke-linecap="round"/>`;
   }
+  // Pontos de marcação nas casas 5 e 7
+  [5,7].forEach(fn=>{
+    const fmid=(FB_FRET_Y[fn-1]+FB_FRET_Y[fn])/2,fmy=Math.round(FB_NUT_Y+fmid);
+    const t=fmid/FB_PLAY_H;
+    const cx=Math.round((fbStrX(2,t)+fbStrX(3,t))/2);
+    o+=`<circle cx="${cx}" cy="${fmy}" r="5" fill="#333" stroke="#555" stroke-width="1"/>`;
+  });
+  // Números das casas (text-anchor end para não cortar 10/11/12)
   for(let fl=1;fl<=12;fl++){
     const fmid=(FB_FRET_Y[fl-1]+FB_FRET_Y[fl])/2,fmy=Math.round(FB_NUT_Y+fmid);
-    const flx=Math.round(fbStrX(0,fmid/FB_PLAY_H))-14;
-    o+=`<text x="${flx}" y="${fmy+4}" text-anchor="middle" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
+    const flx=Math.round(fbStrX(0,fmid/FB_PLAY_H))-4;
+    o+=`<text x="${flx}" y="${fmy+4}" text-anchor="end" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
   }
   // Bolinhas selecionadas
   const isAnswered=state.phase==='answered'||state.phase==='treino_focado_answered';

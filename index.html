@@ -3282,7 +3282,7 @@ function renderTreinoFocadoMenu(){
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:1.4rem;gap:.75rem">
       <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
       <div style="flex:1;min-width:0;overflow:hidden">
-        <span style="font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;white-space:nowrap">${state.lang==='en'?'Focused training':'Treino focado'}</span><span style="font-size:.82rem;font-weight:600;color:#60dcffaa;white-space:nowrap">: ${state.lang==='en'?'the gym for your ear':'a academia do seu ouvido'}</span>
+        <span style="font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;white-space:nowrap">${state.lang==='en'?'Ear Academy':'Academia do ouvido'}</span>
       </div>
     </div>
 
@@ -3291,8 +3291,8 @@ function renderTreinoFocadoMenu(){
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
         <img src="forte.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
         <div style="flex:1;min-width:0">
-          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:${paywall?'.3rem':'.0rem'}">${t('training_suggestion')}</div>
-          ${paywall?`<div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-top:.3rem">${state.lang==='en'?'Find out which chords you miss the most and train exactly your weak points.':'Saiba quais são os acordes que você mais erra e treine exatamente seus pontos fracos.'}</div>`:''}
+          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('training_suggestion')}</div>
+          <div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-top:.3rem">${state.lang==='en'?'Find out which chords you miss the most and train exactly your weak points.':'Saiba quais são os acordes que você mais erra e treine exatamente seus pontos fracos.'}</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem">

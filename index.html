@@ -1828,7 +1828,7 @@ const state={
   user:null,
   lang:null,
   isGuest:true,guestExerciseCount:0,guestNextPrompt:3,guestPopupCount:0,showGuestPopup:false,
-  journeyAnswered:0,journeyBlockErrors:0,pendingFocusedPromo:false,showFocusedPromo:false,
+  journeyAnswered:0,pendingFocusedPromo:false,showFocusedPromo:false,
   chord:null,choices:[],selected:null,
   xp:0,xpDisplay:0,streak:0,bestStreak:0,score:0,result:null,
   stats:{t:0,c:0},
@@ -2404,9 +2404,8 @@ function handleAnswer(choiceId,btnEl){
     }
   }
   if(!state.fullAccess){
-    if(!ok)state.journeyBlockErrors++;
     state.journeyAnswered++;
-    if(state.journeyAnswered%10===0){if(state.journeyBlockErrors>0)state.pendingFocusedPromo=true;state.journeyBlockErrors=0;}
+    if(!ok&&state.journeyAnswered>=10){state.pendingFocusedPromo=true;state.journeyAnswered=0;}
   }
   try{render();}catch(e){console.error('render error:',e);}
   autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1200);
@@ -2511,9 +2510,8 @@ function handleQualityAnswer(quality, btnEl){
     }
   }
   if(!state.fullAccess){
-    if(!ok)state.journeyBlockErrors++;
     state.journeyAnswered++;
-    if(state.journeyAnswered%10===0){if(state.journeyBlockErrors>0)state.pendingFocusedPromo=true;state.journeyBlockErrors=0;}
+    if(!ok&&state.journeyAnswered>=10){state.pendingFocusedPromo=true;state.journeyAnswered=0;}
   }
   try{render();}catch(e){console.error('render error:',e);}
   autoTimer=setTimeout(()=>{autoTimer=null;nextQ();},1200);

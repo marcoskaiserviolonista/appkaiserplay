@@ -1861,7 +1861,7 @@ const state={
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
   fullAccess:true,
-  rankingData:[],
+  rankingData:[], rankingLoading:false,
   ratingDone:false,
   ratingSkippedAt:0,
 };
@@ -2685,7 +2685,7 @@ function goToTraining(){
   setTimeout(()=>playChord(state.chord),300);
 }
 
-function setTab(t){state.tab=t;if(t==='ranking')loadRankingData();else render();}
+function setTab(t){state.tab=t;if(t==='ranking'){state.rankingLoading=true;render();loadRankingData();}else render();}
 
 // ── 7. FUNÇÕES DE RENDERIZAÇÃO (UI) ──────────────────────────
 // Translates quality label based on current language
@@ -4648,14 +4648,20 @@ async function loadRankingData(){
   try{
     const snap=await db.collection('players').orderBy('xp','desc').limit(10).get();
     state.rankingData=snap.docs.map(d=>({uid:d.id,...d.data()}));
-    render();
   }catch(e){console.error('ranking load:',e);}
+  finally{state.rankingLoading=false;render();}
 }
 
 // ── 8. RANKING ────────────────────────────────────────────────
 function renderRanking(){
   const myUid=state.user?.uid;
   const data=state.rankingData;
+  if(state.rankingLoading) return `
+    <div class="back-row">
+      <button class="back-btn" onclick="playClickSfx('back');state.tab='game';state.phase='start';render()">${t('back_btn')}</button>
+      <span class="page-title">${t('ranking_title')}</span>
+    </div>
+    <div style="text-align:center;padding:3rem 1rem;color:#60dcff88;font-size:.95rem;letter-spacing:.05em">${t('loading')}</div>`;
   const rows=data.length===0
     ?`<div style="color:#555;text-align:center;padding:2rem;font-size:.85rem">${t('no_ranking_data')}</div>`
     :data.map((p,i)=>{

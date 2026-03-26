@@ -1031,7 +1031,7 @@ const CHORDS = [
   {id:1,  name:"D", cifra:"D",  midi:[50,57,62,66], quality:'maior'},
   {id:2,  name:"E", cifra:"E",  midi:[40,47,52,56,59,64], quality:'maior'},
   {id:3,  name:"F", cifra:"F",  midi:[41,48,53,57,60,65], quality:'maior'},
-  {id:4,  name:"G", cifra:"G",  midi:[43,47,50,55,62,67], quality:'maior'},
+  {id:4,  name:"G", cifra:"G",  midi:[43,47,50,55,59,67], quality:'maior'},
   {id:5,  name:"A", cifra:"A",  midi:[45,52,57,61,64], quality:'maior'},
   {id:6,  name:"B", cifra:"B",  midi:[47,54,59,63,66], quality:'maior'},
   // MENORES (7–13)
@@ -1377,20 +1377,19 @@ function buildFbSVG(){
   // Bolinhas selecionadas
   const isAnswered=state.phase==='answered'||state.phase==='treino_focado_answered';
   const isWrong=isAnswered&&state.result?.ok===false;
-  const expClsRem={};
-  state.chord.midi.map(m=>m%12).forEach(c=>{expClsRem[c]=(expClsRem[c]||0)+1;});
+  const chordClasses=new Set(state.chord.midi.map(m=>m%12));
   // classes de nota que o usuário cobriu corretamente
   const coveredCls=new Set();
   Object.keys(state.fbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
-    const nc=fbNoteClass(sc,fc),inChord=(expClsRem[nc]||0)>0;
+    const nc=fbNoteClass(sc,fc),inChord=chordClasses.has(nc);
     let cx2,cy2,fspace;
     if(fc===0){cx2=FB_NUT_X[sc];cy2=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
     else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
     const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
     let fill,tf,stroke;
     if(isAnswered){
-      if(inChord){fill='#4caf50';stroke='#1a3d1a';expClsRem[nc]--;coveredCls.add(nc);}
+      if(inChord){fill='#4caf50';stroke='#1a3d1a';coveredCls.add(nc);}
       else{fill='#f44336';stroke='#3d1a1a';}
       tf='#fff';
     }else{fill='#60dcff';tf='#111';stroke='#0a2030';}

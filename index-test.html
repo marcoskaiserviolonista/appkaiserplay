@@ -2215,6 +2215,9 @@ function doFretboardConfirm(){
   const prevMult=comboMultiplier(Math.max(1,ns-1));
   const newMult=comboMultiplier(ns);
   const multLevelUp=ok&&ns>1&&newMult>prevMult;
+  // Captura posição do botão ANTES do render() destruir o DOM
+  const _fbBtn=document.getElementById('fb-confirm-btn');
+  const _fbRect=_fbBtn?_fbBtn.getBoundingClientRect():null;
   if(ok){
     const diamGain=violaoAtual.doubleDiamonds?2:1;
     diamondGained=diamGain;state.diamantes+=diamGain;
@@ -2229,27 +2232,22 @@ function doFretboardConfirm(){
     if(getLvlIdx(state.xp)>lvlBefore){state.lvlUpPending=true;checkRatingPrompt(LEVELS[getLvlIdx(state.xp)].n);}
     const app=document.getElementById('app');
     if(app){app.style.transition='background .15s';app.style.background='#0a1a2e';setTimeout(()=>{app.style.background='';app.style.transition='';},500);}
-    // Popup de pontos
-    setTimeout(()=>{
-      const btnEl=document.getElementById('fb-confirm-btn');
-      if(btnEl){
-        const rect=btnEl.getBoundingClientRect();
-        const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
-        const cl=(window.innerWidth-520)/2;
-        particles.push(...makeParticles(cx-cl,cy,28,true));
-        const xpPopup=document.createElement('div');
-        xpPopup.textContent=`💎 +${gain} ${t('points')}`;
-        xpPopup.style.cssText=`position:fixed;z-index:9999;left:${rect.left+rect.width/2}px;top:${rect.top}px;transform:translate(-50%,-100%);font-size:1.6rem;font-weight:900;color:#60dcff;text-shadow:0 0 18px #60dcff,0 0 40px #60dcff66;pointer-events:none;white-space:nowrap;`;
-        document.body.appendChild(xpPopup);
-        xpPopup.animate([
-          {opacity:0,transform:'translate(-50%,-60%) scale(.5)'},
-          {opacity:1,transform:'translate(-50%,-120%) scale(1.2)',offset:.15},
-          {opacity:1,transform:'translate(-50%,-130%) scale(1)',offset:.78},
-          {opacity:0,transform:'translate(-50%,-160%) scale(.9)'}
-        ],{duration:1500,easing:'ease-out'}).onfinish=()=>xpPopup.remove();
-      }
-      animateXPGain(xpBefore,state.xp);
-    },50);
+    if(_fbRect){
+      const cx=_fbRect.left+_fbRect.width/2,cy=_fbRect.top+_fbRect.height/2;
+      const cl=(window.innerWidth-520)/2;
+      particles.push(...makeParticles(cx-cl,cy,28,true));
+      const xpPopup=document.createElement('div');
+      xpPopup.textContent=`💎 +${gain} ${t('points')}`;
+      xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${_fbRect.top}px;transform:translate(-50%,-100%);font-size:1.6rem;font-weight:900;color:#60dcff;text-shadow:0 0 18px #60dcff,0 0 40px #60dcff66;pointer-events:none;white-space:nowrap;`;
+      document.body.appendChild(xpPopup);
+      xpPopup.animate([
+        {opacity:0,transform:'translate(-50%,-60%) scale(.5)'},
+        {opacity:1,transform:'translate(-50%,-120%) scale(1.2)',offset:.15},
+        {opacity:1,transform:'translate(-50%,-130%) scale(1)',offset:.78},
+        {opacity:0,transform:'translate(-50%,-160%) scale(.9)'}
+      ],{duration:1500,easing:'ease-out'}).onfinish=()=>xpPopup.remove();
+    }
+    setTimeout(()=>animateXPGain(xpBefore,state.xp),50);
   }else{
     state.notas=Math.max(0,state.notas-10);
     gain=-10;state.xp=Math.max(0,state.xp-10);
@@ -2258,22 +2256,18 @@ function doFretboardConfirm(){
     if(app){app.classList.add('flash-wrong');setTimeout(()=>app.classList.remove('flash-wrong'),500);}
     document.querySelector('.play-area')?.classList.add('shake');
     setTimeout(()=>document.querySelector('.play-area')?.classList.remove('shake'),400);
-    setTimeout(()=>{
-      const btnEl=document.getElementById('fb-confirm-btn');
-      if(btnEl){
-        const wrect=btnEl.getBoundingClientRect();
-        const wrongXp=document.createElement('div');
-        wrongXp.textContent=`-10 ${t('points')}`;
-        wrongXp.style.cssText=`position:fixed;z-index:9999;left:${wrect.left+wrect.width/2}px;top:${wrect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
-        document.body.appendChild(wrongXp);
-        wrongXp.animate([
-          {opacity:0,transform:'translate(-50%,-30%) scale(.6)'},
-          {opacity:1,transform:'translate(-50%,-100%) scale(1.05)',offset:.15},
-          {opacity:1,transform:'translate(-50%,-110%) scale(1)',offset:.78},
-          {opacity:0,transform:'translate(-50%,-140%) scale(.85)'}
-        ],{duration:750,easing:'ease-out'}).onfinish=()=>wrongXp.remove();
-      }
-    },50);
+    if(_fbRect){
+      const wrongXp=document.createElement('div');
+      wrongXp.textContent=`-10 ${t('points')}`;
+      wrongXp.style.cssText=`position:fixed;z-index:9999;left:${_fbRect.left+_fbRect.width/2}px;top:${_fbRect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
+      document.body.appendChild(wrongXp);
+      wrongXp.animate([
+        {opacity:0,transform:'translate(-50%,-30%) scale(.6)'},
+        {opacity:1,transform:'translate(-50%,-100%) scale(1.05)',offset:.15},
+        {opacity:1,transform:'translate(-50%,-110%) scale(1)',offset:.78},
+        {opacity:0,transform:'translate(-50%,-140%) scale(.85)'}
+      ],{duration:750,easing:'ease-out'}).onfinish=()=>wrongXp.remove();
+    }
   }
   state.result={ok,gain,msg,chordName:state.chord.name,diamondGained,multLevelUp};
   state.phase='answered';

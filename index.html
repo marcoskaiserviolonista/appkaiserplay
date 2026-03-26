@@ -3286,6 +3286,37 @@ function renderTreinoFocadoMenu(){
       </div>
     </div>
 
+    ${paywall?`
+    <div style="width:100%;max-width:520px;background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.5rem 1.35rem 1.4rem;margin-bottom:1.5rem;text-align:center;box-shadow:6px 6px 0 #000">
+      <div style="line-height:1.25;margin-bottom:1.2rem">
+        <div style="font-size:1.05rem;font-weight:900;color:#4ade80;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em">${t('unlock_all_trainings')}</div>
+        <div style="font-size:.84rem;color:#aaa;font-weight:500;line-height:1.45;margin-top:.35rem">${state.lang==='en'?'Speed up your progress by identifying your weaknesses and creating personalized training sessions.':'Acelere sua evolução identificando suas fraquezas e criando os treinos personalizados.'}</div>
+      </div>
+      <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.2rem;text-align:left">
+        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem">🎯</span>
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem">
+          <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem">♾️</span>
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b3')}</span>
+        </div>
+      </div>
+      <div style="margin-bottom:1.1rem;text-align:center">
+        <div style="font-size:.78rem;color:#888;font-weight:600;margin-bottom:.25rem">${state.lang==='en'?'🇧🇷 From <s style="color:#666">R$99,90</s> for':'De <s style="color:#666">R$99,90</s> por'}</div>
+        <div style="font-size:2.2rem;font-weight:900;color:#4ade80;letter-spacing:-.01em;line-height:1;text-shadow:0 0 14px #22c55e55">R$49,90</div>
+      </div>
+      <button onclick="showToast(t('coming_soon'),t('coming_soon_body'))"
+        style="width:100%;padding:.95rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:4px 4px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:.5rem">
+        ${t('unlock_btn')}
+      </button>
+      <div style="font-size:.68rem;color:#b0c8b4;margin-top:.65rem">${t('payment_info')}</div>
+    </div>`:''}
+
     ${hasHistory&&hasSmartData?`
     <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
@@ -3374,8 +3405,6 @@ function renderTreinoFocadoMenu(){
         style="width:100%;padding:.95rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#fff;cursor:pointer;box-shadow:4px 4px 0 #111;letter-spacing:.02em;text-shadow:0 1px 4px rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;gap:.5rem">
         ${t('unlock_btn')}
       </button>
-      <div style="font-size:.68rem;color:#b0c8b4;margin-top:.65rem">${t('payment_info')}</div>
-    </div>`:''}
   `;
 }
 

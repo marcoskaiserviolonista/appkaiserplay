@@ -4744,7 +4744,7 @@ function nextQ(){
     app.style.boxShadow='inset 0 0 60px rgba(96,220,255,.15)';
     setTimeout(()=>{app.style.boxShadow='';app.style.transition='';},1200);
   }
-  setTimeout(()=>playChord(state.chord),300);
+  setTimeout(()=>playChord(state.chord),state.isBonus?1500:300);
   if(state.isBonus){
     setTimeout(()=>{
       const popup=document.createElement('div');
@@ -4769,9 +4769,9 @@ function afterLvlUp(){
     return;
   }
   genQ();state.phase='question';render();
-  setTimeout(()=>playChord(state.chord),300);
+  if(state.isBonus){playSfx('diamond');}
+  setTimeout(()=>playChord(state.chord),state.isBonus?1500:300);
   if(state.isBonus){
-    playSfx('diamond');
     const app=document.getElementById('app');
     if(app){app.style.transition='box-shadow .2s';app.style.boxShadow='inset 0 0 60px rgba(96,220,255,.15)';setTimeout(()=>{app.style.boxShadow='';app.style.transition='';},1200);}
     setTimeout(()=>{

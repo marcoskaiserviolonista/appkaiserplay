@@ -1440,9 +1440,12 @@ SAMPLE_NOTES.forEach(n => {
   howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.5});
 });
 
-// Boost +10% para notas com volume ligeiramente mais baixo na gravação (MIDI 43–63)
-const _BOOST_MIDI = new Set([43,44,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]);
-function _noteBoost(midi){ return _BOOST_MIDI.has(midi)?1.1:1; }
+// Boost de volume para notas com gravação mais baixa
+// +20%: notas identificadas como ainda mais baixas (MIDI 43–47, 53–56)
+// +10%: demais notas do range médio-grave (MIDI 48–52, 57–63)
+const _BOOST_MIDI_20 = new Set([43,44,45,46,47,53,54,55,56]);
+const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
+function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Compressor dinâmico — evita distorção quando várias notas somam volume
 let _compressorInit = false;

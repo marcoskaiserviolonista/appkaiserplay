@@ -709,6 +709,7 @@ const STRINGS = {
     focused_training_title:'Treino Focado', training_suggestion:'Sugestão de treino',
     most_missed_chords:'Acordes mais errados:', most_missed_qualities:'Qualidades mais erradas:',
     train_weak_points:'Treinar pontos fracos', no_weak_points:'Sem pontos fracos identificados ainda.',
+    chord_building:'Construção de Acorde', start_chord_building:'Iniciar Treino de Construção', hear_build:'Ouvir montagem', next_fretboard:'Próximo',
     focused_promo_title:'Quer evoluir mais rápido?', focused_promo_body:'Treine exatamente os acordes que você erra.', focused_promo_btn:'Ir para Treino Focado',
     locked:'Bloqueado', unlock:'Desbloquear', free:'Grátis',
     // Quality pair labels
@@ -910,6 +911,7 @@ const STRINGS = {
     focused_training_title:'Focused Training', training_suggestion:'Training suggestion',
     most_missed_chords:'Most missed chords:', most_missed_qualities:'Most missed qualities:',
     train_weak_points:'Train weak points', no_weak_points:'No weak points identified yet.',
+    chord_building:'Chord Building', start_chord_building:'Start Chord Building', hear_build:'Hear build', next_fretboard:'Next',
     focused_promo_title:'Want to improve faster?', focused_promo_body:'Train exactly the chords you get wrong.', focused_promo_btn:'Go to Focused Training',
     locked:'Locked', unlock:'Unlock', free:'Free',
     // Quality pair labels
@@ -3381,7 +3383,7 @@ function renderTreinoFocadoMenu(){
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
         <img src="mao.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
         <div style="flex:1;min-width:0">
-          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${state.lang==='en'?'Chord Building':'Construção de Acorde'}</div>
+          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('chord_building')}</div>
           <div style="font-size:.8rem;color:#60dcff88;line-height:1.45">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
         </div>
       </div>
@@ -3391,7 +3393,7 @@ function renderTreinoFocadoMenu(){
         style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
         ${fbEnabled?'':`disabled`}
         onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
-        ${paywall?'🔒 ':''}${state.lang==='en'?'Start Chord Building':'Iniciar Treino de Construção'}
+        ${paywall?'🔒 ':''}${t('start_chord_building')}
       </button>
     </div>
     ${paywall?`
@@ -3435,7 +3437,7 @@ function renderTreinoFocado(){
   const streakSize=state.focusedStreak>=10?'font-size:2.2rem':state.focusedStreak>=5?'font-size:2rem':'font-size:1.7rem';
   const answered=state.phase==='treino_focado_answered';
   const activeLabels=state.fretboardExercise
-    ?[state.lang==='en'?'Chord Building':'Construção de Acorde']
+    ?[t('chord_building')]
     :Object.entries(state.focusedSwitches).filter(([,v])=>v).map(([k])=>getFocusedSwitchLabel(k));
 
   let choicesHtml;
@@ -3443,9 +3445,9 @@ function renderTreinoFocado(){
     choicesHtml=`
       <div class="fb-action-row">
         ${answered
-          ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${state.lang==='en'?'Next':'Próximo'} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
+          ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');nextFocusedFretboardQ()">${t('next_fretboard')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
           : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFocusedFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
-             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
+             <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${t('hear_build')}</button>`
         }
       </div>
       ${answered?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}`;
@@ -3914,9 +3916,9 @@ function renderGame(){
       ${state.isFretboard ? `
         <div class="fb-action-row">
           ${state.phase==='answered'
-            ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${state.lang==='en'?'Next':'Próximo'} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
+            ? `<button class="fb-confirm-btn" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border-color:#4ade80;color:#4ade80" onclick="playClickSfx('soft');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}nextQ()">${t('next_fretboard')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;flex-shrink:0"></button>`
             : `<button id="fb-confirm-btn" class="fb-confirm-btn" onclick="doFretboardConfirm()" ${Object.keys(state.fbSel).length===0?'disabled':''}>✓ ${t('confirm')}</button>
-               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${state.lang==='en'?'Hear build':'Ouvir montagem'}</button>`
+               <button class="fb-ghost-btn" onclick="playClickSfx('soft');playFbSelChord()" ${Object.keys(state.fbSel).length===0?'disabled':''}>  ${t('hear_build')}</button>`
           }
         </div>
         ${state.phase==='answered'?`<div style="text-align:center;font-size:1.5rem;font-weight:900;color:#F5A623;margin-top:.35rem;letter-spacing:-.01em">${(state.lang==='en'&&state.chord.cifraEn)?state.chord.cifraEn:state.chord.cifra}</div>`:''}

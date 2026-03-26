@@ -1437,6 +1437,10 @@ SAMPLE_NOTES.forEach(n => {
   howls[n] = new Howl({src:[`sounds/note-${n}.ogg`],preload:true,volume:0.5});
 });
 
+// Boost +10% para notas com volume ligeiramente mais baixo na gravação (MIDI 43–63)
+const _BOOST_MIDI = new Set([43,44,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63]);
+function _noteBoost(midi){ return _BOOST_MIDI.has(midi)?1.1:1; }
+
 // Compressor dinâmico — evita distorção quando várias notas somam volume
 let _compressorInit = false;
 function initCompressor() {
@@ -1478,9 +1482,10 @@ function playChord(chord){
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
       const id=howls[sn].play();
-      howls[sn].volume(noteVol,id);
+      const _vol=noteVol*_noteBoost(midi);
+      howls[sn].volume(_vol,id);
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
-      _playingIds.push({howl:howls[sn],id,vol:noteVol});
+      _playingIds.push({howl:howls[sn],id,vol:_vol});
     },i*noteDelay);
   });
   const totalDur=(chord.midi.length-1)*noteDelay+3000;
@@ -2064,9 +2069,10 @@ function playFbNoteClick(midi){
   const sn=nearestSample(midi);
   const ratio=midiToFreq(midi)/midiToFreq(sn);
   const id=howls[sn].play();
-  howls[sn].volume(0.3,id);
+  const _fbVol=0.3*_noteBoost(midi);
+  howls[sn].volume(_fbVol,id);
   if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
-  setTimeout(()=>{try{howls[sn].fade(0.3,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
+  setTimeout(()=>{try{howls[sn].fade(_fbVol,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);
 }
 
 // ── Fretboard: toca notas montadas pelo usuário (grave→agudo) ──
@@ -2082,7 +2088,7 @@ function playFbSelChord(){
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
       const id=howls[sn].play();
-      howls[sn].volume(noteVol,id);
+      howls[sn].volume(noteVol*_noteBoost(midi),id);
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
     },i*110);
   });

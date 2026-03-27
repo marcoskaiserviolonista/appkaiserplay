@@ -3345,7 +3345,7 @@ function renderTreinoFocadoMenu(){
       <button
         style="width:100%;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${paywall?'#60dcff44':'#60dcff88'};border-radius:12px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.7rem 1rem;display:flex;align-items:center;justify-content:center;gap:.6rem;font-family:var(--font-body);font-size:.9rem;font-weight:900;color:${paywall?'#60dcff66':'#60dcff'};letter-spacing:.01em;text-shadow:0 0 12px #60dcff44"
         onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startSmartSession()`}">
-        <span style="font-size:1.1rem">${paywall?'🔒':'🎯'}</span> ${t('train_weak_points')}
+        <span style="font-size:1.1rem">${paywall?'🔒':'<img src="alvo.png" style="width:1.1rem;height:1.1rem;vertical-align:middle;object-fit:contain">'}</span> ${t('train_weak_points')}
       </button>
     </div>`:''}
 
@@ -3359,7 +3359,7 @@ function renderTreinoFocadoMenu(){
             : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em'}"
         ${enabled?'':'disabled'}
         onclick="startFocusedSession()">
-        ${enabled?'<span style="font-size:1.3rem">🎯</span> '+t('start_training'):t('activate_one')}
+        ${enabled?'<img src="alvo.png" style="width:1.3rem;height:1.3rem;vertical-align:middle;object-fit:contain;flex-shrink:0"> '+t('start_training'):t('activate_one')}
       </button>
       <div style="border-top:1px solid #60dcff15;margin-bottom:.75rem"></div>
       <div style="font-size:.72rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem">${t('train_by_quality')}</div>
@@ -3397,7 +3397,7 @@ function renderTreinoFocadoMenu(){
           <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
-          <span style="font-size:1rem;flex-shrink:0;margin-top:.05rem">🎯</span>
+          <img src="alvo.png" style="width:1rem;height:1rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
           <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
         </div>
         <div style="display:flex;align-items:flex-start;gap:.65rem">
@@ -3614,7 +3614,7 @@ function render(){
               <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
             </div>
             <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
-              <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎯</span>
+              <img src="alvo.png" style="width:1rem;height:1rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
               <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
             </div>
             <div style="display:flex;align-items:flex-start;gap:.65rem">
@@ -3714,7 +3714,7 @@ function renderStart(){
       </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
-        <span style="font-size:1.8rem;flex-shrink:0">🎯</span>
+        <img src="alvo.png" style="width:1.8rem;height:1.8rem;flex-shrink:0;object-fit:contain">
         <div style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
       </button>
     </div>
@@ -3957,7 +3957,7 @@ function renderGame(){
     ${state.showFocusedPromo&&!state.fullAccess&&state.phase==='question'?`
     <div style="width:100%;max-width:520px;margin-top:1rem;background:linear-gradient(180deg,#0d1e2e,#081422);border:2.5px solid #60dcff66;border-radius:18px;padding:1.1rem 1.15rem 1rem;box-shadow:0 0 18px rgba(96,220,255,.1);animation:promoFadeIn .35s ease">
       <div style="display:flex;align-items:flex-start;gap:.7rem;margin-bottom:.85rem">
-        <span style="font-size:1.4rem;flex-shrink:0;margin-top:.05rem">🎯</span>
+        <img src="alvo.png" style="width:1.4rem;height:1.4rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
         <div>
           <div style="font-size:.95rem;font-weight:900;color:#60dcff;line-height:1.25;margin-bottom:.3rem">${t('focused_promo_title')}</div>
           <div style="font-size:.82rem;color:#a8d8ea;font-weight:500;line-height:1.45">${t('focused_promo_body')}</div>

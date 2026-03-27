@@ -3706,11 +3706,11 @@ function renderStart(){
     <div class="start-hero">
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
       <div class="start-desc">${t('start_desc')}</div>
-      <button class="cta-btn" onclick="playClickSfx('nav');startGame()">
-        ${t('harmonic_journey')}
+      <button class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
+        <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
       </button>
-      <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#1a3a1a 0%,#0e1e0e 100%);border-color:#4ade80;box-shadow:5px 5px 0 #061006;color:#4ade80">
-        ${t('cordas_journey')}
+      <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#1a3a1a 0%,#0e1e0e 100%);border-color:#4ade80;box-shadow:5px 5px 0 #061006;color:#4ade80;display:flex;align-items:center;justify-content:center;gap:.6rem">
+        <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
       </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">

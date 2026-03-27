@@ -730,7 +730,7 @@ const STRINGS = {
     // Profile card
     profile_rank:'Rank #', level_label:'Nível',
     // Level titles
-    lvl_aprendiz:'Aprendiz', lvl_estudante:'Estudante', lvl_bardo:'Bardo',
+    lvl_aprendiz:'Escudeiro', lvl_estudante:'Estudante', lvl_bardo:'Bardo',
     lvl_trovador:'Trovador', lvl_virtuose:'Virtuose', lvl_alquimista:'Alquimista Harmônico', lvl_barbaro:'Bárbaro Dissonante',
     lvl_mago:'Mago do Som', lvl_guardiao:'Guardião da Harmonia',
     lvl_arcanista:'Arcanista das Cordas', lvl_lenda:'Lenda da Música', lvl_mestre:'Mestre Supremo',
@@ -1220,7 +1220,7 @@ function _titleKeyForLvl(n){
 }
 // PT title used for image filename lookup (always Portuguese)
 function _titleForLvl(n){
-  if(n<=10)return"Aprendiz";
+  if(n<=10)return"Escudeiro";
   if(n<=20)return"Estudante";
   if(n<=30)return"Bardo";
   if(n<=40)return"Virtuose";
@@ -4301,7 +4301,7 @@ function renderInventario(){
 
 // ── Render: Níveis ───────────────────────────────────────────
 const NIVEL_GROUPS = [
-  {range:[1,10],   title:"Aprendiz",             desc:"O começo de tudo. Primeiros acordes, primeiros passos numa longa jornada.",          cor:'#a0a0a0'},
+  {range:[1,10],   title:"Escudeiro",             desc:"O começo de tudo. Primeiros acordes, primeiros passos numa longa jornada.",          cor:'#a0a0a0'},
   {range:[11,20],  title:"Estudante",             desc:"A dedicação começa a moldar o ouvido. O conhecimento se aprofunda.",                  cor:'#6ee7b7'},
   {range:[21,30],  title:"Bardo",                 desc:"As músicas ganham alma. O violão vira voz, e a voz vira história.",                   cor:'#86efac'},
   {range:[31,40],  title:"Virtuose",              desc:"Técnica e sensibilidade em equilíbrio perfeito. Poucos chegam até aqui.",             cor:'#60dcff'},

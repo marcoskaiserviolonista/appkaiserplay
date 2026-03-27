@@ -742,7 +742,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
     what_quality:'Qual é a qualidade deste acorde?', build_chord_fretboard:'Monte o acorde no braço do violão', back_btn:'← Voltar',
-    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica',
+    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica', cordas_journey:'Jornada pelas Cordas',
     train_ear:'Treine seu Ouvido',
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
     your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
@@ -944,7 +944,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
     what_quality:'What is the quality of this chord?', build_chord_fretboard:'Build the chord on the fretboard', back_btn:'← Back',
-    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey',
+    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey', cordas_journey:'Journey Through the Strings',
     train_ear:'Train your Ear',
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
     your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
@@ -1273,6 +1273,23 @@ function _poolForLvl(n){
   if(n===22)return [...MENORES,...MENOR7,...VOICE_m,...VOICE_m7]; // menores tríade + m7 + voicings
   if(n<=26) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7,...EXTRAS,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M,...VOICE_m7];
   return 'ALL';                                         // todos CHORDS + CHORDS_DIAMOND
+}
+function _poolForCordas(n){
+  const MAIORES =[0,1,2,3,4,5,6];
+  const MENORES =[7,8,9,10,11,12,13,163];
+  const DOM7    =[14,15,16,17,18,19,20];
+  const SET7M   =[21,22,23,24,25,26,44];
+  const MENOR7  =[27,28,29,30,31,32,43,52];
+  const EXTRAS  =[33,34,35,37,39,45,162];
+  const VOICE_M =[57,60,156];
+  const VOICE_m =[56,58,59];
+  const VOICE_D7=[159,164];
+  const VOICE_7M=[157];
+  const VOICE_m7=[161];
+  if(n<=10) return [...MAIORES,...MENORES,...DOM7];
+  if(n<=19) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7,...EXTRAS];
+  if(n<=29) return [...MAIORES,...MENORES,...DOM7,...SET7M,...MENOR7,...EXTRAS,...VOICE_M,...VOICE_m,...VOICE_D7,...VOICE_7M,...VOICE_m7];
+  return 'ALL';
 }
 // XP por nível n = 6 acertos × 10 XP × n = 60n
 const LEVELS = Array.from({length:100},(_,i)=>{
@@ -1853,6 +1870,7 @@ const state={
   qualitySelected:null,
   qualityPair:null,
   questionCount:0,nextDiamondAt:0,
+  journeyMode:'harmonic',
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
@@ -1914,6 +1932,29 @@ function genQ(){
   state.qualitySelected=null;
   state.qualityPair=null;
 
+  // ── JORNADA PELAS CORDAS ──────────────────────────────────
+  if(state.journeyMode==='cordas'){
+    if(!state.nextDiamondAt) state.nextDiamondAt=Math.floor(Math.random()*5)+6;
+    state.isBonus=(state.questionCount>=state.nextDiamondAt);
+    if(state.isBonus){
+      state.nextDiamondAt=state.questionCount+Math.floor(Math.random()*5)+6;
+      const _prev=state.chord?.id;
+      let ans=CHORDS_DIAMOND[Math.floor(Math.random()*CHORDS_DIAMOND.length)];
+      if(CHORDS_DIAMOND.length>1&&_prev!=null&&ans.id===_prev){const alt=CHORDS_DIAMOND.filter(c=>c.id!==_prev);if(alt.length>0)ans=alt[Math.floor(Math.random()*alt.length)];}
+      state.chord=ans;state.isFretboard=true;state.selected=null;state.result=null;
+      return;
+    }
+    const _lvlC=LEVELS[getLvlIdx(state.xp)].n;
+    const _rawC=_poolForCordas(_lvlC);
+    const _poolC=_rawC==='ALL'?[...CHORDS,...CHORDS_DIAMOND]:_rawC.map(id=>CHORDS.find(c=>c.id===id)).filter(Boolean);
+    const _prevC=state.chord?.id;
+    let ansC=_poolC[Math.floor(Math.random()*_poolC.length)];
+    if(_poolC.length>1&&_prevC!=null&&ansC.id===_prevC){const alt=_poolC.filter(c=>c.id!==_prevC);if(alt.length>0)ansC=alt[Math.floor(Math.random()*alt.length)];}
+    state.chord=ansC;state.isFretboard=true;state.selected=null;state.result=null;
+    return;
+  }
+
+  // ── JORNADA HARMÔNICA ─────────────────────────────────────
   // ── 1. Pergunta Diamante (a cada 6–10 perguntas) ──────────
   if(!state.nextDiamondAt) state.nextDiamondAt=Math.floor(Math.random()*5)+6;
   state.isBonus=(state.questionCount>=state.nextDiamondAt);
@@ -1925,30 +1966,6 @@ function genQ(){
     if(pool.length>1&&_prev!=null&&ans.id===_prev){const alt=pool.filter(c=>c.id!==_prev);if(alt.length>0)ans=alt[Math.floor(Math.random()*alt.length)];}
     state.chord=ans;
     state.choices=[ans,..._pickWrong(ans,pool)].sort(()=>Math.random()-.5);
-    state.selected=null;state.result=null;
-    return;
-  }
-
-  // ── 2. Pergunta de Fretboard (1 a cada 5 perguntas comuns) ─
-  state.commonQCount++;
-  const _lvlNFb=LEVELS[getLvlIdx(state.xp)].n;
-  if(state.commonQCount%_fretboardInterval(_lvlNFb)===0){
-    state.isFretboard=true;
-    let pool;
-    if(_lvlNFb<20){
-      // só tríades maiores e menores básicas
-      pool=CHORDS.filter(c=>c.quality==='maior'||c.quality==='menor');
-    }else if(_lvlNFb<40){
-      // + dominantes (C7–B7)
-      pool=CHORDS.filter(c=>c.quality==='maior'||c.quality==='menor'||[14,15,16,17,18,19,20].includes(c.id));
-    }else{
-      // todos os acordes
-      pool=[...CHORDS,...CHORDS_DIAMOND];
-    }
-    const _prevFb=state.chord?.id;
-    let ans=pool[Math.floor(Math.random()*pool.length)];
-    if(pool.length>1&&_prevFb!=null&&ans.id===_prevFb){const alt=pool.filter(c=>c.id!==_prevFb);if(alt.length>0)ans=alt[Math.floor(Math.random()*alt.length)];}
-    state.chord=ans;
     state.selected=null;state.result=null;
     return;
   }
@@ -3692,6 +3709,9 @@ function renderStart(){
       <button class="cta-btn" onclick="playClickSfx('nav');startGame()">
         ${t('harmonic_journey')}
       </button>
+      <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#1a3a1a 0%,#0e1e0e 100%);border-color:#4ade80;box-shadow:5px 5px 0 #061006;color:#4ade80">
+        ${t('cordas_journey')}
+      </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <span style="font-size:1.8rem;flex-shrink:0">🎯</span>
@@ -4678,12 +4698,31 @@ function renderRanking(){
 // ── Actions ───────────────────────────────────────────────────
 function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.journeyMode='harmonic';
   if(state.xp===0){
     Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }
   // Primeira vez: mostra card inicial antes de gerar pergunta
+  if(!state.firstCardSeen){
+    state.firstCardSeen=true;
+    state.lvlUpIsNewGroup=true;
+    state.phase='levelup';
+    render();
+    return;
+  }
+  genQ();state.phase='question';render();
+}
+
+function startCordas(){
+  if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
+  state.journeyMode='cordas';
+  if(state.xp===0){
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+  } else {
+    Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
+  }
   if(!state.firstCardSeen){
     state.firstCardSeen=true;
     state.lvlUpIsNewGroup=true;

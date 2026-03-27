@@ -2236,15 +2236,11 @@ function doFretboardConfirm(){
     const app=document.getElementById('app');
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),500);}
     if(multLevelUp){
-      const overlay=document.createElement('div');
-      const mc=comboColor(newMult);
-      overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5rem;`;
-      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} ${t('multiplier')}!</div>`;
       const ring=document.createElement('div');
+      const mc=comboColor(newMult);
       ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;`;
       document.body.appendChild(ring);
-      document.body.appendChild(overlay);
-      setTimeout(()=>{overlay.remove();ring.remove();},1500);
+      setTimeout(()=>ring.remove(),1500);
     }
     if(_fbRect){
       const cx=_fbRect.left+_fbRect.width/2,cy=_fbRect.top+_fbRect.height/2;
@@ -2361,15 +2357,11 @@ function handleAnswer(choiceId,btnEl){
       setTimeout(()=>app.classList.remove('flash-correct'),500);
     }
     if(multLevelUp){
-      const overlay=document.createElement('div');
-      const mc=comboColor(newMult);
-      overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5rem;`;
-      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} ${t('multiplier')}!</div>`;
       const ring=document.createElement('div');
+      const mc=comboColor(newMult);
       ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;border-radius:0;`;
       document.body.appendChild(ring);
-      document.body.appendChild(overlay);
-      setTimeout(()=>{overlay.remove();ring.remove();},1500);
+      setTimeout(()=>ring.remove(),1500);
     }
     const color=state.isBonus?'#60dcff':comboColor(newMult);
     const xpPopup=document.createElement('div');
@@ -2455,15 +2447,11 @@ function handleQualityAnswer(quality, btnEl){
     else if(ns>=2){playSfx('correct2');}
     else{playSfx('correct');}
     if(multLevelUp){
-      const overlay=document.createElement('div');
-      const mc=comboColor(newMult);
-      overlay.style.cssText=`position:fixed;inset:0;z-index:9998;pointer-events:none;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5rem;`;
-      overlay.innerHTML=`<div style="font-size:1.5rem;font-weight:900;color:${mc};background:rgba(0,0,0,.72);border:2.5px solid ${mc}88;border-radius:16px;padding:.6rem 1.4rem;box-shadow:0 0 30px ${mc}55;animation:feedbackPop .35s ease, fadeOut .4s ease 1.1s forwards;letter-spacing:-.01em;backdrop-filter:blur(4px)">×${newMult} ${t('multiplier')}!</div>`;
       const ring=document.createElement('div');
+      const mc=comboColor(newMult);
       ring.style.cssText=`position:fixed;inset:0;z-index:9997;pointer-events:none;box-shadow:inset 0 0 0 3px ${mc}66;animation:xpBarFlash .35s ease;`;
       document.body.appendChild(ring);
-      document.body.appendChild(overlay);
-      setTimeout(()=>{overlay.remove();ring.remove();},1500);
+      setTimeout(()=>ring.remove(),1500);
     }
     const xpBefore=state.xp;
     state.score+=gain;state.xp+=gain;state.xpDisplay=xpBefore;
@@ -3942,6 +3930,7 @@ function renderGame(){
           </button>`;
         }).join('')}</div>`}
     </div>
+    ${state.phase==='answered'&&state.result?.multLevelUp?(()=>{const mc=comboColor(comboMultiplier(state.streak));return `<div class="play-area" style="border-color:${mc};background:#111;text-align:center;animation:feedbackPop .35s ease"><div style="font-size:1.5rem;font-weight:900;color:${mc};letter-spacing:-.02em;line-height:1;text-shadow:0 0 24px ${mc}66">${state.result.msg}</div></div>`;})():''}
     ${state.isFretboard ? `
       <div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>
     ` : ''}

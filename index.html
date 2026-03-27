@@ -44,6 +44,8 @@
 @keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 16px #F5A62388) brightness(1)}50%{filter:drop-shadow(0 0 32px #F5A623ff) brightness(1.14)}}
 @keyframes arrowUp{0%{transform:translateY(0);opacity:1}33%{transform:translateY(-5px);opacity:1}66%{transform:translateY(-10px);opacity:0}67%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes sparkOn{0%,100%{opacity:1;transform:scale(1) rotate(0deg)}25%{opacity:0;transform:scale(.4) rotate(45deg)}50%{opacity:1;transform:scale(1.2) rotate(0deg)}75%{opacity:.3;transform:scale(.7) rotate(-30deg)}}
+button{transition:transform .1s,box-shadow .1s}
+button:active:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 #1a1a1a!important}
 .lvlup-arrow{position:absolute;font-family:'VT323',monospace;font-size:2rem;color:#4ade80;text-shadow:0 0 6px #4ade80cc,2px 2px 0 #1a5c1a;animation:arrowUp .55s steps(4) infinite;pointer-events:none}
 .lvlup-spark{position:absolute;font-family:'VT323',monospace;color:#F5A623;text-shadow:0 0 6px #F5A623cc;animation:sparkOn .7s steps(3) infinite;pointer-events:none}
 .lvlup-frame{position:relative;height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0}

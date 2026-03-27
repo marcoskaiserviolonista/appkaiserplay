@@ -742,7 +742,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
     what_quality:'Qual é a qualidade deste acorde?', build_chord_fretboard:'Monte o acorde no braço do violão', back_btn:'← Voltar',
-    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada',
+    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica',
     train_ear:'Treine seu Ouvido',
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
     your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
@@ -944,7 +944,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
     what_quality:'What is the quality of this chord?', build_chord_fretboard:'Build the chord on the fretboard', back_btn:'← Back',
-    continue_journey:'Continue Journey', start_journey:'Start Journey',
+    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey',
     train_ear:'Train your Ear',
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
     your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
@@ -3690,7 +3690,7 @@ function renderStart(){
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
       <div class="start-desc">${t('start_desc')}</div>
       <button class="cta-btn" onclick="playClickSfx('nav');startGame()">
-        ${state.xp>0?t('continue_journey'):t('start_journey')}
+        ${t('harmonic_journey')}
       </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">

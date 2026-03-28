@@ -1406,15 +1406,13 @@ function buildFbSVG(){
   // Bolinhas selecionadas
   const isAnswered=state.phase==='answered'||state.phase==='treino_focado_answered';
   const isWrong=isAnswered&&state.result?.ok===false;
-  // multiconjunto de slots por classe de nota (ex: Ebm tem Eb×2, Bb×1, F#×1)
-  const chordSlots=new Map();
-  state.chord.midi.forEach(m=>{const nc=m%12;chordSlots.set(nc,(chordSlots.get(nc)||0)+1);});
+  // posições corretas do voicing como Set de chaves "corda-casa"
+  const correctPos=isAnswered?new Set(getChordPositions(state.chord).map(({s,f})=>`${s}-${f}`)):null;
   Object.keys(state.fbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
     const nc=fbNoteClass(sc,fc);
-    const slots=chordSlots.get(nc)||0;
-    const inChord=slots>0;
-    if(isAnswered&&inChord){chordSlots.set(nc,slots-1);} // consome o slot
+    // verde se acertou a posição exata; se acerto geral (result.ok), tudo verde
+    const inChord=isAnswered&&(!isWrong||correctPos.has(k));
     let cx2,cy2,fspace;
     if(fc===0){cx2=FB_NUT_X[sc];cy2=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
     else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx2=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy2=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
@@ -1428,13 +1426,12 @@ function buildFbSVG(){
     o+=`<circle cx="${cx2}" cy="${cy2}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
     o+=`<text x="${cx2}" y="${cy2+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
   });
-  // Notas corretas que faltaram → laranja
+  // Posições corretas que o usuário não colocou → laranja
   if(isWrong){
     const usedStrings=new Set(Object.keys(state.fbSel).map(k=>parseInt(k.split('-')[0])));
     getChordPositions(state.chord).forEach(({s,f})=>{
-      const nc=fbNoteClass(s,f);
-      if((chordSlots.get(nc)||0)===0)return; // nota já coberta (todos os slots consumidos)
-      if(usedStrings.has(s))return; // corda já ocupada — não mostrar posição impossível
+      if(state.fbSel[`${s}-${f}`])return; // usuário já colocou aqui (mostrado como verde)
+      if(usedStrings.has(s))return; // corda ocupada por nota errada — não mostrar posição impossível
       let cx3,cy3,fspace;
       if(f===0){cx3=FB_NUT_X[s];cy3=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
       else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx3=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy3=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}

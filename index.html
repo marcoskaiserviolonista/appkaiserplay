@@ -1550,6 +1550,7 @@ function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.a
 let _playTimer=null;
 let _fadeTimer=null;
 let _playingIds=[];
+let _salaStartTimer=null;
 const FADE_DURATION=600;
 function playChord(chord){
   initCompressor();
@@ -2211,7 +2212,7 @@ function startSalaDeAula(){
   state.phase='sala_de_aula';
   state.playing=false;
   render();
-  setTimeout(()=>playChord(state.chord),500);
+  _salaStartTimer=setTimeout(()=>{_salaStartTimer=null;playChord(state.chord);},500);
 }
 
 function playChordHighlighted(chord,highlightNoteClasses){
@@ -2261,6 +2262,7 @@ function _salaHighlightClasses(step){
 
 function doSalaStep(n){
   playClickSfx('soft');
+  if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}
   state.salaStep=Math.max(state.salaStep,n);
   const wasOpen=(state.salaOpenStep===n);
   state.salaOpenStep=wasOpen?0:n;
@@ -2272,8 +2274,9 @@ function doSalaStep(n){
       state.salaActiveStep=4;
       playChord(state.chord);
     }
+  }else{
+    render();
   }
-  render();
 }
 
 function buildSalaFbSVG(){
@@ -2433,7 +2436,7 @@ function renderSalaDeAula(){
       ${open(n)?`<div class="sala-step-text">${body}</div>`:''}
     </div>`;
   return`<div style="padding:.75rem 0">
-  <button onclick="playClickSfx('nav');state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
+  <button onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
   <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.4rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
   <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>

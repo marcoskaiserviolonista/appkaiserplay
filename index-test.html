@@ -731,12 +731,12 @@ const STRINGS = {
     sala_s2_title:'Passo 2: Identifique a nota mais grave',
     sala_s2_body:'Quando ouvir um acorde, foque sua atenção na nota mais grave. Não é tão fácil ouvir quanto a mais aguda — esteja em um ambiente silencioso, com um bom equipamento de som. Na maioria das vezes, a nota mais grave é a tônica do acorde. Se não tiver certeza, tudo bem: a soma das informações dos próximos passos ajuda a chegar na resposta.',
     sala_s3_title:'Passo 3: Identifique o tipo de acorde',
-    sala_s3_intro:'Classifique o acorde como:',
-    sala_s3_maior:'Maior → sensação "feliz"',
-    sala_s3_menor:'Menor → sensação "triste"',
-    sala_s3_dim:'Diminuto → sensação "dramática"',
-    sala_s3_aug:'Aumentado → sensação "inquietante"',
-    sala_s3_diff:'O diminuto e o aumentado podem confundir, pois ambos são dissonantes. Diferença: diminuto → terça menor (mais "triste") | aumentado → mais raro.',
+    sala_s3_intro:'Classifique o acorde analisando a terça e a quinta:',
+    sala_s3_maior:'Maior → terça maior + quinta justa',
+    sala_s3_menor:'Menor → terça menor + quinta justa',
+    sala_s3_dim:'Diminuto → terça menor + quinta diminuta',
+    sala_s3_aug:'Aumentado → terça maior + quinta aumentada',
+    sala_s3_diff:'',
     sala_s4_title:'Passo 4: Experimente no instrumento',
     sala_s4_body:'Ao identificar a qualidade do acorde, a nota mais grave e a nota mais aguda, pegue seu violão e experimente os acordes mais comuns daquela região. Com o tempo, ficará mais fácil reconhecer tétrades, acordes com sétima, acordes com nona e outros mais complexos.',
     sala_intro:'Tente identificar qual é o acorde apenas ouvindo. Se não conseguir, siga os passos abaixo — eles vão te guiar até a resposta.',
@@ -953,12 +953,12 @@ const STRINGS = {
     sala_s2_title:'Step 2: Identify the lowest note',
     sala_s2_body:'When you hear a chord, focus on the lowest note. It is not as easy to hear as the highest — be in a quiet environment with good audio equipment. Most of the time, the lowest note is the chord root. If you are not sure, that is fine: information from the next steps will help.',
     sala_s3_title:'Step 3: Identify the chord type',
-    sala_s3_intro:'Classify the chord as:',
-    sala_s3_maior:'Major → "happy" feeling',
-    sala_s3_menor:'Minor → "sad" feeling',
-    sala_s3_dim:'Diminished → "dramatic" feeling',
-    sala_s3_aug:'Augmented → "unsettling" feeling',
-    sala_s3_diff:'Diminished and augmented can be confused — both are dissonant. Difference: diminished → minor third (more "sad") | augmented → rarer.',
+    sala_s3_intro:'Classify the chord by analyzing the third and fifth:',
+    sala_s3_maior:'Major → major third + perfect fifth',
+    sala_s3_menor:'Minor → minor third + perfect fifth',
+    sala_s3_dim:'Diminished → minor third + diminished fifth',
+    sala_s3_aug:'Augmented → major third + augmented fifth',
+    sala_s3_diff:'',
     sala_s4_title:'Step 4: Try on the instrument',
     sala_s4_body:'Once you identify the chord quality, the lowest note and the highest note, pick up your guitar and try the most common chords in that range. With time, it will be easier to recognize tetrads, seventh chords, ninth chords and other complex chords.',
     sala_intro:'Try to identify the chord just by listening. If you can\'t, follow the steps below — they will guide you to the answer.',
@@ -2426,7 +2426,7 @@ function renderSalaDeAula(){
       <li>${t('sala_s3_dim')}</li>
       <li>${t('sala_s3_aug')}</li>
     </ul>
-    <p style="margin:.3rem 0 0">${t('sala_s3_diff')}</p>${focusBtn(t('sala_focus_mid'),3)}`;
+    ${focusBtn(t('sala_focus_mid'),3)}`;
   const row=(n,title,body,disabled='')=>`
     <div style="margin-top:.35rem">
       <div style="display:flex;align-items:center;gap:.4rem">${arrowEl(n)}<button class="sala-step-btn ${done(n)}" onclick="doSalaStep(${n})" ${disabled} style="flex:1">${check(n)}${title}</button></div>

@@ -4231,15 +4231,15 @@ function renderStart(){
       <button class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
       <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
-    <div class="section-title" style="margin-top:.5rem">${t('your_stats')}</div>
+    <div class="nav-grid" style="margin-top:.75rem">
+      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
+    </div>
+    <div class="section-title" style="margin-top:.75rem">${t('your_stats')}</div>
     <div class="user-stats">
       <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">${t('hit_rate')}</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🔥</span><div><div class="us-val">${state.bestStreak}</div><div class="us-lbl">${t('best_seq')}</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🏆</span><div><div class="us-val">${rankDisplay}</div><div class="us-lbl">${t('placement')}</div></div></div>
-    </div>
-    <div class="nav-grid" style="margin-top:.75rem">
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
     <a href="https://kaiserplay.com.br" target="_blank" rel="noopener" onclick="playClickSfx('nav')"
        style="display:flex;flex-direction:column;align-items:center;gap:.35rem;width:100%;max-width:520px;margin-top:1.25rem;text-decoration:none">
@@ -4831,17 +4831,17 @@ function renderInventario(){
 
 // ── Render: Níveis ───────────────────────────────────────────
 const NIVEL_GROUPS = [
-  {range:[1,10],   title:"Escudeiro",                        desc:"O começo de tudo. Primeiros acordes, primeiros passos numa longa jornada.",          cor:'#a0a0a0'},
-  {range:[11,20],  title:"Bardo",                            desc:"As músicas ganham alma. O violão vira voz, e a voz vira história.",                   cor:'#86efac'},
-  {range:[21,30],  title:"Alquimista Harmônico",             desc:"Transformas sons em emoções. A harmonia obedece à sua vontade.",                     cor:'#F5A623'},
-  {range:[31,40],  title:"Sentinela das Cordas",             desc:"A dedicação começa a moldar o ouvido. O conhecimento se aprofunda.",                  cor:'#6ee7b7'},
-  {range:[41,50],  title:"Bardo Dissonante",                 desc:"O caos se torna técnica. Você domina tensões e dissonâncias que outros temem tocar.", cor:'#ef4444'},
-  {range:[51,60],  title:"Guardião da Harmonia",             desc:"Protetor da tradição e da inovação. Seu legado já começa a ser escrito.",             cor:'#f472b6'},
-  {range:[61,70],  title:"Mago do Som",                     desc:"O ouvido tornou-se instrumento. Você ouve o que outros não conseguem perceber.",     cor:'#fb923c'},
-  {range:[71,80],  title:"Arcanista das Cordas",             desc:"Domínio quase mítico das harmonias. A teoria e o instinto se fundem em você.",       cor:'#c084fc'},
-  {range:[81,90],  title:"Bruxo da Tempestade Harmônica",   desc:"Técnica e sensibilidade em equilíbrio perfeito. Poucos chegam até aqui.",             cor:'#60dcff'},
-  {range:[91,99],  title:"Lenda da Música",                 desc:"Nome reverenciado. Sua jornada inspira todos que ainda estão no começo.",            cor:'#fbbf24'},
-  {range:[100,100],title:"Mestre Supremo",                  desc:"O ápice. Quem chega aqui não apenas aprendeu — transcendeu.",                       cor:'#60dcff'},
+  {range:[1,10],   title:"Escudeiro",                        desc:"Cada acorde é uma conquista. A jornada começa — e o violão nunca mais soa igual.",                         cor:'#a0a0a0'},
+  {range:[11,20],  title:"Bardo",                            desc:"Suas músicas já carregam histórias. O violão não é mais instrumento — é sua voz.",                         cor:'#86efac'},
+  {range:[21,30],  title:"Alquimista Harmônico",             desc:"Você não toca acordes — você transmuta sons em sentimento. A harmonia cede à sua vontade.",                cor:'#F5A623'},
+  {range:[31,40],  title:"Sentinela das Cordas",             desc:"Sua escuta afinou. Cada corda revela segredos que só os dedicados conseguem ouvir.",                      cor:'#6ee7b7'},
+  {range:[41,50],  title:"Bardo Dissonante",                 desc:"Onde outros ouvem erro, você ouve expressão. O caos harmônico é sua arma.",                               cor:'#ef4444'},
+  {range:[51,60],  title:"Guardião da Harmonia",             desc:"Você preserva o que outros esquecem e inventa o que ninguém ousou. Seu legado ressoa.",                   cor:'#f472b6'},
+  {range:[61,70],  title:"Mago do Som",                     desc:"Seu ouvido enxerga o invisível. Cada acorde revela camadas que poucos jamais perceberão.",                cor:'#fb923c'},
+  {range:[71,80],  title:"Arcanista das Cordas",             desc:"Teoria e instinto são um só em você. As harmonias mais complexas rendem-se ao seu domínio.",              cor:'#c084fc'},
+  {range:[81,90],  title:"Bruxo da Tempestade Harmônica",   desc:"A tempestade harmônica responde ao seu toque. Você convoca sons que pouquíssimos dominam.",               cor:'#60dcff'},
+  {range:[91,99],  title:"Lenda da Música",                 desc:"Seu nome ressoa como uma canção que ninguém esquece. Você é a inspiração de quem começa.",                cor:'#fbbf24'},
+  {range:[100,100],title:"Mestre Supremo",                  desc:"Além da técnica, além da teoria — você transcendeu. O som flui por você como respiração.",                cor:'#60dcff'},
 ];
 
 function _nivelImg(title){

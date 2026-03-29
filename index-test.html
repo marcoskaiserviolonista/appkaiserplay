@@ -2393,9 +2393,9 @@ function buildSalaFbSVGLimited(){
       if(f===0){cx=FB_NUT_X[s];cy=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
       else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}
       const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
-      const fill=isExp?'#3a3a3a':'#F5A623';
-      const stroke=isExp?'#1a1a1a':'#7a4a00';
-      const tf=isExp?'#888':'#111';
+      const fill='#F5A623';
+      const stroke='#7a4a00';
+      const tf='#111';
       o+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
       o+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
     });

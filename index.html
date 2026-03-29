@@ -2266,10 +2266,10 @@ function doSalaStep(n){
   state.salaOpenStep=wasOpen?0:n;
   if(!wasOpen){
     if(n<=3){
-      state.salaActiveStep=Math.max(state.salaActiveStep,n);
+      state.salaActiveStep=n;
       playChordHighlighted(state.chord,_salaHighlightClasses(n));
     }else if(n===4){
-      state.salaActiveStep=Math.max(state.salaActiveStep,4);
+      state.salaActiveStep=4;
       playChord(state.chord);
     }
   }

@@ -2306,20 +2306,11 @@ function _salaHighlightMidis(step){
 function doSalaStep(n){
   playClickSfx('soft');
   if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}
-  state.salaStep=Math.max(state.salaStep,n);
-  const wasOpen=(state.salaOpenStep===n);
-  state.salaOpenStep=wasOpen?0:n;
-  if(!wasOpen){
-    if(n<=3){
-      state.salaActiveStep=n;
-      playSalaFocus(_salaHighlightMidis(n));
-    }else if(n===4){
-      state.salaActiveStep=4;
-      playChord(state.chord);
-    }
-  }else{
-    render();
-  }
+  state.salaStep=n;
+  state.salaActiveStep=n;
+  if(n===4){state.salaFbSel={};state.salaVerified=false;state.salaVerifyOk=false;}
+  if(n<=3){playSalaFocus(_salaHighlightMidis(n));}
+  else{playChord(state.chord);}
 }
 
 function buildSalaFbSVG(){
@@ -2552,13 +2543,8 @@ function renderSalaDeAula(){
   const step=state.salaStep;
   const nextStep=step+1;
   // Seta à esquerda apontando para a direita (imagem rotacionada -90°)
+  const cifra=state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra;
   const _arrowImg=`<img src="seta-para-baixo.png" style="width:28px;height:28px;transform:rotate(-90deg)">`;
-  const arrowEl=n=>(n===nextStep&&n<=4)
-    ?`<span class="sala-vez-arrow">${_arrowImg}</span>`
-    :`<span style="width:28px;display:inline-block;flex-shrink:0"></span>`;
-  const open=n=>state.salaOpenStep===n;
-  const done=n=>step>=n?'sala-done':'';
-  const check=n=>step>=n?'✓ ':'';
   const _fbtn=(label,hlN)=>
     `<button class="sala-focus-btn" onclick="playClickSfx('soft');playSalaFocus(_salaHighlightMidis(${hlN}))"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${label}</button>`;
   const _lbtn=()=>
@@ -2575,30 +2561,39 @@ function renderSalaDeAula(){
       <li>${t('sala_s3_aug')}</li>
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
-  const row=(n,title,body,disabled='')=>`
-    <div style="margin-top:.35rem">
-      <div style="display:flex;align-items:center;gap:.4rem">${arrowEl(n)}<button class="sala-step-btn ${done(n)}" onclick="doSalaStep(${n})" ${disabled} style="flex:1">${check(n)}${title}</button></div>
-      ${open(n)?`<div class="sala-step-text">${body}</div>`:''}
+  const s4body=`<div style="text-align:center;margin:.4rem 0 .6rem"><span style="font-size:2.4rem;font-weight:900;color:#F5A623;font-family:var(--font-body);text-shadow:0 0 18px #F5A62366;letter-spacing:.02em">${cifra}</span></div><div style="font-size:.83rem;color:#ccc;line-height:1.6">${t('sala_s4_body')}</div><div style="font-size:.8rem;color:#F5A623;margin-top:.6rem;font-weight:700">${t('sala_build_instruction')}</div>`;
+  // Painel expandido (passo ativo)
+  const panel=(n,title,body)=>`
+    <div style="margin-top:.5rem">
+      <button class="sala-step-btn sala-done" onclick="doSalaStep(${n})" style="width:100%;margin-bottom:.4rem">✓ ${title}</button>
+      <div class="sala-step-text">${body}</div>
     </div>`;
+  // Botão do próximo passo
+  const nextBtn=(n,title)=>`
+    <div style="margin-top:.5rem;display:flex;align-items:center;gap:.4rem">
+      <span class="sala-vez-arrow">${_arrowImg}</span>
+      <button class="sala-step-btn" onclick="doSalaStep(${n})" style="flex:1">${title}</button>
+    </div>`;
+  // Área de passos: apenas passo atual + botão do próximo
+  let stepArea='';
+  if(step===0){stepArea=nextBtn(1,t('sala_s1_title'));}
+  else if(step===1){stepArea=panel(1,t('sala_s1_title'),s1body)+nextBtn(2,t('sala_s2_title'));}
+  else if(step===2){stepArea=panel(2,t('sala_s2_title'),s2body)+nextBtn(3,t('sala_s3_title'));}
+  else if(step===3){stepArea=panel(3,t('sala_s3_title'),s3body)+nextBtn(4,t('sala_s4_title'));}
+  else{
+    stepArea=panel(4,t('sala_s4_title'),s4body);
+    if(state.salaVerified&&state.salaVerifyOk)stepArea+=`<div style="text-align:center;margin-top:.6rem;font-size:1.6rem;font-weight:900;color:#4caf50;text-shadow:0 0 14px #4caf5066">${t('sala_verify_correct')} ${cifra}</div>`;
+    else if(state.salaVerified&&!state.salaVerifyOk)stepArea+=`<div style="text-align:center;margin-top:.6rem"><span style="font-size:1.1rem;font-weight:900;color:#f44336">${t('sala_verify_wrong')} </span><span style="font-size:1.6rem;font-weight:900;color:#F5A623">${cifra}</span><br><button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button></div>`;
+    stepArea+=`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`;
+  }
   return`<div style="padding:.75rem 0">
   <button onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
   <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.4rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
   <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
-  <div style="width:100%;max-width:520px;margin-top:.6rem">
-    ${row(1,t('sala_s1_title'),s1body)}
-    ${row(2,t('sala_s2_title'),s2body,step<1?'disabled':'')}
-    ${row(3,t('sala_s3_title'),s3body,step<2?'disabled':'')}
-    ${row(4,t('sala_s4_title'),`<div style="text-align:center;margin:.4rem 0 .6rem"><span style="font-size:2.4rem;font-weight:900;color:#F5A623;font-family:var(--font-body);text-shadow:0 0 18px #F5A62366;letter-spacing:.02em">${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</span></div><div style="font-size:.83rem;color:#ccc;line-height:1.6">${t('sala_s4_body')}</div><div style="font-size:.8rem;color:#F5A623;margin-top:.6rem;font-weight:700">${t('sala_build_instruction')}</div>`,step<3?'disabled':'')}
-    ${step>=4&&state.salaVerified&&state.salaVerifyOk?`<div style="text-align:center;margin-top:.6rem;font-size:1.6rem;font-weight:900;color:#4caf50;text-shadow:0 0 14px #4caf5066">${t('sala_verify_correct')} ${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</div>`:''}
-    ${step>=4&&state.salaVerified&&!state.salaVerifyOk?`<div style="text-align:center;margin-top:.6rem"><span style="font-size:1.1rem;font-weight:900;color:#f44336">${t('sala_verify_wrong')} </span><span style="font-size:1.6rem;font-weight:900;color:#F5A623">${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</span><br><button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button></div>`:''}
-    ${step>=4?`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`:''}
-  </div>
   <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
-  ${state.salaActiveStep===4&&!state.salaVerified?`
-    <div class="fb-note-count">${Object.keys(state.salaFbSel).length} / ${state.chord.midi.length} ${t('notes')}</div>
-    <button id="sala-verify-btn" class="sala-step-btn" onclick="doSalaVerify()" style="width:100%;margin-top:.3rem">${t('sala_verify_btn')}</button>
-  `:''}
+  ${state.salaActiveStep===4&&!state.salaVerified?`<div class="fb-note-count">${Object.keys(state.salaFbSel).length} / ${state.chord.midi.length} ${t('notes')}</div><button id="sala-verify-btn" class="sala-step-btn" onclick="doSalaVerify()" style="width:100%;margin-top:.3rem">${t('sala_verify_btn')}</button>`:''}
+  <div style="width:100%;max-width:520px;margin-top:.4rem">${stepArea}</div>
 </div>`;
 }
 

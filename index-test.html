@@ -737,7 +737,8 @@ const STRINGS = {
     sala_s3_dim:'Diminuto → terça menor + quinta diminuta',
     sala_s3_aug:'Aumentado → terça maior + quinta aumentada',
     sala_s3_diff:'',
-    sala_s4_title:'Passo 4: Experimente no instrumento',
+    sala_s4_title:'Passo 4: Descubra o acorde',
+    sala_monte:'Monte o acorde no braço do instrumento.',
     sala_s4_body:'Ao identificar:<ul style="margin:.3rem 0 .6rem;padding-left:1.2rem"><li>A qualidade do acorde</li><li>A nota mais grave</li><li>A nota mais aguda</li></ul>Pegue seu violão e comece a experimentar os acordes mais comuns daquela região.<br><br>Com o tempo e mais experiência, ficará mais fácil reconhecer:<ul style="margin:.3rem 0 .3rem;padding-left:1.2rem"><li>Tétrades</li><li>Acordes com sétima</li><li>Acordes com nona</li><li>Outros acordes mais complexos</li></ul>',
     sala_build_instruction:'Monte o acorde no fretboard abaixo e clique em Verificar:',
     sala_verify_btn:'Verificar acorde',
@@ -964,7 +965,8 @@ const STRINGS = {
     sala_s3_dim:'Diminished → minor third + diminished fifth',
     sala_s3_aug:'Augmented → major third + augmented fifth',
     sala_s3_diff:'',
-    sala_s4_title:'Step 4: Try on the instrument',
+    sala_s4_title:'Step 4: Discover the chord',
+    sala_monte:'Build the chord on the instrument.',
     sala_s4_body:'Once you identify:<ul style="margin:.3rem 0 .6rem;padding-left:1.2rem"><li>The chord quality</li><li>The lowest note</li><li>The highest note</li></ul>Pick up your guitar and start trying the most common chords in that range.<br><br>With time and experience, it will be easier to recognize:<ul style="margin:.3rem 0 .3rem;padding-left:1.2rem"><li>Tetrads</li><li>Seventh chords</li><li>Ninth chords</li><li>Other complex chords</li></ul>',
     sala_build_instruction:'Build the chord on the fretboard below and click Verify:',
     sala_verify_btn:'Verify chord',
@@ -1942,7 +1944,7 @@ const state={
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
   fretboardSwitches:{fb_triades:false,fb_tetrades:false,fb_complexos:false},
   fretboardExercise:false,
-  salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false,
+  salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false, salaCorrectCount:0,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
   fullAccess:true,
@@ -2456,9 +2458,27 @@ function doSalaVerify(){
   const exp=state.chord.midi.map(m=>m%12).sort((a,b)=>a-b);
   let ok=(got.length===exp.length);
   if(ok)for(let i=0;i<exp.length;i++){if(got[i]!==exp[i]){ok=false;break;}}
+  const expSet=new Set(exp);
+  state.salaCorrectCount=got.filter(nc=>expSet.has(nc)).length;
   state.salaVerified=true;
   state.salaVerifyOk=ok;
   render();
+}
+function playSalaAssembly(){
+  const keys=Object.keys(state.salaFbSel);
+  if(!keys.length)return;
+  initCompressor();
+  const notes=keys.map(k=>{const p=k.split('-').map(Number);return FB_OPEN[p[0]]+p[1];}).sort((a,b)=>a-b);
+  const noteVol=Math.min(0.9,1/keys.length);
+  notes.forEach((midi,i)=>{
+    const sn=nearestSample(midi);
+    const ratio=midiToFreq(midi)/midiToFreq(sn);
+    setTimeout(()=>{
+      const id=howls[sn].play();
+      howls[sn].volume(noteVol*_noteBoost(midi),id);
+      if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
+    },i*110);
+  });
 }
 function buildSalaFbInteractive(){
   const SALA_FRETS=4;
@@ -2561,7 +2581,10 @@ function renderSalaDeAula(){
       <li>${t('sala_s3_aug')}</li>
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
-  const s4body=`<div style="text-align:center;margin:.4rem 0 .6rem"><span style="font-size:2.4rem;font-weight:900;color:#F5A623;font-family:var(--font-body);text-shadow:0 0 18px #F5A62366;letter-spacing:.02em">${cifra}</span></div><div style="font-size:.83rem;color:#ccc;line-height:1.6">${t('sala_s4_body')}</div><div style="font-size:.8rem;color:#F5A623;margin-top:.6rem;font-weight:700">${t('sala_build_instruction')}</div>`;
+  const _selCount=Object.keys(state.salaFbSel).length;
+  const s4body=`<div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
+  ${!state.salaVerified?`<div class="fb-note-count" style="margin:.2rem 0">${_selCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div><div class="fb-action-row"><button class="fb-confirm-btn" onclick="doSalaVerify()" ${_selCount===0?'disabled':''}>✓ ${t('confirm')}</button><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`
+  :`<div style="text-align:center;margin:.4rem 0"><div style="font-size:.85rem;color:#aaa;margin-bottom:.3rem">${state.salaCorrectCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes correct':'notas corretas'}</div><div style="font-size:2.2rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'}">${cifra}</div>${!state.salaVerifyOk?`<button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}</div><div class="fb-action-row"><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`}`;
   // Painel expandido (passo ativo)
   const panel=(n,title,body)=>`
     <div style="margin-top:.5rem">
@@ -2587,12 +2610,13 @@ function renderSalaDeAula(){
     stepArea+=`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`;
   }
   return`<div style="padding:.75rem 0">
-  <button onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
-  <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.4rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
+  <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:.6rem;gap:.75rem">
+    <button class="back-btn" onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
+    <span style="font-size:1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body)">${t('sala_de_aula')}</span>
+  </div>
   <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
   <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
-  ${state.salaActiveStep===4&&!state.salaVerified?`<div class="fb-note-count">${Object.keys(state.salaFbSel).length} / ${state.chord.midi.length} ${t('notes')}</div><button id="sala-verify-btn" class="sala-step-btn" onclick="doSalaVerify()" style="width:100%;margin-top:.3rem">${t('sala_verify_btn')}</button>`:''}
   <div style="width:100%;max-width:520px;margin-top:.4rem">${stepArea}</div>
 </div>`;
 }
@@ -4342,6 +4366,7 @@ function renderGame(){
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:.75rem;gap:.75rem">
       <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+      <span style="font-size:1rem;font-weight:900;color:${state.journeyMode==='cordas'?'#a855f7':'#F5A623'}">${t(state.journeyMode==='cordas'?'cordas_journey':'harmonic_journey')}</span>
       ${state.diamantes>0?`<span style="margin-left:auto;font-size:.85rem;font-weight:800;color:#60dcff;background:#0a1a2e;border:2px solid #60dcff;border-radius:10px;padding:.25rem .7rem">💎 ${state.diamantes}</span>`:''}
     </div>
     <div class="lvl-bar">

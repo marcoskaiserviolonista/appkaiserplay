@@ -739,9 +739,9 @@ const STRINGS = {
     sala_s3_diff:'O diminuto e o aumentado podem confundir, pois ambos são dissonantes. Diferença: diminuto → terça menor (mais "triste") | aumentado → mais raro.',
     sala_s4_title:'Passo 4: Experimente no instrumento',
     sala_s4_body:'Ao identificar a qualidade do acorde, a nota mais grave e a nota mais aguda, pegue seu violão e experimente os acordes mais comuns daquela região. Com o tempo, ficará mais fácil reconhecer tétrades, acordes com sétima, acordes com nona e outros mais complexos.',
-    sala_focus_high:'🎵 Focar nota aguda',
-    sala_focus_low:'🎵 Focar nota grave',
-    sala_focus_mid:'🎵 Focar tipo do acorde',
+    sala_focus_high:'Focar nota aguda',
+    sala_focus_low:'Focar nota grave',
+    sala_focus_mid:'Focar tipo do acorde',
     sala_next:'Próximo',
     focused_promo_title:'Quer evoluir mais rápido?', focused_promo_body:'Treine exatamente os acordes que você erra.', focused_promo_btn:'Ir para Treino Focado',
     locked:'Bloqueado', unlock:'Desbloquear', free:'Grátis',
@@ -960,9 +960,9 @@ const STRINGS = {
     sala_s3_diff:'Diminished and augmented can be confused — both are dissonant. Difference: diminished → minor third (more "sad") | augmented → rarer.',
     sala_s4_title:'Step 4: Try on the instrument',
     sala_s4_body:'Once you identify the chord quality, the lowest note and the highest note, pick up your guitar and try the most common chords in that range. With time, it will be easier to recognize tetrads, seventh chords, ninth chords and other complex chords.',
-    sala_focus_high:'🎵 Focus on highest note',
-    sala_focus_low:'🎵 Focus on lowest note',
-    sala_focus_mid:'🎵 Focus on chord type',
+    sala_focus_high:'Focus on highest note',
+    sala_focus_low:'Focus on lowest note',
+    sala_focus_mid:'Focus on chord type',
     sala_next:'Next',
     focused_promo_title:'Want to improve faster?', focused_promo_body:'Train exactly the chords you get wrong.', focused_promo_btn:'Go to Focused Training',
     locked:'Locked', unlock:'Unlock', free:'Free',
@@ -2401,7 +2401,7 @@ function renderSalaDeAula(){
   const done=n=>step>=n?'sala-done':'';
   const check=n=>step>=n?'✓ ':'';
   const focusBtn=(label,hlN)=>
-    `<button class="sala-focus-btn" onclick="playChordHighlighted(state.chord,_salaHighlightClasses(${hlN}))">${label}</button>`;
+    `<button class="sala-focus-btn" onclick="playChordHighlighted(state.chord,_salaHighlightClasses(${hlN}))"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${label}</button>`;
   const s1body=`${t('sala_s1_body')}${focusBtn(t('sala_focus_high'),1)}`;
   const s2body=`${t('sala_s2_body')}${focusBtn(t('sala_focus_low'),2)}`;
   const s3body=`<p style="margin:.2rem 0 .1rem">${t('sala_s3_intro')}</p>

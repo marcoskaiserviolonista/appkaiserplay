@@ -738,7 +738,7 @@ const STRINGS = {
     sala_s3_aug:'Aumentado → terça maior + quinta aumentada',
     sala_s3_diff:'',
     sala_s4_title:'Passo 4: Descubra o acorde',
-    sala_monte:'Monte o acorde no braço do instrumento.',
+    sala_monte:'Monte o acorde que você ouviu no braço do instrumento.',
     sala_s4_body:'Ao identificar:<ul style="margin:.3rem 0 .6rem;padding-left:1.2rem"><li>A qualidade do acorde</li><li>A nota mais grave</li><li>A nota mais aguda</li></ul>Pegue seu violão e comece a experimentar os acordes mais comuns daquela região.<br><br>Com o tempo e mais experiência, ficará mais fácil reconhecer:<ul style="margin:.3rem 0 .3rem;padding-left:1.2rem"><li>Tétrades</li><li>Acordes com sétima</li><li>Acordes com nona</li><li>Outros acordes mais complexos</li></ul>',
     sala_build_instruction:'Monte o acorde no fretboard abaixo e clique em Verificar:',
     sala_verify_btn:'Verificar acorde',
@@ -966,7 +966,7 @@ const STRINGS = {
     sala_s3_aug:'Augmented → major third + augmented fifth',
     sala_s3_diff:'',
     sala_s4_title:'Step 4: Discover the chord',
-    sala_monte:'Build the chord on the instrument.',
+    sala_monte:'Build the chord you heard on the instrument.',
     sala_s4_body:'Once you identify:<ul style="margin:.3rem 0 .6rem;padding-left:1.2rem"><li>The chord quality</li><li>The lowest note</li><li>The highest note</li></ul>Pick up your guitar and start trying the most common chords in that range.<br><br>With time and experience, it will be easier to recognize:<ul style="margin:.3rem 0 .3rem;padding-left:1.2rem"><li>Tetrads</li><li>Seventh chords</li><li>Ninth chords</li><li>Other complex chords</li></ul>',
     sala_build_instruction:'Build the chord on the fretboard below and click Verify:',
     sala_verify_btn:'Verify chord',
@@ -2582,12 +2582,28 @@ function renderSalaDeAula(){
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
   const _selCount=Object.keys(state.salaFbSel).length;
+  const _qLabel=_translateQualityLabel(state.chord.quality,state.chord.quality);
   const s4body=`
-  <div style="text-align:center;font-size:1.8rem;font-weight:900;color:#F5A623;font-family:var(--font-body);margin:.1rem 0 .5rem;text-shadow:0 0 12px #F5A62344">${cifra}</div>
   <div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
   ${!state.salaVerified
-    ?`<div class="fb-note-count" style="margin:.2rem 0">${_selCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div><div class="fb-action-row"><button class="fb-confirm-btn" onclick="doSalaVerify()" ${_selCount===0?'disabled':''}>✓ ${t('confirm')}</button><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`
-    :`<div style="text-align:center;margin:.4rem 0"><div style="font-size:.85rem;color:#aaa;margin-bottom:.3rem">${state.salaCorrectCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes correct':'notas corretas'}</div><div style="font-size:2.2rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'}">${cifra}</div>${!state.salaVerifyOk?`<button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}</div><div class="fb-action-row"><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`}`;
+    ?`<div class="fb-note-count" style="margin:.2rem 0">${_selCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div>
+      <div class="fb-action-row">
+        <button class="fb-confirm-btn" onclick="doSalaVerify()" ${_selCount===0?'disabled':''}>✓ ${t('confirm')}</button>
+        <button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button>
+      </div>`
+    :`<div style="text-align:center;margin:.4rem 0 .3rem">
+        <div style="font-size:1.6rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'};letter-spacing:-.01em">${cifra}</div>
+        <div style="font-size:.82rem;color:#aaa;font-weight:700;margin-top:.15rem">${_qLabel}</div>
+        <div style="margin-top:.4rem;font-size:.75rem;color:#888;display:flex;justify-content:center;gap:.9rem">
+          <span><span style="color:#4caf50;font-size:.9rem">●</span> ${state.lang==='en'?'correct':'acertou'}</span>
+          <span><span style="color:#f44336;font-size:.9rem">●</span> ${state.lang==='en'?'wrong':'errou'}</span>
+          <span><span style="color:#F5A623;font-size:.9rem">●</span> ${state.lang==='en'?'missing':'faltando'}</span>
+        </div>
+      </div>
+      <div class="fb-action-row">
+        ${!state.salaVerifyOk?`<button class="fb-ghost-btn" onclick="playClickSfx('soft');state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}
+        <button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button>
+      </div>`}`;
   // Painel expandido (passo ativo)
   const panel=(n,title,body)=>`
     <div style="margin-top:.5rem">

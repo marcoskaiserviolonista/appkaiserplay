@@ -2313,6 +2313,7 @@ function doSalaStep(n){
   if(n===4){state.salaFbSel={};state.salaVerified=false;state.salaVerifyOk=false;}
   if(n<=3){playSalaFocus(_salaHighlightMidis(n));}
   else{playChord(state.chord);}
+  render();
 }
 
 function buildSalaFbSVG(){

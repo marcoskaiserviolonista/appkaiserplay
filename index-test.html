@@ -2447,9 +2447,10 @@ function buildSalaFbSVGLimited(){
 function doSalaFbTap(key){
   if(state.salaVerified)return;
   const s=parseInt(key.split('-')[0]);
+  const parts=key.split('-').map(Number);
   const wasSelected=!!state.salaFbSel[key];
   Object.keys(state.salaFbSel).forEach(k=>{if(parseInt(k.split('-')[0])===s)delete state.salaFbSel[k];});
-  if(!wasSelected)state.salaFbSel[key]=true;
+  if(!wasSelected){state.salaFbSel[key]=true;playFbNoteClick(FB_OPEN[parts[0]]+parts[1]);}
   render();
 }
 function doSalaVerify(){

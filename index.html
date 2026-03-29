@@ -742,7 +742,7 @@ const STRINGS = {
     sala_intro:'Tente identificar qual é o acorde apenas ouvindo. Se não conseguir, siga os passos abaixo — eles vão te guiar até a resposta.',
     sala_focus_high:'Focar nota aguda',
     sala_focus_low:'Focar nota grave',
-    sala_focus_mid:'Focar tipo do acorde',
+    sala_focus_mid:'Focar terça e quinta',
     sala_next:'Próximo',
     focused_promo_title:'Quer evoluir mais rápido?', focused_promo_body:'Treine exatamente os acordes que você erra.', focused_promo_btn:'Ir para Treino Focado',
     locked:'Bloqueado', unlock:'Desbloquear', free:'Grátis',
@@ -964,7 +964,7 @@ const STRINGS = {
     sala_intro:'Try to identify the chord just by listening. If you can\'t, follow the steps below — they will guide you to the answer.',
     sala_focus_high:'Focus on highest note',
     sala_focus_low:'Focus on lowest note',
-    sala_focus_mid:'Focus on chord type',
+    sala_focus_mid:'Focus on third and fifth',
     sala_next:'Next',
     focused_promo_title:'Want to improve faster?', focused_promo_body:'Train exactly the chords you get wrong.', focused_promo_btn:'Go to Focused Training',
     locked:'Locked', unlock:'Unlock', free:'Free',
@@ -2246,6 +2246,36 @@ function playChordHighlighted(chord,highlightNoteClasses){
   },totalDur);
 }
 
+function playSalaFocus(midiArray){
+  initCompressor();
+  if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
+  if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
+  state.chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  _playingIds=[];
+  state.playing=true;
+  render();
+  const noteDelay=110;
+  const noteVol=Math.min(0.9,1/midiArray.length);
+  midiArray.forEach((midi,i)=>{
+    const sn=nearestSample(midi);
+    const ratio=midiToFreq(midi)/midiToFreq(sn);
+    setTimeout(()=>{
+      const id=howls[sn].play();
+      const _vol=noteVol*_noteBoost(midi);
+      howls[sn].volume(_vol,id);
+      if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
+      _playingIds.push({howl:howls[sn],id,vol:_vol});
+    },i*noteDelay);
+  });
+  const totalDur=(midiArray.length-1)*noteDelay+3000;
+  _fadeTimer=setTimeout(()=>{
+    _playingIds.forEach(({howl,id,vol})=>{try{howl.fade(vol,0,FADE_DURATION,id);}catch(e){}});
+  },totalDur-FADE_DURATION);
+  _playTimer=setTimeout(()=>{
+    _playTimer=null;state.playing=false;render();
+  },totalDur);
+}
+
 function _salaHighlightMidis(step){
   const midi=state.chord.midi;
   const sorted=[...midi].sort((a,b)=>a-b);
@@ -2269,7 +2299,7 @@ function doSalaStep(n){
   if(!wasOpen){
     if(n<=3){
       state.salaActiveStep=n;
-      playChordHighlighted(state.chord,_salaHighlightMidis(n));
+      playSalaFocus(_salaHighlightMidis(n));
     }else if(n===4){
       state.salaActiveStep=4;
       playChord(state.chord);
@@ -2418,10 +2448,14 @@ function renderSalaDeAula(){
   const open=n=>state.salaOpenStep===n;
   const done=n=>step>=n?'sala-done':'';
   const check=n=>step>=n?'✓ ':'';
-  const focusBtn=(label,hlN)=>
-    `<button class="sala-focus-btn" onclick="playChordHighlighted(state.chord,_salaHighlightMidis(${hlN}))"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${label}</button>`;
-  const s1body=`${t('sala_s1_body')}${focusBtn(t('sala_focus_high'),1)}`;
-  const s2body=`${t('sala_s2_body')}${focusBtn(t('sala_focus_low'),2)}`;
+  const _fbtn=(label,hlN)=>
+    `<button class="sala-focus-btn" onclick="playClickSfx('soft');playSalaFocus(_salaHighlightMidis(${hlN}))"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${label}</button>`;
+  const _lbtn=()=>
+    `<button class="sala-focus-btn" onclick="playClickSfx('soft');playChord(state.chord)"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${t('listen_chord')}</button>`;
+  const twoBtns=(label,hlN)=>
+    `<div style="display:flex;gap:.5rem;margin-top:.5rem">${_lbtn()}${_fbtn(label,hlN)}</div>`;
+  const s1body=`${t('sala_s1_body')}${twoBtns(t('sala_focus_high'),1)}`;
+  const s2body=`${t('sala_s2_body')}${twoBtns(t('sala_focus_low'),2)}`;
   const s3body=`<p style="margin:.2rem 0 .1rem">${t('sala_s3_intro')}</p>
     <ul>
       <li>${t('sala_s3_maior')}</li>
@@ -2429,7 +2463,7 @@ function renderSalaDeAula(){
       <li>${t('sala_s3_dim')}</li>
       <li>${t('sala_s3_aug')}</li>
     </ul>
-    ${focusBtn(t('sala_focus_mid'),3)}`;
+    ${twoBtns(t('sala_focus_mid'),3)}`;
   const row=(n,title,body,disabled='')=>`
     <div style="margin-top:.35rem">
       <div style="display:flex;align-items:center;gap:.4rem">${arrowEl(n)}<button class="sala-step-btn ${done(n)}" onclick="doSalaStep(${n})" ${disabled} style="flex:1">${check(n)}${title}</button></div>

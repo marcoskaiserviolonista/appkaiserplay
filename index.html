@@ -2298,8 +2298,9 @@ function _salaHighlightMidis(step){
   if(step===1)return[sorted[sorted.length-1]];
   if(step===2)return[rootMidi];
   if(step===3){
+    const seen=new Set();
     const result=[];
-    sorted.forEach(m=>{const iv=((m-rootMidi)%12+12)%12;if(iv>=3&&iv<=8)result.push(m);});
+    sorted.forEach(m=>{const iv=((m-rootMidi)%12+12)%12;if(iv>=3&&iv<=8&&!seen.has(iv)){seen.add(iv);result.push(m);}});
     return result;
   }
   return[];
@@ -2584,7 +2585,7 @@ function renderSalaDeAula(){
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
   const _selCount=Object.keys(state.salaFbSel).length;
-  const _qLabel=_translateQualityLabel(state.chord.quality,state.chord.quality);
+  const _qLabel=state.chord.quality?_translateQualityLabel(state.chord.quality,state.chord.quality):'';
   const s4body=`
   <div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
   ${!state.salaVerified
@@ -2595,7 +2596,7 @@ function renderSalaDeAula(){
       </div>`
     :`<div style="text-align:center;margin:.4rem 0 .3rem">
         <div style="font-size:1.6rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'};letter-spacing:-.01em">${cifra}</div>
-        <div style="font-size:.82rem;color:#aaa;font-weight:700;margin-top:.15rem">${_qLabel}</div>
+        ${_qLabel?`<div style="font-size:.82rem;color:#aaa;font-weight:700;margin-top:.15rem">${_qLabel}</div>`:''}
         <div style="margin-top:.4rem;font-size:.75rem;color:#888;display:flex;justify-content:center;gap:.9rem">
           <span><span style="color:#4caf50;font-size:.9rem">●</span> ${state.lang==='en'?'correct':'acertou'}</span>
           <span><span style="color:#f44336;font-size:.9rem">●</span> ${state.lang==='en'?'wrong':'errou'}</span>

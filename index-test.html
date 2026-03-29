@@ -2582,9 +2582,12 @@ function renderSalaDeAula(){
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
   const _selCount=Object.keys(state.salaFbSel).length;
-  const s4body=`<div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
-  ${!state.salaVerified?`<div class="fb-note-count" style="margin:.2rem 0">${_selCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div><div class="fb-action-row"><button class="fb-confirm-btn" onclick="doSalaVerify()" ${_selCount===0?'disabled':''}>✓ ${t('confirm')}</button><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`
-  :`<div style="text-align:center;margin:.4rem 0"><div style="font-size:.85rem;color:#aaa;margin-bottom:.3rem">${state.salaCorrectCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes correct':'notas corretas'}</div><div style="font-size:2.2rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'}">${cifra}</div>${!state.salaVerifyOk?`<button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}</div><div class="fb-action-row"><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`}`;
+  const s4body=`
+  <div style="text-align:center;font-size:1.8rem;font-weight:900;color:#F5A623;font-family:var(--font-body);margin:.1rem 0 .5rem;text-shadow:0 0 12px #F5A62344">${cifra}</div>
+  <div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
+  ${!state.salaVerified
+    ?`<div class="fb-note-count" style="margin:.2rem 0">${_selCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes':'notas'}</div><div class="fb-action-row"><button class="fb-confirm-btn" onclick="doSalaVerify()" ${_selCount===0?'disabled':''}>✓ ${t('confirm')}</button><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`
+    :`<div style="text-align:center;margin:.4rem 0"><div style="font-size:.85rem;color:#aaa;margin-bottom:.3rem">${state.salaCorrectCount} / ${state.chord.midi.length} ${state.lang==='en'?'notes correct':'notas corretas'}</div><div style="font-size:2.2rem;font-weight:900;color:${state.salaVerifyOk?'#4caf50':'#F5A623'};font-family:var(--font-body);text-shadow:0 0 18px ${state.salaVerifyOk?'#4caf5066':'#F5A62366'}">${cifra}</div>${!state.salaVerifyOk?`<button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}</div><div class="fb-action-row"><button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button></div>`}`;
   // Painel expandido (passo ativo)
   const panel=(n,title,body)=>`
     <div style="margin-top:.5rem">
@@ -2605,9 +2608,7 @@ function renderSalaDeAula(){
   else if(step===3){stepArea=panel(3,t('sala_s3_title'),s3body)+nextBtn(4,t('sala_s4_title'));}
   else{
     stepArea=panel(4,t('sala_s4_title'),s4body);
-    if(state.salaVerified&&state.salaVerifyOk)stepArea+=`<div style="text-align:center;margin-top:.6rem;font-size:1.6rem;font-weight:900;color:#4caf50;text-shadow:0 0 14px #4caf5066">${t('sala_verify_correct')} ${cifra}</div>`;
-    else if(state.salaVerified&&!state.salaVerifyOk)stepArea+=`<div style="text-align:center;margin-top:.6rem"><span style="font-size:1.1rem;font-weight:900;color:#f44336">${t('sala_verify_wrong')} </span><span style="font-size:1.6rem;font-weight:900;color:#F5A623">${cifra}</span><br><button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button></div>`;
-    stepArea+=`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`;
+    if(state.salaVerified)stepArea+=`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`;
   }
   return`<div style="padding:.75rem 0">
   <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:.6rem;gap:.75rem">

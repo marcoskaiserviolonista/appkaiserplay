@@ -739,6 +739,7 @@ const STRINGS = {
     sala_s3_diff:'O diminuto e o aumentado podem confundir, pois ambos são dissonantes. Diferença: diminuto → terça menor (mais "triste") | aumentado → mais raro.',
     sala_s4_title:'Passo 4: Experimente no instrumento',
     sala_s4_body:'Ao identificar a qualidade do acorde, a nota mais grave e a nota mais aguda, pegue seu violão e experimente os acordes mais comuns daquela região. Com o tempo, ficará mais fácil reconhecer tétrades, acordes com sétima, acordes com nona e outros mais complexos.',
+    sala_intro:'Tente identificar qual é o acorde apenas ouvindo. Se não conseguir, siga os passos abaixo — eles vão te guiar até a resposta.',
     sala_focus_high:'Focar nota aguda',
     sala_focus_low:'Focar nota grave',
     sala_focus_mid:'Focar tipo do acorde',
@@ -960,6 +961,7 @@ const STRINGS = {
     sala_s3_diff:'Diminished and augmented can be confused — both are dissonant. Difference: diminished → minor third (more "sad") | augmented → rarer.',
     sala_s4_title:'Step 4: Try on the instrument',
     sala_s4_body:'Once you identify the chord quality, the lowest note and the highest note, pick up your guitar and try the most common chords in that range. With time, it will be easier to recognize tetrads, seventh chords, ninth chords and other complex chords.',
+    sala_intro:'Try to identify the chord just by listening. If you can\'t, follow the steps below — they will guide you to the answer.',
     sala_focus_high:'Focus on highest note',
     sala_focus_low:'Focus on lowest note',
     sala_focus_mid:'Focus on chord type',
@@ -2331,7 +2333,20 @@ function _salaFbPositions(activeStep){
   const sorted=[...pos].sort((a,b)=>(FB_OPEN[a.s]+a.f)-(FB_OPEN[b.s]+b.f));
   if(activeStep===1)return[sorted[sorted.length-1]]; // só a mais aguda
   if(activeStep===2)return[sorted[0]];               // só a mais grave
-  if(activeStep===3)return sorted.slice(1,sorted.length-1); // notas do meio
+  if(activeStep===3){
+    // Passo 3: apenas terça e quinta (intervalos 3–8 semitones da raiz)
+    // Exclui tônica (intervalo 0) e suas oitavas, e a nota mais aguda
+    // Mantém uma posição por classe de intervalo (sem duplicatas de oitava)
+    const rootMidi=FB_OPEN[sorted[0].s]+sorted[0].f;
+    const seen=new Set();
+    const result=[];
+    sorted.forEach(p=>{
+      const midi=FB_OPEN[p.s]+p.f;
+      const iv=((midi-rootMidi)%12+12)%12;
+      if(iv>=3&&iv<=8&&!seen.has(iv)){seen.add(iv);result.push(p);}
+    });
+    return result;
+  }
   return sorted;                                     // todas (passo 4)
 }
 
@@ -2419,7 +2434,8 @@ function renderSalaDeAula(){
     </div>`;
   return`<div style="padding:.75rem 0">
   <button onclick="playClickSfx('nav');state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
-  <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.5rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
+  <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.4rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
+  <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center;font-style:italic">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
   <div style="width:100%;max-width:520px;margin-top:.6rem">
     ${row(1,t('sala_s1_title'),s1body)}

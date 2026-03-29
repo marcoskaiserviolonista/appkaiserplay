@@ -729,7 +729,7 @@ const STRINGS = {
     sala_s1_title:'Passo 1: Identifique a nota mais aguda',
     sala_s1_body:'Ela é a mais nítida e fácil de reconhecer nos acordes. Identificá-la oferece um bom ponto de partida para localizar o acorde.',
     sala_s2_title:'Passo 2: Identifique a nota mais grave',
-    sala_s2_body:'Quando ouvir um acorde, foque sua atenção na nota mais grave. Não é tão fácil ouvir quanto a mais aguda — esteja em um ambiente silencioso, com um bom equipamento de som. Na maioria das vezes, a nota mais grave é a tônica do acorde. Se não tiver certeza, tudo bem: a soma das informações dos próximos passos ajuda a chegar na resposta.',
+    sala_s2_body:'Quando ouvir um acorde, foque sua atenção na nota mais grave. Não é tão fácil ouvir quanto a mais aguda. Na maioria das vezes, a nota mais grave é a tônica do acorde.',
     sala_s3_title:'Passo 3: Identifique o tipo de acorde',
     sala_s3_intro:'Classifique o acorde analisando a terça e a quinta:',
     sala_s3_maior:'Maior → terça maior + quinta justa',
@@ -738,7 +738,12 @@ const STRINGS = {
     sala_s3_aug:'Aumentado → terça maior + quinta aumentada',
     sala_s3_diff:'',
     sala_s4_title:'Passo 4: Experimente no instrumento',
-    sala_s4_body:'Ao identificar a qualidade do acorde, a nota mais grave e a nota mais aguda, pegue seu violão e experimente os acordes mais comuns daquela região. Com o tempo, ficará mais fácil reconhecer tétrades, acordes com sétima, acordes com nona e outros mais complexos.',
+    sala_s4_body:'Ao identificar a qualidade do acorde, a nota mais grave e a nota mais aguda, pegue seu violão e comece a experimentar os acordes mais comuns daquela região.<br><br>Com o tempo e mais experiência, ficará mais fácil reconhecer tétrades, acordes com sétima, acordes com nona e outros acordes mais complexos.',
+    sala_build_instruction:'Monte o acorde no fretboard abaixo e clique em Verificar:',
+    sala_verify_btn:'Verificar acorde',
+    sala_verify_correct:'Correto!',
+    sala_verify_wrong:'Era:',
+    sala_retry:'Tentar novamente',
     sala_intro:'Tente identificar qual é o acorde apenas ouvindo. Se não conseguir, siga os passos abaixo — eles vão te guiar até a resposta.',
     sala_focus_high:'Focar nota aguda',
     sala_focus_low:'Focar nota grave',
@@ -951,7 +956,7 @@ const STRINGS = {
     sala_s1_title:'Step 1: Identify the highest note',
     sala_s1_body:'It is the clearest and easiest to recognize in chords. Identifying it gives you a good starting point for locating the chord.',
     sala_s2_title:'Step 2: Identify the lowest note',
-    sala_s2_body:'When you hear a chord, focus on the lowest note. It is not as easy to hear as the highest — be in a quiet environment with good audio equipment. Most of the time, the lowest note is the chord root. If you are not sure, that is fine: information from the next steps will help.',
+    sala_s2_body:'When you hear a chord, focus on the lowest note. It is not as easy to hear as the highest. Most of the time, the lowest note is the chord root.',
     sala_s3_title:'Step 3: Identify the chord type',
     sala_s3_intro:'Classify the chord by analyzing the third and fifth:',
     sala_s3_maior:'Major → major third + perfect fifth',
@@ -960,7 +965,12 @@ const STRINGS = {
     sala_s3_aug:'Augmented → major third + augmented fifth',
     sala_s3_diff:'',
     sala_s4_title:'Step 4: Try on the instrument',
-    sala_s4_body:'Once you identify the chord quality, the lowest note and the highest note, pick up your guitar and try the most common chords in that range. With time, it will be easier to recognize tetrads, seventh chords, ninth chords and other complex chords.',
+    sala_s4_body:'Once you identify the chord quality, the lowest note and the highest note, pick up your guitar and start trying the most common chords in that range.<br><br>With time and experience, it will be easier to recognize tetrads, seventh chords, ninth chords and other complex chords.',
+    sala_build_instruction:'Build the chord on the fretboard below and click Verify:',
+    sala_verify_btn:'Verify chord',
+    sala_verify_correct:'Correct!',
+    sala_verify_wrong:'It was:',
+    sala_retry:'Try again',
     sala_intro:'Try to identify the chord just by listening. If you can\'t, follow the steps below — they will guide you to the answer.',
     sala_focus_high:'Focus on highest note',
     sala_focus_low:'Focus on lowest note',
@@ -1932,7 +1942,7 @@ const state={
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
   fretboardSwitches:{fb_triades:false,fb_tetrades:false,fb_complexos:false},
   fretboardExercise:false,
-  salaStep:0, salaActiveStep:0, salaOpenStep:0,
+  salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   _pendingDisplayName:false,
   fullAccess:true,
@@ -2209,6 +2219,9 @@ function startSalaDeAula(){
   state.salaStep=0;
   state.salaActiveStep=0;
   state.salaOpenStep=0;
+  state.salaFbSel={};
+  state.salaVerified=false;
+  state.salaVerifyOk=false;
   state.phase='sala_de_aula';
   state.playing=false;
   render();
@@ -2437,6 +2450,104 @@ function buildSalaFbSVGLimited(){
   return o;
 }
 
+function doSalaFbTap(key){
+  if(state.salaVerified)return;
+  const s=parseInt(key.split('-')[0]);
+  const wasSelected=!!state.salaFbSel[key];
+  Object.keys(state.salaFbSel).forEach(k=>{if(parseInt(k.split('-')[0])===s)delete state.salaFbSel[k];});
+  if(!wasSelected)state.salaFbSel[key]=true;
+  render();
+}
+function doSalaVerify(){
+  const keys=Object.keys(state.salaFbSel);
+  if(keys.length===0)return;
+  const got=keys.map(k=>{const p=k.split('-').map(Number);return fbNoteClass(p[0],p[1]);}).sort((a,b)=>a-b);
+  const exp=state.chord.midi.map(m=>m%12).sort((a,b)=>a-b);
+  let ok=(got.length===exp.length);
+  if(ok)for(let i=0;i<exp.length;i++){if(got[i]!==exp[i]){ok=false;break;}}
+  state.salaVerified=true;
+  state.salaVerifyOk=ok;
+  render();
+}
+function buildSalaFbInteractive(){
+  const SALA_FRETS=4;
+  const SALA_SVG_H=FB_NUT_Y+FB_FRET_Y[SALA_FRETS]+16;
+  const ST=[2.2,1.8,1.4,1.1,0.9,0.7];
+  let o='';
+  const hL=FB_NUT_X[0]-20,hR=FB_NUT_X[5]+20;
+  const botT=FB_FRET_Y[SALA_FRETS]/FB_PLAY_H;
+  o+=`<svg width="${FB_SVG_W}" height="${SALA_SVG_H}" viewBox="0 0 ${FB_SVG_W} ${SALA_SVG_H}" xmlns="http://www.w3.org/2000/svg" style="display:block">`;
+  o+=`<rect width="${FB_SVG_W}" height="${SALA_SVG_H}" fill="#111"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${hL}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[5]}" y1="${FB_NUT_Y}" x2="${hR}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${hL}" y1="${FB_HEAD_Y}" x2="${hR}" y2="${FB_HEAD_Y}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  for(let sn=0;sn<6;sn++)o+=`<text x="${FB_NUT_X[sn]}" y="${FB_HEAD_Y-9}" text-anchor="middle" dominant-baseline="alphabetic" fill="#ccc" font-size="17" font-weight="700" font-family="Poppins,sans-serif">${FB_SNAMES[sn]}</text>`;
+  for(let sh=0;sh<6;sh++)o+=`<line x1="${FB_NUT_X[sh]}" y1="${FB_HEAD_Y}" x2="${FB_NUT_X[sh]}" y2="${FB_NUT_Y}" stroke="#fff" stroke-width="${ST[sh]}" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${FB_NUT_X[5]}" y2="${FB_NUT_Y}" stroke="#fff" stroke-width="5" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[0]}" y1="${FB_NUT_Y}" x2="${Math.round(fbStrX(0,botT))}" y2="${FB_NUT_Y+FB_FRET_Y[SALA_FRETS]}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  o+=`<line x1="${FB_NUT_X[5]}" y1="${FB_NUT_Y}" x2="${Math.round(fbStrX(5,botT))}" y2="${FB_NUT_Y+FB_FRET_Y[SALA_FRETS]}" stroke="#fff" stroke-width="2" stroke-linecap="round"/>`;
+  for(let ss=1;ss<=4;ss++)o+=`<line x1="${FB_NUT_X[ss]}" y1="${FB_NUT_Y}" x2="${Math.round(fbStrX(ss,botT))}" y2="${FB_NUT_Y+FB_FRET_Y[SALA_FRETS]}" stroke="#fff" stroke-width="${ST[ss]}" stroke-linecap="round"/>`;
+  for(let fw=1;fw<=SALA_FRETS;fw++){
+    const wy=FB_NUT_Y+FB_FRET_Y[fw],tn=FB_FRET_Y[fw]/FB_PLAY_H;
+    const wxL=Math.round(fbStrX(0,tn)),wxR=Math.round(fbStrX(5,tn));
+    o+=`<line x1="${wxL}" y1="${wy}" x2="${wxR}" y2="${wy}" stroke="#fff" stroke-width="${fw===SALA_FRETS?2.5:1.5}" stroke-linecap="round"/>`;
+  }
+  for(let fl=1;fl<=SALA_FRETS;fl++){
+    const fmid=(FB_FRET_Y[fl-1]+FB_FRET_Y[fl])/2,fmy=Math.round(FB_NUT_Y+fmid);
+    const flx=Math.round(fbStrX(0,fmid/FB_PLAY_H))-4;
+    o+=`<text x="${flx}" y="${fmy+4}" text-anchor="end" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
+  }
+  // Notas selecionadas pelo usuário
+  const isAnswered=state.salaVerified;
+  const isWrong=isAnswered&&!state.salaVerifyOk;
+  const correctPos=isAnswered?new Set(getChordPositions(state.chord).map(({s,f})=>`${s}-${f}`)):null;
+  Object.keys(state.salaFbSel).forEach(k=>{
+    const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
+    if(fc>SALA_FRETS)return;
+    const nc=fbNoteClass(sc,fc);
+    let cx,cy,fspace;
+    if(fc===0){cx=FB_NUT_X[sc];cy=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
+    else{const fmv=(FB_FRET_Y[fc-1]+FB_FRET_Y[fc])/2;cx=Math.round(fbStrX(sc,fmv/FB_PLAY_H));cy=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[fc]-FB_FRET_Y[fc-1];}
+    const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
+    let fill,stroke,tf;
+    if(isAnswered){
+      const inChord=!isWrong||correctPos.has(k);
+      if(inChord){fill='#4caf50';stroke='#1a3d1a';}else{fill='#f44336';stroke='#3d1a1a';}
+      tf='#fff';
+    }else{fill='#60dcff';tf='#111';stroke='#0a2030';}
+    o+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
+    o+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
+  });
+  // Posições corretas não colocadas → laranja (somente quando errou)
+  if(isWrong){
+    const usedStrings=new Set(Object.keys(state.salaFbSel).map(k=>parseInt(k.split('-')[0])));
+    getChordPositions(state.chord).forEach(({s,f})=>{
+      if(f>SALA_FRETS)return;
+      if(state.salaFbSel[`${s}-${f}`])return;
+      if(usedStrings.has(s))return;
+      const nc=fbNoteClass(s,f);
+      let cx,cy,fspace;
+      if(f===0){cx=FB_NUT_X[s];cy=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
+      else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}
+      const r=Math.min(16,Math.floor(fspace*0.45))+2,fs=r>=14?'12':r>=11?'11':'10';
+      o+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="#F5A623" stroke="#7a4a00" stroke-width="2"/>`;
+      o+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="#111" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
+    });
+  }
+  // Células clicáveis (apenas enquanto não verificado)
+  if(!state.salaVerified){
+    for(let cs0=0;cs0<6;cs0++)o+=`<rect x="${FB_COL_EDGES[cs0]}" y="${FB_HEAD_Y}" width="${FB_COL_EDGES[cs0+1]-FB_COL_EDGES[cs0]}" height="${FB_NUT_Y-FB_HEAD_Y}" fill="transparent" class="fb-fc" onclick="doSalaFbTap('${cs0}-0')"/>`;
+    for(let cs=0;cs<6;cs++){
+      for(let cf=1;cf<=SALA_FRETS;cf++){
+        const ry=FB_NUT_Y+FB_FRET_Y[cf-1],rh=FB_FRET_Y[cf]-FB_FRET_Y[cf-1];
+        o+=`<rect x="${FB_COL_EDGES[cs]}" y="${ry}" width="${FB_COL_EDGES[cs+1]-FB_COL_EDGES[cs]}" height="${rh}" fill="transparent" class="fb-fc" onclick="doSalaFbTap('${cs}-${cf}')"/>`;
+      }
+    }
+  }
+  o+='</svg>';
+  return o;
+}
+
 function renderSalaDeAula(){
   const step=state.salaStep;
   const nextStep=step+1;
@@ -2478,10 +2589,16 @@ function renderSalaDeAula(){
     ${row(1,t('sala_s1_title'),s1body)}
     ${row(2,t('sala_s2_title'),s2body,step<1?'disabled':'')}
     ${row(3,t('sala_s3_title'),s3body,step<2?'disabled':'')}
-    ${row(4,t('sala_s4_title'),`<div style="text-align:center;margin-bottom:.6rem"><span style="font-size:2.4rem;font-weight:900;color:#F5A623;font-family:var(--font-body);text-shadow:0 0 18px #F5A62366;letter-spacing:.02em">${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</span></div>${t('sala_s4_body')}`,step<3?'disabled':'')}
+    ${row(4,t('sala_s4_title'),`<div style="font-size:.83rem;color:#ccc;line-height:1.6">${t('sala_s4_body')}</div><div style="font-size:.8rem;color:#F5A623;margin-top:.6rem;font-weight:700">${t('sala_build_instruction')}</div>`,step<3?'disabled':'')}
+    ${step>=4&&state.salaVerified&&state.salaVerifyOk?`<div style="text-align:center;margin-top:.6rem;font-size:1.6rem;font-weight:900;color:#4caf50;text-shadow:0 0 14px #4caf5066">${t('sala_verify_correct')} ${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</div>`:''}
+    ${step>=4&&state.salaVerified&&!state.salaVerifyOk?`<div style="text-align:center;margin-top:.6rem"><span style="font-size:1.1rem;font-weight:900;color:#f44336">${t('sala_verify_wrong')} </span><span style="font-size:1.6rem;font-weight:900;color:#F5A623">${state.lang==='en'&&state.chord.cifraEn?state.chord.cifraEn:state.chord.cifra}</span><br><button class="sala-focus-btn" style="margin-top:.4rem" onclick="state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button></div>`:''}
     ${step>=4?`<button class="cta-btn" style="margin-top:.9rem" onclick="playClickSfx('nav');startSalaDeAula()">${t('sala_next')} <img src="seta-direita.png" style="width:18px;height:18px;vertical-align:middle;margin-left:.3rem"></button>`:''}
   </div>
-  <div class="fb-wrap" style="margin-top:.5rem">${buildSalaFbSVGLimited()}</div>
+  <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
+  ${state.salaActiveStep===4&&!state.salaVerified?`
+    <div class="fb-note-count">${Object.keys(state.salaFbSel).length} / ${state.chord.midi.length} ${t('notes')}</div>
+    <button id="sala-verify-btn" class="sala-step-btn" onclick="doSalaVerify()" style="width:100%;margin-top:.3rem">${t('sala_verify_btn')}</button>
+  `:''}
 </div>`;
 }
 

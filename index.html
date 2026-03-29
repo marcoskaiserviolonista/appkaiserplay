@@ -2435,7 +2435,7 @@ function renderSalaDeAula(){
   return`<div style="padding:.75rem 0">
   <button onclick="playClickSfx('nav');state.phase='start';render()" style="background:linear-gradient(180deg,#1a2a1a,#0e1a0e);border:3px solid #2a5a2a;border-radius:12px;color:#7cdd7c;font-family:var(--font-body);font-size:.85rem;font-weight:700;padding:.45rem 1rem;cursor:pointer;box-shadow:3px 3px 0 #051005;margin-bottom:.6rem;display:inline-flex;align-items:center;gap:.4rem">← ${t('back_btn').replace('← ','')}</button>
   <div style="text-align:center;font-size:1.3rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);margin-bottom:.4rem;text-shadow:0 0 12px #7cdd7c44">${t('sala_de_aula')}</div>
-  <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center;font-style:italic">${t('sala_intro')}</div>
+  <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
   <div style="width:100%;max-width:520px;margin-top:.6rem">
     ${row(1,t('sala_s1_title'),s1body)}

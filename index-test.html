@@ -4586,7 +4586,6 @@ function renderLevelUp(){
         onerror="this.style.display='none'">
       <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};margin-bottom:.15rem">${t('new_level')}</div>
       <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;letter-spacing:-.03em;margin-bottom:.45rem;text-shadow:4px 4px 0 ${cor}99;line-height:1">${lvl.n}</div>
-      <div style="font-size:.82rem;color:#bbb;font-style:italic;line-height:1.5;margin-bottom:.75rem;padding:0 .25rem">"${grupo.desc}"</div>
       <button class="cta-btn" onclick="afterLvlUp()">${lvl.n===1?t('start_journey'):t('continue_journey')}</button>
     </div>`;
   }
@@ -4936,7 +4935,6 @@ function renderNiveis(){
       <div style="padding:.9rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem">${statusBadge}${rangeBadge}</div>
         <div style="font-size:1.15rem;font-weight:900;color:${isLocked?'#555':gc};margin-bottom:.3rem;letter-spacing:-.01em">${g.title}</div>
-        <div style="font-size:.78rem;color:${isLocked?'#333':'#777'};line-height:1.6;font-style:italic;margin-bottom:.85rem">"${g.desc}"</div>
         ${xpBar}
         ${downloadBtn}
       </div>
@@ -5080,7 +5078,6 @@ function openNivelModal(idx){
         <div style="font-size:.82rem;color:#666;font-weight:700;margin-bottom:.85rem">
           ${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
         </div>
-        <div style="font-size:.9rem;color:${isLocked?'#444':'#aaa'};line-height:1.7;margin-bottom:1.1rem;font-style:italic">"${g.desc}"</div>
         ${progressBar}
         ${!isDone&&!isCurrent?`<div style="font-size:.8rem;color:#555;display:flex;align-items:center;gap:.4rem">⭐ ${state.lang==='en'?'Required XP:':'XP necessário:'} <strong style="color:#666">${xpNeeded.toLocaleString()} XP</strong></div>`:''}
         ${isDone?`<div style="font-size:.8rem;color:#4ade8088;display:flex;align-items:center;gap:.4rem">✓ ${state.lang==='en'?'You have already passed this stage.':'Você já superou esta etapa da jornada.'}</div>`:''}
@@ -5210,7 +5207,7 @@ function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.journeyMode='harmonic';
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }
@@ -5229,7 +5226,7 @@ function startCordas(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.journeyMode='cordas';
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

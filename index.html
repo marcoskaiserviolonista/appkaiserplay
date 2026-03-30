@@ -1842,6 +1842,7 @@ function makeCoinParticles(x,y){
   }));
 }
 
+let _particleRAF=null;
 function drawParticles(){
   ctx2d.clearRect(0,0,520,700);
   particles.forEach(p=>{
@@ -1859,9 +1860,9 @@ function drawParticles(){
   });
   particles=particles.map(p=>({...p,x:p.x+p.vx,y:p.y+p.vy,vy:p.vy+.5,life:p.life-p.decay})).filter(p=>p.life>0);
   if(particles.length>120)particles.splice(0,particles.length-120);
-  requestAnimationFrame(drawParticles);
+  if(particles.length>0){_particleRAF=requestAnimationFrame(drawParticles);}else{_particleRAF=null;ctx2d.clearRect(0,0,520,700);}
 }
-drawParticles();
+function startParticleLoop(){if(_particleRAF)return;_particleRAF=requestAnimationFrame(drawParticles);}
 
 function esc(str){return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
@@ -2667,7 +2668,7 @@ function doFocusedFretboardConfirm(){
     state.focusedSessionTotal++;
     const color=getFocusedColor(state.focusedStreak);
     playSfx(getFocusedSound(state.focusedStreak));
-    particles.push(...makeParticles(cx-cl,cy,12,false));
+    particles.push(...makeParticles(cx-cl,cy,12,false));startParticleLoop();
     const app=document.getElementById('app');
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
     const pontosTxt=bonus===0?`+5 ${t('points')}`:`5 + ${bonus} ${t('points')}`;
@@ -2709,7 +2710,7 @@ function nextFocusedFretboardQ(){
     const isNewGroup=lvlNow.n===grupoNow.range[0];
     state.lvlUpIsNewGroup=isNewGroup;
     state.firstCardSeen=true;
-    if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+    if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));startParticleLoop();}
     else{playSfx('correct2');}
     state.lvlUpPending=false;
     state.lvlUpFromFocused=true;
@@ -2766,7 +2767,7 @@ function doFretboardConfirm(){
       const cx=_fbRect.left+_fbRect.width/2,cy=_fbRect.top+_fbRect.height/2;
       const cl=(window.innerWidth-520)/2;
       const isBig=ns>=5;
-      particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));
+      particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));startParticleLoop();
       const color=comboColor(newMult);
       const xpPopup=document.createElement('div');
       xpPopup.textContent=`+${gain} ${t('points')}`;
@@ -2867,7 +2868,7 @@ function handleAnswer(choiceId,btnEl){
     btnEl.style.animation='correctExplode .4s ease';
     setTimeout(()=>{if(btnEl)btnEl.style.animation='';},400);
     const isBig=ns>=5||state.isBonus;
-    particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));
+    particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));startParticleLoop();
     const app=document.getElementById('app');
     if(state.isBonus){
       app.style.transition='background .15s';app.style.background='#0a1a2e';
@@ -2984,7 +2985,7 @@ function handleQualityAnswer(quality, btnEl){
     btnEl.style.animation='correctExplode .4s ease';
     setTimeout(()=>{if(btnEl)btnEl.style.animation='';},400);
     const isBig=ns>=5;
-    particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));
+    particles.push(...makeParticles(cx-cl,cy,isBig?28:12,isBig));startParticleLoop();
     const app=document.getElementById('app');
     app.classList.add('flash-correct');
     setTimeout(()=>app.classList.remove('flash-correct'),500);
@@ -3101,7 +3102,7 @@ function exchangeDiamonds(btnEl){
   const rect=btnEl.getBoundingClientRect();
   const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
   const cl=(window.innerWidth-520)/2;
-  particles.push(...makeCoinParticles(cx-cl,cy));
+  particles.push(...makeCoinParticles(cx-cl,cy));startParticleLoop();
   spawnCoinFloats(cx,cy,Math.min(gained,8));
   spawnFloat(cx,cy-60,`+${gained} ${t('coins').toLowerCase()}`,true);
   saveProgress();
@@ -3117,7 +3118,7 @@ function exchangePoints(btnEl){
   const rect=btnEl.getBoundingClientRect();
   const cx=rect.left+rect.width/2,cy=rect.top+rect.height/2;
   const cl=(window.innerWidth-520)/2;
-  particles.push(...makeCoinParticles(cx-cl,cy));
+  particles.push(...makeCoinParticles(cx-cl,cy));startParticleLoop();
   spawnCoinFloats(cx,cy,gained>0?6:3);
   spawnFloat(cx,cy-60,`+${gained} ${t('coins').toLowerCase()}`,true);
   saveProgress();
@@ -3595,7 +3596,7 @@ function handleFocusedQualityAnswer(quality, btnEl){
     playSfx(getFocusedSound(state.focusedStreak));
     btnEl.style.animation='correctExplode .4s ease';
     setTimeout(()=>{if(btnEl)btnEl.style.animation='';},400);
-    particles.push(...makeParticles(cx-cl,cy,12,false));
+    particles.push(...makeParticles(cx-cl,cy,12,false));startParticleLoop();
     const app=document.getElementById('app');
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
 
@@ -3644,7 +3645,7 @@ function handleFocusedQualityAnswer(quality, btnEl){
       const isNewGroup=lvlNow.n===grupoNow.range[0];
       state.lvlUpIsNewGroup=isNewGroup;
       state.firstCardSeen=true;
-      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));startParticleLoop();}
       else{playSfx('correct2');}
       state.lvlUpPending=false;
       state.lvlUpFromFocused=true;
@@ -3687,7 +3688,7 @@ function handleFocusedAnswer(choiceId,btnEl){
 
     btnEl.style.animation='correctExplode .4s ease';
     setTimeout(()=>{if(btnEl)btnEl.style.animation='';},400);
-    particles.push(...makeParticles(cx-cl,cy,12,false));
+    particles.push(...makeParticles(cx-cl,cy,12,false));startParticleLoop();
 
     const app=document.getElementById('app');
     if(app){app.classList.add('flash-correct');setTimeout(()=>app.classList.remove('flash-correct'),350);}
@@ -3744,7 +3745,7 @@ function handleFocusedAnswer(choiceId,btnEl){
       const isNewGroup=lvlNow.n===grupoNow.range[0];
       state.lvlUpIsNewGroup=isNewGroup;
       state.firstCardSeen=true;
-      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));}
+      if(isNewGroup){playSfx('levelup');particles.push(...makeParticles(260,300,60,true));particles.push(...makeParticles(100,200,30,true));particles.push(...makeParticles(400,200,30,true));startParticleLoop();}
       else{playSfx('correct2');}
       state.lvlUpPending=false;
       state.lvlUpFromFocused=true;
@@ -4047,6 +4048,7 @@ function renderComprar(){
 
 
 let _saveTimer=null;
+let _saveMaxTimer=null;
 const _NAV_PHASES=new Set(['start','login','signup','forgot_password','set_display_name','perfil','levelup','desempenho','loja','inventario','niveis','treino_focado_menu','comprar']);
 let _lastPhase=null;
 function render(){
@@ -4064,6 +4066,7 @@ function render(){
   if(state.user&&state.phase!=='login'){
     if(_saveTimer)clearTimeout(_saveTimer);
     _saveTimer=setTimeout(saveProgress,4000);
+    if(!_saveMaxTimer){_saveMaxTimer=setTimeout(()=>{_saveMaxTimer=null;if(_saveTimer){clearTimeout(_saveTimer);_saveTimer=null;}saveProgress();},15000);}
   }
   const header=document.querySelector('.header');
   if(header)header.style.display=(state.phase==='login'||state.phase==='signup'||state.phase==='set_display_name'||state.phase==='forgot_password')?'none':'';
@@ -5259,6 +5262,7 @@ function nextQ(){
       particles.push(...makeParticles(260,300,60,true));
       particles.push(...makeParticles(100,200,30,true));
       particles.push(...makeParticles(400,200,30,true));
+      startParticleLoop();
     } else {
       playSfx('correct2');
     }
@@ -5803,6 +5807,7 @@ function showRatingPrompt(){
 function saveProgress(){
   if(!state.user)return;
   _saveTimer=null;
+  if(_saveMaxTimer){clearTimeout(_saveMaxTimer);_saveMaxTimer=null;}
   db.collection('players').doc(state.user.uid).set({
     displayName:state.user.displayName||'',
     xp:state.xp,
@@ -5818,7 +5823,7 @@ function saveProgress(){
     firstCardSeen:state.firstCardSeen,
     ratingDone:state.ratingDone,
     ratingSkippedAt:state.ratingSkippedAt,
-  }).catch(e=>console.error('saveProgress error:',e));
+  },{merge:true}).catch(e=>console.error('saveProgress error:',e));
 }
 async function loadProgress(uid){
   try{

@@ -782,7 +782,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
     what_quality:'Qual é a qualidade deste acorde?', build_chord_fretboard:'Monte o acorde no braço do violão', back_btn:'← Voltar',
-    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica', cordas_journey:'Jornada pelas Cordas',
+    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica', cordas_journey:'Jornada pelas Cordas', cordas_2x:'2× pts',
     train_ear:'Treine seu Ouvido',
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
     your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
@@ -1010,7 +1010,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
     what_quality:'What is the quality of this chord?', build_chord_fretboard:'Build the chord on the fretboard', back_btn:'← Back',
-    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey', cordas_journey:'Journey Through the Strings',
+    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey', cordas_journey:'Journey Through the Strings', cordas_2x:'2× pts',
     train_ear:'Train your Ear',
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
     your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
@@ -2742,7 +2742,7 @@ function doFretboardConfirm(){
   const _fbBtn=document.getElementById('fb-confirm-btn');
   const _fbRect=_fbBtn?_fbBtn.getBoundingClientRect():null;
   if(ok){
-    gain=Math.round(comboPoints(ns)*(1+violaoPct));
+    gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
     if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
     else if(ns>=10){playSfx('combo9');}
     else if(ns>=6){playSfx('combo6');}
@@ -2842,11 +2842,11 @@ function handleAnswer(choiceId,btnEl){
       const diamGain=violaoAtual.doubleDiamonds?2:1;
       diamondGained=diamGain;state.diamantes+=diamGain;
       const baseCombo=comboPoints(ns);
-      gain=Math.round((baseCombo*2)*(1+violaoPct));
+      gain=Math.round((baseCombo*2)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
       msg=violaoAtual.doubleDiamonds?`💎💎 ${state.lang==='en'?'Double Diamond! ×2':'Diamante Duplo! ×2'}`:`💎 ×2 ${state.lang==='en'?'in Combo!':'no Combo!'}`;
       playSfx('diamond');
     } else {
-      gain=Math.round(comboPoints(ns)*(1+violaoPct));
+      gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
       if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
       else if(ns>=10){playSfx('combo9');}
       else if(ns>=6){playSfx('combo6');}
@@ -4194,7 +4194,7 @@ function renderStart(){
   return `
     <div class="profile-card">
       <div style="width:52px;flex-shrink:0;aspect-ratio:2/3;background:transparent;display:flex;align-items:center;justify-content:center">
-        <img src="${_titleForLvl(lvl.n).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_')}.png"
+        <img src="${_nivelImg((NIVEL_GROUPS.find(g=>lvl.n>=g.range[0]&&lvl.n<=g.range[1])||NIVEL_GROUPS[0]).title)}"
           style="width:100%;height:100%;object-fit:contain"
           onerror="this.style.display='none';this.insertAdjacentHTML('afterend','<span style=\'font-size:1.1rem;font-weight:900;color:#F5A623\'>${initials}</span>')"
           alt="${lvlTitle(lvl)}"/>
@@ -4216,9 +4216,12 @@ function renderStart(){
       <button class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
         <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
       </button>
-      <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
-        <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
-      </button>
+      <div style="position:relative;margin-top:.75rem">
+        <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem;width:100%">
+          <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
+        </button>
+        <span style="position:absolute;right:6px;top:-13px;font-family:cursive;font-size:.82rem;font-style:italic;color:#fbbf24;transform:rotate(10deg);display:block;text-shadow:0 1px 4px rgba(0,0,0,.9);pointer-events:none;line-height:1">${t('cordas_2x')}</span>
+      </div>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <img src="alvo.png" style="width:1.8rem;height:1.8rem;flex-shrink:0;object-fit:contain">

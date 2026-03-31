@@ -1766,6 +1766,11 @@ function playClickSfx(type){
       o.type='sine';o.frequency.setValueAtTime(900,t);o.frequency.exponentialRampToValueAtTime(500,t+.06);
       g.gain.setValueAtTime(.05,t);g.gain.exponentialRampToValueAtTime(.001,t+.08);
       o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.09);
+    } else if(type==='locked'){
+      const o=ctx.createOscillator(),g=ctx.createGain();
+      o.type='square';o.frequency.setValueAtTime(220,t);o.frequency.exponentialRampToValueAtTime(140,t+.07);
+      g.gain.setValueAtTime(.06,t);g.gain.exponentialRampToValueAtTime(.001,t+.1);
+      o.connect(g);g.connect(ctx.destination);o.start(t);o.stop(t+.11);
     }
   }catch(e){}
 }
@@ -3401,7 +3406,7 @@ function hasFocusedSwitch(){
 }
 
 function toggleFocusedSwitch(key){
-  if(!isSwitchUnlocked(key)) return;
+  if(!isSwitchUnlocked(key)){playClickSfx('locked');return;}
   state.focusedSwitches[key]=!state.focusedSwitches[key];
   playClickSfx(state.focusedSwitches[key]?'switch_on':'switch_off');
   render();

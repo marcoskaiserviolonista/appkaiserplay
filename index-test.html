@@ -4194,6 +4194,10 @@ function renderStart(){
   const userName=esc(state.isGuest?t('guest_label'):(state.user?.displayName||state.user?.email?.split('@')[0]||t('player_default_pt')));
   const initials=userName[0].toUpperCase();
   return `
+    <div style="display:flex;gap:.5rem;margin-bottom:.75rem">
+      <button onclick="state.lvlUpIsNewGroup=false;state.phase='levelup';render()" style="flex:1;padding:.5rem;background:#1a1a1a;border:2px solid #333;border-radius:10px;color:#888;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer">🧪 Testar Level Up</button>
+      <button onclick="state.lvlUpIsNewGroup=true;state.phase='levelup';render()" style="flex:1;padding:.5rem;background:#1a1a1a;border:2px solid #333;border-radius:10px;color:#888;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer">🧪 Testar Level Up (carta)</button>
+    </div>
     <div class="profile-card">
       <div style="width:52px;flex-shrink:0;aspect-ratio:2/3;background:transparent;display:flex;align-items:center;justify-content:center">
         <img src="${_nivelImg((NIVEL_GROUPS.find(g=>lvl.n>=g.range[0]&&lvl.n<=g.range[1])||NIVEL_GROUPS[0]).title)}"

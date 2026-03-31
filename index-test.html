@@ -698,6 +698,7 @@ const STRINGS = {
     combo_prefix:'🔥', combo_suffix:'combo!',
     // Level Up
     level_up:'Level Up!', new_level:'Nível',
+    course_cta_title:'Quer evoluir de verdade no violão?', course_cta_body:'Conheça o curso completo de Marcos Kaiser e leve seu aprendizado para outro nível.', course_cta_btn:'Saiba mais',
     // Journey
     journey_title:'Jornada', start_playing:'Jogar', continue_playing:'Continuar', your_progress:'Seu progresso',
     // Economy
@@ -926,6 +927,7 @@ const STRINGS = {
     combo_prefix:'🔥', combo_suffix:'combo!',
     // Level Up
     level_up:'Level Up!', new_level:'Level',
+    course_cta_title:'Want to truly evolve on guitar?', course_cta_body:'Discover Marcos Kaiser\'s complete course and take your learning to the next level.', course_cta_btn:'Learn more',
     // Journey
     journey_title:'Journey', start_playing:'Play', continue_playing:'Continue', your_progress:'Your progress',
     // Economy
@@ -4581,6 +4583,15 @@ function renderLevelUp(){
   const grupo=NIVEL_GROUPS.find(g=>lvl.n>=g.range[0]&&lvl.n<=g.range[1])||NIVEL_GROUPS[0];
   const cor=grupo.cor;
   const showCard=state.lvlUpIsNewGroup; // nova categoria OU primeira vez
+  const coursePromo=`
+    <div style="width:100%;max-width:340px;margin-top:1.25rem;background:#111;border:2px solid #2a2a2a;border-radius:16px;padding:.85rem 1rem;display:flex;align-items:center;gap:.85rem;cursor:pointer" onclick="window.open('https://kaiserplay.com.br','_blank')">
+      <img src="logo-kaiser.png" style="width:48px;height:48px;object-fit:contain;flex-shrink:0;border-radius:10px" onerror="this.style.display='none'">
+      <div style="flex:1;min-width:0;text-align:left">
+        <div style="font-size:.78rem;font-weight:900;color:#F5A623;margin-bottom:.2rem">${t('course_cta_title')}</div>
+        <div style="font-size:.72rem;color:#888;line-height:1.35">${t('course_cta_body')}</div>
+      </div>
+      <div style="font-size:.72rem;font-weight:900;color:#F5A623;white-space:nowrap;flex-shrink:0">${t('course_cta_btn')} →</div>
+    </div>`;
 
   if(showCard){
     const img=_nivelImg(grupo.title);
@@ -4593,6 +4604,7 @@ function renderLevelUp(){
       <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};margin-bottom:.15rem">${t('new_level')}</div>
       <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;letter-spacing:-.03em;margin-bottom:.45rem;text-shadow:4px 4px 0 ${cor}99;line-height:1">${lvl.n}</div>
       <button class="cta-btn" onclick="afterLvlUp()">${lvl.n===1?t('start_journey'):t('continue_journey')}</button>
+      ${coursePromo}
     </div>`;
   }
 
@@ -4614,6 +4626,7 @@ function renderLevelUp(){
       <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};line-height:1">${t('new_level')}</div>
       <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;text-shadow:4px 4px 0 ${cor}99,0 0 30px ${cor}55;line-height:1;margin-bottom:.9rem">${lvl.n}</div>
       <button class="cta-btn" onclick="afterLvlUp()">${t('continue_journey')}</button>
+      ${coursePromo}
     </div>`;
 }
 

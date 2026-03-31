@@ -812,7 +812,7 @@ const STRINGS = {
     most_missed_chord:'Acorde que mais errou', hits_and_misses:'Acertos e Erros por Acorde',
     play_to_see_stats:'Jogue para ver suas estatísticas! 🎸',
     // Focused Training menu
-    evolve_faster:'EVOLUA MAIS RÁPIDO.', choose_chords:'Escolha os acordes e monte o seu treino.',
+    evolve_faster:'EVOLUA MAIS RÁPIDO', choose_chords:'Escolha os acordes e monte o seu treino.',
     train_by_quality:'Treine por qualidade', train_by_type:'Treine por tipo de acorde',
     start_training:'Iniciar Treino', activate_one:'Ative ao menos um exercício', loading:'Carregando...',
     // Paywall
@@ -1040,7 +1040,7 @@ const STRINGS = {
     most_missed_chord:'Most missed chord', hits_and_misses:'Hits and Misses by Chord',
     play_to_see_stats:'Play to see your stats! 🎸',
     // Focused Training menu
-    evolve_faster:'EVOLVE FASTER.', choose_chords:'Choose chords and build your training.',
+    evolve_faster:'EVOLVE FASTER', choose_chords:'Choose chords and build your training.',
     train_by_quality:'Train by quality', train_by_type:'Train by chord type',
     start_training:'Start Training', activate_one:'Activate at least one exercise', loading:'Loading...',
     // Paywall
@@ -3836,6 +3836,7 @@ function renderTreinoFocadoMenu(){
         <img src="forte.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
         <div style="flex:1;min-width:0">
           <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('training_suggestion')}</div>
+          <div style="font-size:.75rem;color:#e53e3e;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem;margin-bottom:.2rem">${state.lang==='en'?'THESE ARE THE CHORDS YOU MISS THE MOST':'ESTES SÃO OS ACORDES QUE VOCÊ MAIS ERRA'}</div>
           <div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-top:.3rem">${state.lang==='en'?'Find out which chords you miss the most and train exactly your weak points.':'Saiba quais são os acordes que você mais erra e treine exatamente seus pontos fracos.'}</div>
         </div>
       </div>

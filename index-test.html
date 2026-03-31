@@ -3401,11 +3401,7 @@ function hasFocusedSwitch(){
 }
 
 function toggleFocusedSwitch(key){
-  if(!isSwitchUnlocked(key)){
-    showToast(t('premium_locked'),t('premium_locked_body'));
-    playClickSfx('back');
-    return;
-  }
+  if(!isSwitchUnlocked(key)) return;
   state.focusedSwitches[key]=!state.focusedSwitches[key];
   playClickSfx(state.focusedSwitches[key]?'switch_on':'switch_off');
   render();

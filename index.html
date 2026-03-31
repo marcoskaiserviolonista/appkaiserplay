@@ -5609,11 +5609,11 @@ function renderPerfil(){
         <div style="font-size:.9rem;font-weight:900;color:#F5A623;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.75rem">${t('choose_language')}</div>
         <div style="display:flex;gap:.5rem">
           <button onclick="state.lang='pt';localStorage.setItem('kaiserplay_lang','pt');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='pt'?'#F5A623':'#333'};background:${state.lang==='pt'?'#F5A623':'#111'};color:${state.lang==='pt'?'#111':'#aaa'};text-shadow:none;display:flex;align-items:center;justify-content:center;gap:.45rem">
             <img src="brasil.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> Português
           </button>
           <button onclick="state.lang='en';localStorage.setItem('kaiserplay_lang','en');render()"
-            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'};display:flex;align-items:center;justify-content:center;gap:.45rem">
+            style="flex:1;padding:.65rem;border-radius:12px;font-size:.88rem;font-weight:800;font-family:var(--font-body);cursor:pointer;border:2px solid ${state.lang==='en'?'#F5A623':'#333'};background:${state.lang==='en'?'#F5A623':'#111'};color:${state.lang==='en'?'#111':'#aaa'};text-shadow:none;display:flex;align-items:center;justify-content:center;gap:.45rem">
             <img src="eua.png" style="width:18px;height:18px;object-fit:contain;flex-shrink:0"> English
           </button>
         </div>
@@ -5791,7 +5791,7 @@ function showRatingPrompt(){
       <div style="font-size:2rem;margin-bottom:.4rem">⭐</div>
       <div style="font-size:.95rem;font-weight:900;color:#F5A623;margin-bottom:.5rem">${t('rate_popup_title')}</div>
       <div style="font-size:.82rem;color:#999;margin-bottom:1.2rem;line-height:1.5">${t('rate_popup_body')}</div>
-      <button id="_rate-now" style="width:100%;padding:.75rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#111;font-size:.9rem;font-weight:900;font-family:var(--font-body);cursor:pointer;margin-bottom:.6rem">${t('rate_now')}</button>
+      <button id="_rate-now" style="width:100%;padding:.75rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#111;text-shadow:none;font-size:.9rem;font-weight:900;font-family:var(--font-body);cursor:pointer;margin-bottom:.6rem">${t('rate_now')}</button>
       <button id="_rate-later" style="width:100%;padding:.4rem;background:transparent;border:none;color:#555;font-size:.78rem;font-weight:600;font-family:var(--font-body);cursor:pointer;text-decoration:underline">${t('rate_later')}</button>
     </div>`;
   document.body.appendChild(overlay);

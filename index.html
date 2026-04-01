@@ -5087,17 +5087,17 @@ function renderInventario(){
 
 // ── Render: Níveis ───────────────────────────────────────────
 const NIVEL_GROUPS = [
-  {range:[1,10],   title:"Escudeiro",                        desc:"Cada acorde é uma conquista. A jornada começa — e o violão nunca mais soa igual.",                         cor:'#a0a0a0'},
-  {range:[11,20],  title:"Bardo",                            desc:"Suas músicas já carregam histórias. O violão não é mais instrumento — é sua voz.",                         cor:'#86efac'},
-  {range:[21,30],  title:"Alquimista Harmônico",             desc:"Você não toca acordes — você transmuta sons em sentimento. A harmonia cede à sua vontade.",                cor:'#F5A623'},
-  {range:[31,40],  title:"Sentinela das Cordas",             desc:"Sua escuta afinou. Cada corda revela segredos que só os dedicados conseguem ouvir.",                      cor:'#6ee7b7'},
-  {range:[41,50],  title:"Bardo Dissonante",                 desc:"Onde outros ouvem erro, você ouve expressão. O caos harmônico é sua arma.",                               cor:'#ef4444'},
-  {range:[51,60],  title:"Guardião da Harmonia",             desc:"Você preserva o que outros esquecem e inventa o que ninguém ousou. Seu legado ressoa.",                   cor:'#f472b6'},
-  {range:[61,70],  title:"Mago do Som",                     desc:"Seu ouvido enxerga o invisível. Cada acorde revela camadas que poucos jamais perceberão.",                cor:'#fb923c'},
-  {range:[71,80],  title:"Arcanista das Cordas",             desc:"Teoria e instinto são um só em você. As harmonias mais complexas rendem-se ao seu domínio.",              cor:'#c084fc'},
-  {range:[81,90],  title:"Bruxo da Tempestade Harmônica",   desc:"A tempestade harmônica responde ao seu toque. Você convoca sons que pouquíssimos dominam.",               cor:'#60dcff'},
-  {range:[91,99],  title:"Lenda da Música",                 desc:"Seu nome ressoa como uma canção que ninguém esquece. Você é a inspiração de quem começa.",                cor:'#fbbf24'},
-  {range:[100,100],title:"Mestre Supremo",                  desc:"Além da técnica, além da teoria — você transcendeu. O som flui por você como respiração.",                cor:'#60dcff'},
+  {range:[1,10],   title:"Escudeiro",                        titleKey:'lvl_aprendiz', desc:"Cada acorde é uma conquista. A jornada começa — e o violão nunca mais soa igual.",                         cor:'#a0a0a0'},
+  {range:[11,20],  title:"Bardo",                            titleKey:'lvl_bardo',    desc:"Suas músicas já carregam histórias. O violão não é mais instrumento — é sua voz.",                         cor:'#86efac'},
+  {range:[21,30],  title:"Alquimista Harmônico",             titleKey:'lvl_alquimista',desc:"Você não toca acordes — você transmuta sons em sentimento. A harmonia cede à sua vontade.",                cor:'#F5A623'},
+  {range:[31,40],  title:"Sentinela das Cordas",             titleKey:'lvl_estudante',desc:"Sua escuta afinou. Cada corda revela segredos que só os dedicados conseguem ouvir.",                      cor:'#6ee7b7'},
+  {range:[41,50],  title:"Bardo Dissonante",                 titleKey:'lvl_barbaro',  desc:"Onde outros ouvem erro, você ouve expressão. O caos harmônico é sua arma.",                               cor:'#ef4444'},
+  {range:[51,60],  title:"Guardião da Harmonia",             titleKey:'lvl_guardiao', desc:"Você preserva o que outros esquecem e inventa o que ninguém ousou. Seu legado ressoa.",                   cor:'#f472b6'},
+  {range:[61,70],  title:"Mago do Som",                      titleKey:'lvl_mago',     desc:"Seu ouvido enxerga o invisível. Cada acorde revela camadas que poucos jamais perceberão.",                cor:'#fb923c'},
+  {range:[71,80],  title:"Arcanista das Cordas",             titleKey:'lvl_arcanista',desc:"Teoria e instinto são um só em você. As harmonias mais complexas rendem-se ao seu domínio.",              cor:'#c084fc'},
+  {range:[81,90],  title:"Bruxo da Tempestade Harmônica",   titleKey:'lvl_virtuose', desc:"A tempestade harmônica responde ao seu toque. Você convoca sons que pouquíssimos dominam.",               cor:'#60dcff'},
+  {range:[91,99],  title:"Lenda da Música",                  titleKey:'lvl_lenda',    desc:"Seu nome ressoa como uma canção que ninguém esquece. Você é a inspiração de quem começa.",                cor:'#fbbf24'},
+  {range:[100,100],title:"Mestre Supremo",                   titleKey:'lvl_mestre',   desc:"Além da técnica, além da teoria — você transcendeu. O som flui por você como respiração.",                cor:'#60dcff'},
 ];
 
 function _nivelImg(title){
@@ -5191,7 +5191,7 @@ function renderNiveis(){
       </div>
       <div style="padding:.9rem 1rem 1rem">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:.55rem">${statusBadge}${rangeBadge}</div>
-        <div style="font-size:1.15rem;font-weight:900;color:${isLocked?'#555':gc};margin-bottom:.3rem;letter-spacing:-.01em">${g.title}</div>
+        <div style="font-size:1.15rem;font-weight:900;color:${isLocked?'#555':gc};margin-bottom:.3rem;letter-spacing:-.01em">${t(g.titleKey)||g.title}</div>
         ${xpBar}
         ${downloadBtn}
       </div>
@@ -5331,7 +5331,7 @@ function openNivelModal(idx){
       <!-- painel info -->
       <div style="flex:1;background:#0e0e0e;padding:1.5rem 1.3rem 3rem;border-top:2.5px solid ${cor}33;">
         ${statusTag}
-        <div style="font-size:1.6rem;font-weight:900;color:${isLocked?'#555':cor};margin-bottom:.25rem;letter-spacing:-.02em">${g.title}</div>
+        <div style="font-size:1.6rem;font-weight:900;color:${isLocked?'#555':cor};margin-bottom:.25rem;letter-spacing:-.02em">${t(g.titleKey)||g.title}</div>
         <div style="font-size:.82rem;color:#666;font-weight:700;margin-bottom:.85rem">
           ${t('levels_range')} ${g.range[0]}${g.range[1]!==g.range[0]?' – '+g.range[1]:''}
         </div>

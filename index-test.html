@@ -5477,6 +5477,7 @@ function startGame(){
     return;
   }
   genQ();state.phase='question';render();
+  setTimeout(()=>playChord(state.chord),300);
 }
 
 function startCordas(){
@@ -5495,6 +5496,7 @@ function startCordas(){
     return;
   }
   genQ();state.phase='question';render();
+  setTimeout(()=>playChord(state.chord),300);
 }
 
 function nextQ(){
@@ -5532,7 +5534,7 @@ function nextQ(){
     app.style.boxShadow='inset 0 0 60px rgba(96,220,255,.15)';
     setTimeout(()=>{app.style.boxShadow='';app.style.transition='';},1200);
   }
-  setTimeout(()=>playChord(state.chord),state.isBonus?1500:300);
+  setTimeout(()=>playChord(state.chord),state.isBonus?900:300);
   if(state.isBonus){
     setTimeout(()=>{
       const popup=document.createElement('div');
@@ -5558,7 +5560,7 @@ function afterLvlUp(){
   }
   genQ();state.phase='question';render();
   if(state.isBonus){playSfx('diamond');}
-  setTimeout(()=>playChord(state.chord),state.isBonus?1500:300);
+  setTimeout(()=>playChord(state.chord),state.isBonus?900:300);
   if(state.isBonus){
     const app=document.getElementById('app');
     if(app){app.style.transition='box-shadow .2s';app.style.boxShadow='inset 0 0 60px rgba(96,220,255,.15)';setTimeout(()=>{app.style.boxShadow='';app.style.transition='';},1200);}

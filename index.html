@@ -2382,15 +2382,16 @@ function playFbSelChord(){
 }
 
 // ── Fretboard: posições corretas de um acorde no braço ─────────
-function getChordPositions(chord){
+function getChordPositions(chord,targetFret){
+  targetFret=targetFret??0;
   const positions=[];
   const usedStrings=new Set();
   for(const midi of chord.midi){
-    let best=null,bestFret=99;
+    let best=null,bestDist=99;
     for(let s=0;s<6;s++){
       if(usedStrings.has(s))continue;
       const f=midi-FB_OPEN[s];
-      if(f>=0&&f<=12&&f<bestFret){best={s,f};bestFret=f;}
+      if(f>=0&&f<=12){const dist=Math.abs(f-targetFret);if(dist<bestDist){best={s,f};bestDist=dist;}}
     }
     if(best){positions.push({s:best.s,f:best.f,midi});usedStrings.add(best.s);}
   }
@@ -2704,7 +2705,9 @@ function buildSalaFbInteractive(){
   // Notas selecionadas pelo usuário
   const isAnswered=state.salaVerified;
   const isWrong=isAnswered&&!state.salaVerifyOk;
-  const correctPos=isAnswered?new Set(getChordPositions(state.chord).map(({s,f})=>`${s}-${f}`)):null;
+  const _userFrets=Object.keys(state.salaFbSel).map(k=>parseInt(k.split('-')[1]));
+  const _targetFret=_userFrets.length?Math.round(_userFrets.reduce((a,b)=>a+b,0)/_userFrets.length):0;
+  const correctPos=isAnswered?new Set(getChordPositions(state.chord,_targetFret).map(({s,f})=>`${s}-${f}`)):null;
   Object.keys(state.salaFbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
     if(fc>SALA_FRETS)return;
@@ -2725,7 +2728,7 @@ function buildSalaFbInteractive(){
   // Posições corretas não colocadas → laranja (somente quando errou)
   if(isWrong){
     const usedStrings=new Set(Object.keys(state.salaFbSel).map(k=>parseInt(k.split('-')[0])));
-    getChordPositions(state.chord).forEach(({s,f})=>{
+    getChordPositions(state.chord,_targetFret).forEach(({s,f})=>{
       if(f>SALA_FRETS)return;
       if(state.salaFbSel[`${s}-${f}`])return;
       if(usedStrings.has(s))return;

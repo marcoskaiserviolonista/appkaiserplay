@@ -2191,6 +2191,7 @@ const state={
   ratingSkippedAt:0,
   dailyStreak:0,
   lastPlayedDate:'',
+  unlockPopupDismissed:false,
 };
 
 let autoTimer=null;
@@ -4348,7 +4349,7 @@ function render(){
   if(state.phase==='niveis'){c.innerHTML=renderNiveis();nivelCarouselInit();return;}
   if(state.phase==='treino_focado_menu'){
     c.innerHTML=renderTreinoFocadoMenu();
-    if(!state.fullAccess&&!document.getElementById('unlock-popup-overlay')){
+    if(!state.fullAccess&&!state.unlockPopupDismissed){
       const overlay=document.createElement('div');
       overlay.id='unlock-popup-overlay';
       overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
@@ -4372,11 +4373,11 @@ function render(){
               <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b3')}</span>
             </div>
           </div>
-          <button onclick="document.getElementById('unlock-popup-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
+          <button onclick="state.unlockPopupDismissed=true;document.getElementById('unlock-popup-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
             style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);margin-bottom:.6rem;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:.5rem">
             🔓 ${t('unlock_popup_cta')}
           </button>
-          <button onclick="document.getElementById('unlock-popup-overlay').remove()"
+          <button onclick="state.unlockPopupDismissed=true;document.getElementById('unlock-popup-overlay').remove()"
             style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
             ${t('unlock_popup_dismiss')}
           </button>

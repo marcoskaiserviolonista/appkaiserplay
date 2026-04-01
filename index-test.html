@@ -2382,16 +2382,16 @@ function playFbSelChord(){
 }
 
 // ── Fretboard: posições corretas de um acorde no braço ─────────
-function getChordPositions(chord,targetFret){
-  targetFret=targetFret??0;
+function getChordPositions(chord){
   const positions=[];
   const usedStrings=new Set();
-  for(const midi of chord.midi){
-    let best=null,bestDist=99;
+  const sorted=[...chord.midi].sort((a,b)=>b-a);
+  for(const midi of sorted){
+    let best=null,bestFret=99;
     for(let s=0;s<6;s++){
       if(usedStrings.has(s))continue;
       const f=midi-FB_OPEN[s];
-      if(f>=0&&f<=12){const dist=Math.abs(f-targetFret);if(dist<bestDist){best={s,f};bestDist=dist;}}
+      if(f>=0&&f<=12&&f<bestFret){best={s,f};bestFret=f;}
     }
     if(best){positions.push({s:best.s,f:best.f,midi});usedStrings.add(best.s);}
   }

@@ -4454,10 +4454,10 @@ function renderStart(){
         <div class="profile-lvl-lbl">${t('level_label')}</div>
       </div>
     </div>
-    ${state.dailyStreak>0?`
+    ${state.dailyStreak>1?`
     <div style="width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;gap:.5rem;background:#1a1200;border:2px solid #F5A62344;border-radius:12px;padding:.5rem 1rem;margin-bottom:.5rem">
       <span style="font-size:1.15rem">🔥</span>
-      <span style="font-size:.88rem;font-weight:800;color:#F5A623">${state.dailyStreak===1?t('streak_first_day'):`${state.dailyStreak} ${t('streak_days')}`}</span>
+      <span style="font-size:.88rem;font-weight:800;color:#F5A623">${state.dailyStreak} ${t('streak_days')}</span>
     </div>`:''}
     <div class="start-hero">
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>

@@ -2707,7 +2707,7 @@ function buildSalaFbInteractive(){
   const isWrong=isAnswered&&!state.salaVerifyOk;
   const _userFrets=Object.keys(state.salaFbSel).map(k=>parseInt(k.split('-')[1]));
   const _targetFret=_userFrets.length?Math.round(_userFrets.reduce((a,b)=>a+b,0)/_userFrets.length):0;
-  const correctPos=isAnswered?new Set(getChordPositions(state.chord,_targetFret).map(({s,f})=>`${s}-${f}`)):null;
+  const _chordClasses=isAnswered?new Set(state.chord.midi.map(m=>m%12)):null;
   Object.keys(state.salaFbSel).forEach(k=>{
     const pts=k.split('-').map(Number),sc=pts[0],fc=pts[1];
     if(fc>SALA_FRETS)return;
@@ -2718,21 +2718,28 @@ function buildSalaFbInteractive(){
     const r=Math.min(16,Math.floor(fspace*0.45)),fs=r>=14?'12':r>=11?'11':'10';
     let fill,stroke,tf;
     if(isAnswered){
-      const inChord=!isWrong||correctPos.has(k);
+      const inChord=!isWrong||_chordClasses.has(nc);
       if(inChord){fill='#4caf50';stroke='#1a3d1a';}else{fill='#f44336';stroke='#3d1a1a';}
       tf='#fff';
     }else{fill='#60dcff';tf='#111';stroke='#0a2030';}
     o+=`<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="2"/>`;
     o+=`<text x="${cx}" y="${cy+4}" text-anchor="middle" fill="${tf}" font-size="${fs}" font-weight="800" font-family="Poppins,sans-serif">${FB_NNAMES[nc]}</text>`;
   });
-  // Posições corretas não colocadas → laranja (somente quando errou)
+  // Classes de notas faltando → laranja, na posição mais próxima do usuário (somente quando errou)
   if(isWrong){
+    const userClasses=new Set(Object.keys(state.salaFbSel).map(k=>{const[s,f]=k.split('-').map(Number);return fbNoteClass(s,f);}));
+    const missingClasses=[..._chordClasses].filter(c=>!userClasses.has(c));
     const usedStrings=new Set(Object.keys(state.salaFbSel).map(k=>parseInt(k.split('-')[0])));
-    getChordPositions(state.chord,_targetFret).forEach(({s,f})=>{
-      if(f>SALA_FRETS)return;
-      if(state.salaFbSel[`${s}-${f}`])return;
-      if(usedStrings.has(s))return;
-      const nc=fbNoteClass(s,f);
+    missingClasses.forEach(nc=>{
+      let best=null,bestDist=99;
+      for(let s=0;s<6;s++){
+        if(usedStrings.has(s))continue;
+        for(let f=0;f<=SALA_FRETS;f++){
+          if(fbNoteClass(s,f)===nc){const dist=Math.abs(f-_targetFret);if(dist<bestDist){best={s,f};bestDist=dist;}}
+        }
+      }
+      if(!best)return;
+      const{s,f}=best;
       let cx,cy,fspace;
       if(f===0){cx=FB_NUT_X[s];cy=Math.round((FB_HEAD_Y+FB_NUT_Y)/2);fspace=FB_NUT_Y-FB_HEAD_Y;}
       else{const fmv=(FB_FRET_Y[f-1]+FB_FRET_Y[f])/2;cx=Math.round(fbStrX(s,fmv/FB_PLAY_H));cy=Math.round(FB_NUT_Y+fmv);fspace=FB_FRET_Y[f]-FB_FRET_Y[f-1];}

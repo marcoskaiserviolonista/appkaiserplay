@@ -3663,6 +3663,7 @@ function startFretboardSession(){
 function startSmartSession(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.fretboardExercise=false;
+  state.isFretboard=false;
   const allChords=[...CHORDS,...CHORDS_DIAMOND];
   const chordMap=Object.fromEntries(allChords.map(c=>[c.id,c]));
   const specificWeak=Object.entries(state.chordStats)

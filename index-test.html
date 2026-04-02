@@ -61,6 +61,7 @@ button:active:not(:disabled){transform:scale(.97);filter:brightness(.88)}
 @keyframes feedbackPop{0%{opacity:0;transform:scale(.5)}60%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
 @keyframes fadeOut{0%{opacity:1}100%{opacity:0}}
 @keyframes streakPop{0%{transform:scale(1)}30%{transform:scale(1.5)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes obFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
 @keyframes correctExplode{0%{transform:scale(1)}25%{transform:scale(1.12)}60%{transform:scale(.96)}100%{transform:scale(1)}}
 @keyframes diamondEntrance{0%{opacity:0;transform:scale(.4) rotate(-15deg)}60%{transform:scale(1.15) rotate(4deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
 @keyframes diamondPulse{0%,100%{box-shadow:0 0 0 0 rgba(96,220,255,.4)}50%{box-shadow:0 0 28px 6px rgba(96,220,255,.22)}}
@@ -601,6 +602,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
   </div>
   <div id="content"></div>
 </div>
+<div id="ob-root"></div>
 
 <script>
 // ── Firebase ──────────────────────────────────────────
@@ -2141,6 +2143,7 @@ const state={
   fretboardExercise:false,
   salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false, salaCorrectCount:0,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
+  onbStep:null,focTutStep:null,
   _pendingDisplayName:false,
   fullAccess:true,
   rankingData:[], rankingLoading:false,
@@ -3624,6 +3627,7 @@ function hasFretboardSwitch(){
 function toggleFretboardSwitch(key){
   state.fretboardSwitches[key]=!state.fretboardSwitches[key];
   playClickSfx(state.fretboardSwitches[key]?'switch_on':'switch_off');
+  if(state.focTutStep===0&&state.fretboardSwitches[key]){state.focTutStep=1;}
   render();
 }
 
@@ -3646,6 +3650,7 @@ function startFocusedSession(){
 }
 
 function startFretboardSession(){
+  if(state.focTutStep!==null){focTutEnd();}
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.isSmartSession=false;
   state.fretboardExercise=true;
@@ -4077,8 +4082,8 @@ function renderTreinoFocadoMenu(){
         </div>
       </div>
       <div style="border-top:1px solid #60dcff22;margin-bottom:.65rem"></div>
-      ${fbSwitchesHtml}
-      <button
+      <div id="tut-fb-switches">${fbSwitchesHtml}</div>
+      <button id="tut-fb-start-btn"
         style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
         ${fbEnabled?'':`disabled`}
         onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
@@ -4266,7 +4271,9 @@ let _saveTimer=null;
 let _saveMaxTimer=null;
 const _NAV_PHASES=new Set(['start','login','signup','forgot_password','set_display_name','perfil','levelup','desempenho','loja','inventario','niveis','treino_focado_menu','comprar']);
 let _lastPhase=null;
+let _obTimer=null;
 function render(){
+  clearTimeout(_obTimer);_obTimer=setTimeout(updateObOverlay,60);
   const _cur=state.phase;
   if(_cur!==_lastPhase){
     const _prev=_lastPhase;_lastPhase=_cur;
@@ -4433,30 +4440,30 @@ function renderStart(){
     <div class="start-hero">
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
       <div class="start-desc">${t('start_desc')}</div>
-      <button class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
+      <button id="ob-harmonica" class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
         <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
       </button>
       ${SHOW_CORDAS_JOURNEY?`<button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
         <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
       </button>`:''}
 
-      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
+      <button id="ob-focused" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <img src="alvo.png" style="width:1.8rem;height:1.8rem;flex-shrink:0;object-fit:contain">
         <div style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
       </button>
-      <button onclick="playClickSfx('nav');startSalaDeAula()"
+      <button id="ob-sala" onclick="playClickSfx('nav');startSalaDeAula()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a1a 0%,#0e1a0e 100%);border:3px solid #2a5a2a;border-radius:16px;box-shadow:5px 5px 0 #051005;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <img src="chapeu-da-graduacao.png" style="width:1.8rem;height:1.8rem;flex-shrink:0;object-fit:contain">
         <div style="font-size:1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c66">${t('sala_de_aula')}</div>
       </button>
     </div>
     <div class="nav-grid">
-      <button class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
+      <button id="ob-loja" class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
+      <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
     <div class="nav-grid" style="margin-top:.75rem">
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
+      <button id="ob-niveis" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
     <div class="section-title" style="margin-top:.75rem">${t('your_stats')}</div>
     <div class="user-stats">
@@ -6194,6 +6201,90 @@ auth.onAuthStateChanged(async user=>{
   }
   try{render();}catch(e){console.error('render error:',e);}
 });
+
+// ── ONBOARDING SYSTEM ─────────────────────────────────────────
+const OB_STEPS=[
+  {id:'ob-harmonica',pt:'Seu caminho principal! Ouça acordes e tente identificar pelo som.',en:'Your main path! Listen to chords and identify them by ear.',es:'¡Tu camino principal! Escucha acordes e identifícalos de oído.'},
+  {id:'ob-focused',pt:'Treine os acordes que você mais erra. Personalizado para você!',en:'Train the chords you miss the most. Personalized for you!',es:'¡Entrena los acordes que más fallas. ¡Personalizado para ti!'},
+  {id:'ob-sala',pt:'Aulas estruturadas para aprender violão passo a passo.',en:'Structured lessons to learn guitar step by step.',es:'Clases estructuradas para aprender guitarra paso a paso.'},
+  {id:'ob-loja',pt:'Compre violões com bônus de pontos e outros recursos.',en:'Buy guitars with point bonuses and extra resources.',es:'Compra guitarras con bonos de puntos y recursos extra.'},
+  {id:'ob-inventario',pt:'Veja seus itens e o violão que está equipado.',en:'See your items and the guitar you have equipped.',es:'Ve tus artículos y la guitarra que tienes equipada.'},
+  {id:'ob-niveis',pt:'Acompanhe sua evolução e suba de nível!',en:'Track your progress and level up!',es:'¡Sigue tu evolución y sube de nivel!'},
+];
+const FT_STEPS=[
+  {id:'tut-fb-switches',pt:'Selecione o tipo de treino. Comece pelas Tríades!',en:'Select the training type. Start with Triads!',es:'¡Selecciona el tipo de entrenamiento. ¡Empieza con las Tríadas!'},
+  {id:'tut-fb-start-btn',pt:'Ótimo! Agora inicie o treino de construção.',en:'Great! Now start the chord building training.',es:'¡Genial! Ahora inicia el entrenamiento de construcción.'},
+];
+function _obFlag(k){try{return localStorage.getItem(k)==='1';}catch(e){return false;}}
+function _obSetFlag(k){try{localStorage.setItem(k,'1');}catch(e){}}
+function updateObOverlay(){
+  _maybeInitOb();
+  const root=document.getElementById('ob-root');if(!root)return;
+  if(state.onbStep!==null&&state.onbStep>=0&&state.phase==='start'){
+    const step=OB_STEPS[state.onbStep];if(!step){obEnd();return;}
+    const target=document.getElementById(step.id);if(!target){root.innerHTML='';return;}
+    const txt=state.lang==='en'?step.en:state.lang==='es'?step.es:step.pt;
+    _drawTooltip(root,target,txt,state.onbStep===OB_STEPS.length-1,'obNext()','obSkip()',state.onbStep+1,OB_STEPS.length);return;
+  }
+  if(state.focTutStep!==null&&state.focTutStep>=0&&state.phase==='treino_focado_menu'){
+    const step=FT_STEPS[state.focTutStep];if(!step){focTutEnd();return;}
+    const target=document.getElementById(step.id);if(!target){root.innerHTML='';return;}
+    const txt=state.lang==='en'?step.en:state.lang==='es'?step.es:step.pt;
+    const isLast=state.focTutStep===FT_STEPS.length-1;
+    _drawTooltip(root,target,txt,isLast,isLast?'focTutEnd()':'null','focTutEnd()',state.focTutStep+1,FT_STEPS.length,isLast);return;
+  }
+  root.innerHTML='';
+}
+function _drawTooltip(root,target,text,isLast,nextFn,skipFn,stepN,stepTotal,noNext){
+  const rect=target.getBoundingClientRect();
+  const vw=window.innerWidth,vh=window.innerHeight;
+  const ttW=Math.min(272,vw-28);const ttH=120;const gap=10;
+  const spaceBelow=vh-(rect.bottom+gap);
+  let ttTop,arrowDir;
+  if(spaceBelow>=ttH||spaceBelow>=rect.top-gap){ttTop=rect.bottom+gap+6;arrowDir='up';}
+  else{ttTop=rect.top-ttH-gap-6;arrowDir='down';}
+  let ttLeft=(rect.left+rect.width/2)-ttW/2;
+  ttLeft=Math.max(8,Math.min(ttLeft,vw-ttW-8));
+  const arrowOff=Math.max(12,Math.min((rect.left+rect.width/2)-ttLeft-9,ttW-22));
+  const nextLabel=state.lang==='en'?'Next':state.lang==='es'?'Siguiente':'Próximo';
+  const skipLabel=state.lang==='en'?'Skip':state.lang==='es'?'Saltar':'Pular';
+  const nextBtn=noNext?'':`<button onclick="${nextFn}" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:10px;box-shadow:3px 3px 0 #000;padding:.35rem .85rem;font-family:var(--font-body);font-size:.8rem;font-weight:900;color:#111;cursor:pointer">${isLast?'OK':nextLabel}</button>`;
+  root.innerHTML=`
+    <div style="position:fixed;inset:0;z-index:8997;pointer-events:none">
+      <div style="position:absolute;left:${rect.left-5}px;top:${rect.top-5}px;width:${rect.width+10}px;height:${rect.height+10}px;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.72);border:2.5px solid rgba(245,166,35,.7);pointer-events:none"></div>
+    </div>
+    <div style="position:fixed;left:${ttLeft}px;top:${ttTop}px;width:${ttW}px;z-index:8999;pointer-events:all;animation:obFadeIn .22s ease">
+      ${arrowDir==='up'?`<div style="position:absolute;top:-7px;left:${arrowOff}px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:8px solid #F5A623"></div>`:''}
+      <div style="background:#1c1c1c;border:2.5px solid #F5A623;border-radius:14px;padding:.8rem 1rem .7rem;box-shadow:4px 4px 0 #000">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.4rem">
+          <span style="font-size:.62rem;font-weight:900;color:#F5A623;text-transform:uppercase;letter-spacing:.1em">${stepN}/${stepTotal}</span>
+          <button onclick="${skipFn}" style="background:transparent;border:none;color:#555;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer;padding:0">${skipLabel}</button>
+        </div>
+        <p style="font-size:.83rem;color:#eee;font-weight:600;line-height:1.45;margin:0 0 .6rem">${text}</p>
+        <div style="display:flex;justify-content:flex-end">${nextBtn}</div>
+      </div>
+      ${arrowDir==='down'?`<div style="position:absolute;bottom:-7px;left:${arrowOff}px;width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-top:8px solid #F5A623"></div>`:''}
+    </div>`;
+}
+function obNext(){
+  if(state.onbStep===null)return;
+  state.onbStep++;
+  if(state.onbStep>=OB_STEPS.length){obEnd();return;}
+  clearTimeout(_obTimer);_obTimer=setTimeout(updateObOverlay,40);
+}
+function obSkip(){obEnd();}
+function obEnd(){
+  state.onbStep=null;_obSetFlag('kp_ob_done');
+  const el=document.getElementById('ob-root');if(el)el.innerHTML='';
+}
+function focTutEnd(){
+  state.focTutStep=null;_obSetFlag('kp_ft_done');
+  const el=document.getElementById('ob-root');if(el)el.innerHTML='';
+}
+function _maybeInitOb(){
+  if(!_obFlag('kp_ob_done')&&state.phase==='start'&&state.onbStep===null)state.onbStep=0;
+  if(!_obFlag('kp_ft_done')&&state.phase==='treino_focado_menu'&&state.focTutStep===null)state.focTutStep=0;
+}
 
 // ── Fretboard: delegação de clique (registrado uma vez, nunca dentro do render) ──
 document.getElementById('content').addEventListener('click',function(e){

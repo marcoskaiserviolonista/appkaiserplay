@@ -769,7 +769,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Ouvir Acorde', listening:'♪ Tocando...', what_chord:'Qual é este acorde?',
     what_quality:'Qual é a qualidade deste acorde?', build_chord_fretboard:'Monte o acorde no braço do violão', back_btn:'← Voltar',
-    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica', cordas_journey:'Jornada pelas Cordas', cordas_double_pts:'(você ganha pontos em dobro)',
+    continue_journey:'Continuar a Jornada', start_journey:'Começar a Jornada', harmonic_journey:'Jornada Harmônica', cordas_journey:'Jornada pelas Cordas', cordas_double_pts:'(você ganha 3× mais pontos)',
     train_ear:'Treine seu Ouvido',
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
     your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
@@ -984,7 +984,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Listen to Chord', listening:'♪ Playing...', what_chord:'Which chord is this?',
     what_quality:'What is the quality of this chord?', build_chord_fretboard:'Build the chord on the fretboard', back_btn:'← Back',
-    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey', cordas_journey:'Journey Through the Strings', cordas_double_pts:'(you earn double points)',
+    continue_journey:'Continue Journey', start_journey:'Start Journey', harmonic_journey:'Harmonic Journey', cordas_journey:'Journey Through the Strings', cordas_double_pts:'(you earn 3× more points)',
     train_ear:'Train your Ear',
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
     your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
@@ -1199,7 +1199,7 @@ const STRINGS = {
     // Misc
     listen_chord:'Escuchar Acorde', listening:'♪ Reproduciendo...', what_chord:'¿Cuál es este acorde?',
     what_quality:'¿Cuál es la calidad de este acorde?', build_chord_fretboard:'Construye el acorde en el mástil de la guitarra', back_btn:'← Volver',
-    continue_journey:'Continuar la Jornada', start_journey:'Comenzar la Jornada', harmonic_journey:'Jornada Armónica', cordas_journey:'Jornada por las Cuerdas', cordas_double_pts:'(ganas el doble de puntos)',
+    continue_journey:'Continuar la Jornada', start_journey:'Comenzar la Jornada', harmonic_journey:'Jornada Armónica', cordas_journey:'Jornada por las Cuerdas', cordas_double_pts:'(ganas 3× más puntos)',
     train_ear:'Entrena tu Oído',
     start_desc:'Identifica acordes por su sonido, acumula puntos y desbloquea contenidos para mejorar en la guitarra.',
     your_stats:'Tus Estadísticas', total_xp:'XP Total', hit_rate:'Tasa de Acierto',
@@ -2940,7 +2940,7 @@ function doFretboardConfirm(){
   const _fbBtn=document.getElementById('fb-confirm-btn');
   const _fbRect=_fbBtn?_fbBtn.getBoundingClientRect():null;
   if(ok){
-    gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
+    gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?3:1));
     if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
     else if(ns>=10){playSfx('combo9');}
     else if(ns>=6){playSfx('combo6');}
@@ -3040,11 +3040,11 @@ function handleAnswer(choiceId,btnEl){
       const diamGain=violaoAtual.doubleDiamonds?2:1;
       diamondGained=diamGain;state.diamantes+=diamGain;
       const baseCombo=comboPoints(ns);
-      gain=Math.round((baseCombo*2)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
+      gain=Math.round((baseCombo*2)*(1+violaoPct)*(state.journeyMode==='cordas'?3:1));
       msg=violaoAtual.doubleDiamonds?`💎💎 ${state.lang==='en'?'Double Diamond! ×2':state.lang==='es'?'¡Doble Diamante! ×2':'Diamante Duplo! ×2'}`:`💎 ×2 ${state.lang==='en'?'in Combo!':state.lang==='es'?'¡en Combo!':'no Combo!'}`;
       playSfx('diamond');
     } else {
-      gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?2:1));
+      gain=Math.round(comboPoints(ns)*(1+violaoPct)*(state.journeyMode==='cordas'?3:1));
       if(multLevelUp){msg=`×${newMult} ${t('multiplier')}!`;playSfx('combo9');}
       else if(ns>=10){playSfx('combo9');}
       else if(ns>=6){playSfx('combo6');}

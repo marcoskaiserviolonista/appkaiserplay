@@ -3587,6 +3587,9 @@ function getFocusedQualityForChord(ch, switchKey){
 
 function isQualitySwitch(key){ return key in FOCUSED_QUALITY_PAIRS; }
 
+// UX TEST: setar true para reexibir o botão "Jornada pelas Cordas" na tela inicial
+const SHOW_CORDAS_JOURNEY = false;
+
 const FOCUSED_FREE_SWITCHES = new Set(['maior_menor','menor_diminuto','triades_maiores','tetrades_menores']);
 function isSwitchUnlocked(key){ return state.fullAccess || FOCUSED_FREE_SWITCHES.has(key); }
 const FRETBOARD_FREE_SWITCHES = new Set(['fb_triades']);
@@ -4428,9 +4431,10 @@ function renderStart(){
       <button class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
         <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
       </button>
-      <button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
+      ${SHOW_CORDAS_JOURNEY?`<button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.75rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
         <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
-      </button>
+      </button>`:''}
+
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="width:100%;margin-top:.75rem;background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.9rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem">
         <img src="alvo.png" style="width:1.8rem;height:1.8rem;flex-shrink:0;object-fit:contain">

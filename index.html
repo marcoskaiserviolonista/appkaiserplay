@@ -14,6 +14,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Fredoka:wght@600;700&family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-check-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
@@ -611,6 +612,7 @@ firebase.initializeApp({
   messagingSenderId:"876642046971",
   appId:"1:876642046971:web:4d40a9a16a2020bfb2315e"
 });
+firebase.appCheck().activate('6LcDU6MsAAAAAAex_KQDtJuro6mb90BZzqN1ODoH', true);
 const auth=firebase.auth();
 const db=firebase.firestore();
 

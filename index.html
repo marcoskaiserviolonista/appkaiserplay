@@ -3589,6 +3589,8 @@ function isQualitySwitch(key){ return key in FOCUSED_QUALITY_PAIRS; }
 
 const FOCUSED_FREE_SWITCHES = new Set(['maior_menor','menor_diminuto','triades_maiores','tetrades_menores']);
 function isSwitchUnlocked(key){ return state.fullAccess || FOCUSED_FREE_SWITCHES.has(key); }
+const FRETBOARD_FREE_SWITCHES = new Set(['fb_triades']);
+function isFretboardSwitchUnlocked(key){ return state.fullAccess || FRETBOARD_FREE_SWITCHES.has(key); }
 
 function buildFocusedPool(){
   const seen=new Set();
@@ -4014,15 +4016,16 @@ function renderTreinoFocadoMenu(){
   const fbSwitchesHtml=['fb_triades','fb_tetrades','fb_complexos'].map(key=>{
     const on=state.fretboardSwitches[key];
     const lbl=fbSwitchLabels[key];
-    const clickAct=paywall?`playClickSfx('click');state.phase='comprar';render()`:`toggleFretboardSwitch('${key}')`;
+    const locked=paywall&&!isFretboardSwitchUnlocked(key);
+    const clickAct=locked?`playClickSfx('click');state.phase='comprar';render()`:`toggleFretboardSwitch('${key}')`;
     return `<div class="tf-switch-row${on?' active':''}" style="border-color:${on?'#60dcff88':'#60dcff22'};background:${on?'#0e2030':'#0a1520'}" onclick="${clickAct}">
       <span class="tf-switch-label" style="color:#60dcff">${lbl}</span>
       <span style="display:flex;align-items:center;flex-shrink:0">
-        ${paywall?`<span style="font-size:1.05rem;line-height:1">🔒</span>`:`<span class="tf-switch${on?' on':''}"></span>`}
+        ${locked?`<span style="font-size:1.05rem;line-height:1">🔒</span>`:`<span class="tf-switch${on?' on':''}"></span>`}
       </span>
     </div>`;
   }).join('');
-  const fbEnabled=!paywall&&hasFretboardSwitch();
+  const fbEnabled=hasFretboardSwitch()&&(['fb_triades','fb_tetrades','fb_complexos'].some(k=>state.fretboardSwitches[k]&&isFretboardSwitchUnlocked(k)));
   return `
     <div style="width:100%;max-width:520px;display:flex;align-items:center;margin-bottom:1.4rem;gap:.75rem">
       <button class="back-btn" onclick="playClickSfx('back');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='start';render()">${t('back_btn')}</button>

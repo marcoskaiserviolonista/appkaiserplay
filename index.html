@@ -726,7 +726,7 @@ const STRINGS = {
     focused_training_title:'Treino Focado', training_suggestion:'Sugestão de treino',
     most_missed_chords:'Acordes mais errados:', most_missed_qualities:'Qualidades mais erradas:',
     train_weak_points:'Treinar pontos fracos', no_weak_points:'Sem pontos fracos identificados ainda.',
-    chord_building:'Construção de Acorde', start_chord_building:'Iniciar Treino de Construção', hear_build:'Ouvir montagem', next_fretboard:'Próximo',
+    chord_building:'Construção de Acordes', start_chord_building:'Iniciar Treino de Construção', hear_build:'Ouvir montagem', next_fretboard:'Próximo',
     sala_de_aula:'Sala de Aula',
     sala_s1_title:'Passo 1: Identifique a nota mais aguda',
     sala_s1_body:'Ela é a mais nítida e fácil de reconhecer nos acordes. Identificá-la oferece um bom ponto de partida para localizar o acorde.',
@@ -1156,7 +1156,7 @@ const STRINGS = {
     focused_training_title:'Entrenamiento Enfocado', training_suggestion:'Sugerencia de entrenamiento',
     most_missed_chords:'Acordes más fallados:', most_missed_qualities:'Calidades más falladas:',
     train_weak_points:'Entrenar puntos débiles', no_weak_points:'Sin puntos débiles identificados aún.',
-    chord_building:'Construcción de Acorde', start_chord_building:'Iniciar Entrenamiento de Construcción', hear_build:'Escuchar montaje', next_fretboard:'Siguiente',
+    chord_building:'Construcción de Acordes', start_chord_building:'Iniciar Entrenamiento de Construcción', hear_build:'Escuchar montaje', next_fretboard:'Siguiente',
     sala_de_aula:'Sala de Clase',
     sala_s1_title:'Paso 1: Identifica la nota más aguda',
     sala_s1_body:'Es la más clara y fácil de reconocer en los acordes. Identificarla te da un buen punto de partida para localizar el acorde.',
@@ -4056,6 +4056,24 @@ function renderTreinoFocadoMenu(){
       </button>
     </div>`:''}
 
+    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
+      <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
+        <img src="mao.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('chord_building')}</div>
+          <div style="font-size:.8rem;color:#60dcff88;line-height:1.45">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':state.lang==='es'?'Entrena tu oído construyendo el acorde directamente en el mástil de la guitarra.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
+        </div>
+      </div>
+      <div style="border-top:1px solid #60dcff22;margin-bottom:.65rem"></div>
+      ${fbSwitchesHtml}
+      <button
+        style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
+        ${fbEnabled?'':`disabled`}
+        onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
+        ${paywall?'🔒 ':''}${t('start_chord_building')}
+      </button>
+    </div>
+
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff22;border-radius:16px;padding:1rem 1rem 1.1rem;margin-bottom:1.25rem">
       <div style="font-size:.88rem;color:#60dcff;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.2rem">${t('evolve_faster')}</div>
       <div style="font-size:.82rem;color:#aaa;margin-bottom:.9rem">${t('choose_chords')}</div>
@@ -4073,24 +4091,6 @@ function renderTreinoFocadoMenu(){
       ${section1.map(makeSwitch).join('')}
       <div style="font-size:.72rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin:.75rem 0 .45rem">${t('train_by_type')}</div>
       ${section2.map(makeSwitch).join('')}
-    </div>
-
-    <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:.75rem">
-      <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
-        <img src="mao.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
-        <div style="flex:1;min-width:0">
-          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('chord_building')}</div>
-          <div style="font-size:.8rem;color:#60dcff88;line-height:1.45">${state.lang==='en'?'Train your ear by building the chord directly on the guitar fretboard.':state.lang==='es'?'Entrena tu oído construyendo el acorde directamente en el mástil de la guitarra.':'Treine seu ouvido construindo o acorde diretamente no braço do violão.'}</div>
-        </div>
-      </div>
-      <div style="border-top:1px solid #60dcff22;margin-bottom:.65rem"></div>
-      ${fbSwitchesHtml}
-      <button
-        style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
-        ${fbEnabled?'':`disabled`}
-        onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
-        ${paywall?'🔒 ':''}${t('start_chord_building')}
-      </button>
     </div>
     ${paywall?`
     <div style="width:100%;max-width:520px;background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.5rem 1.35rem 1.4rem;margin-top:1.5rem;text-align:center;box-shadow:6px 6px 0 #000">

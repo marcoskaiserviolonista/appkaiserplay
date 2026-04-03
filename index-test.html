@@ -4071,6 +4071,10 @@ function renderTreinoFocadoMenu(){
       </button>
     </div>`:''}
 
+    <div style="width:100%;max-width:520px;margin-bottom:.75rem;padding:0 .1rem">
+      <div style="font-size:.82rem;font-weight:800;color:#60dcff99;text-transform:uppercase;letter-spacing:.1em">${state.lang==='en'?'Combine workouts the way you prefer':state.lang==='es'?'Combina los entrenamientos a tu manera':'Combine os treinos da forma que preferir'}</div>
+    </div>
+
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">
         <img src="mao.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
@@ -4080,13 +4084,16 @@ function renderTreinoFocadoMenu(){
         </div>
       </div>
       <div style="border-top:1px solid #60dcff22;margin-bottom:.65rem"></div>
-      <div id="tut-fb-switches">${fbSwitchesHtml}</div>
       <button id="tut-fb-start-btn"
-        style="width:100%;margin-top:.65rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid ${fbEnabled?'#60dcff88':'#60dcff33'};border-radius:14px;box-shadow:4px 4px 0 #0a1520;padding:.65rem 1rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:${fbEnabled?'#60dcff':'#60dcff44'};letter-spacing:.01em;text-align:center;cursor:${fbEnabled?'pointer':'default'}"
-        ${fbEnabled?'':`disabled`}
+        style="width:100%;margin-bottom:.65rem;
+          ${fbEnabled
+            ? 'background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:14px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff66'
+            : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em;text-align:center'}"
+        ${fbEnabled?'':'disabled'}
         onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
-        ${paywall?'🔒 ':''}${t('start_chord_building')}
+        ${fbEnabled?'<img src="alvo.png" style="width:1.3rem;height:1.3rem;vertical-align:middle;object-fit:contain;flex-shrink:0"> '+t('start_chord_building'):'🔒 '+t('activate_one')}
       </button>
+      <div id="tut-fb-switches">${fbSwitchesHtml}</div>
     </div>
 
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff22;border-radius:16px;padding:1rem 1rem 1.1rem;margin-bottom:1.25rem">
@@ -4096,10 +4103,10 @@ function renderTreinoFocadoMenu(){
         style="width:100%;margin-bottom:.9rem;
           ${enabled
             ? 'background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:14px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff66'
-            : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em'}"
+            : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em;text-align:center'}"
         ${enabled?'':'disabled'}
         onclick="startFocusedSession()">
-        ${enabled?'<img src="alvo.png" style="width:1.3rem;height:1.3rem;vertical-align:middle;object-fit:contain;flex-shrink:0"> '+t('start_training'):t('activate_one')}
+        ${enabled?'<img src="alvo.png" style="width:1.3rem;height:1.3rem;vertical-align:middle;object-fit:contain;flex-shrink:0"> '+t('start_training'):'🔒 '+t('activate_one')}
       </button>
       <div style="border-top:1px solid #60dcff15;margin-bottom:.75rem"></div>
       <div style="font-size:.72rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.45rem">${t('train_by_quality')}</div>

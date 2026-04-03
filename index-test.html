@@ -6253,7 +6253,7 @@ function _drawTooltip(root,target,text,isLast,nextFn,skipFn,stepN,stepTotal,noNe
   const arrowOff=Math.max(12,Math.min((rect.left+rect.width/2)-ttLeft-9,ttW-22));
   const nextLabel=state.lang==='en'?'Next':state.lang==='es'?'Siguiente':'Próximo';
   const skipLabel=state.lang==='en'?'Skip':state.lang==='es'?'Saltar':'Pular';
-  const nextBtn=noNext?'':`<button onclick="${nextFn}" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:10px;padding:.35rem .85rem;font-family:var(--font-body);font-size:.8rem;font-weight:900;color:#111;cursor:pointer">${isLast?'OK':nextLabel}</button>`;
+  const nextBtn=noNext?'':`<button onclick="${nextFn}" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:10px;padding:.35rem .85rem;font-family:var(--font-body);font-size:.8rem;font-weight:900;color:#111;cursor:pointer;text-shadow:none">${isLast?'OK':nextLabel}</button>`;
   root.innerHTML=`
     <div style="position:fixed;inset:0;z-index:8997;pointer-events:none">
       <div style="position:absolute;left:${rect.left-5}px;top:${rect.top-5}px;width:${rect.width+10}px;height:${rect.height+10}px;border-radius:14px;box-shadow:0 0 0 9999px rgba(0,0,0,.72);border:2.5px solid rgba(245,166,35,.7);pointer-events:none"></div>

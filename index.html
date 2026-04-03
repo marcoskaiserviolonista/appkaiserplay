@@ -4090,7 +4090,7 @@ function renderTreinoFocadoMenu(){
             ? 'background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:14px;box-shadow:5px 5px 0 #0a1520;cursor:pointer;padding:.85rem 1.25rem;display:flex;align-items:center;justify-content:center;gap:.75rem;font-family:var(--font-body);font-size:1rem;font-weight:900;color:#60dcff;letter-spacing:.01em;text-shadow:0 0 12px #60dcff66'
             : 'padding:.85rem;background:#111;border:2px solid #1e1e1e;border-radius:14px;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#333;cursor:default;box-shadow:none;letter-spacing:.02em;text-align:center'}"
         ${fbEnabled?'':'disabled'}
-        onclick="${paywall?`playClickSfx('click');state.phase='comprar';render()`:`startFretboardSession()`}">
+        onclick="${fbEnabled?`startFretboardSession()`:paywall?`playClickSfx('click');state.phase='comprar';render()`:''}">
         ${fbEnabled?'<img src="alvo.png" style="width:1.3rem;height:1.3rem;vertical-align:middle;object-fit:contain;flex-shrink:0"> '+t('start_chord_building'):'🔒 '+t('activate_one')}
       </button>
       <div id="tut-fb-switches">${fbSwitchesHtml}</div>

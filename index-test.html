@@ -3602,7 +3602,7 @@ function buildFocusedPool(){
   const seen=new Set();
   const pool=[];
   for(const[key,on] of Object.entries(state.focusedSwitches)){
-    if(!on) continue;
+    if(!on||!isSwitchUnlocked(key)) continue;
     for(const c of FOCUSED_SWITCH_POOLS[key]()){
       if(!seen.has(c.id)){seen.add(c.id);pool.push(c);}
     }
@@ -3611,7 +3611,7 @@ function buildFocusedPool(){
 }
 
 function hasFocusedSwitch(){
-  return Object.values(state.focusedSwitches).some(Boolean);
+  return Object.entries(state.focusedSwitches).some(([k,v])=>v&&isSwitchUnlocked(k));
 }
 
 function toggleFocusedSwitch(key){
@@ -3654,9 +3654,9 @@ function startFretboardSession(){
   state.fretboardExercise=true;
   let pool=[];
   const sw=state.fretboardSwitches;
-  if(sw.fb_triades)  pool.push(...FRETBOARD_SWITCH_POOLS.fb_triades());
-  if(sw.fb_tetrades) pool.push(...FRETBOARD_SWITCH_POOLS.fb_tetrades());
-  if(sw.fb_complexos)pool.push(...FRETBOARD_SWITCH_POOLS.fb_complexos());
+  if(sw.fb_triades  &&isFretboardSwitchUnlocked('fb_triades'))  pool.push(...FRETBOARD_SWITCH_POOLS.fb_triades());
+  if(sw.fb_tetrades &&isFretboardSwitchUnlocked('fb_tetrades')) pool.push(...FRETBOARD_SWITCH_POOLS.fb_tetrades());
+  if(sw.fb_complexos&&isFretboardSwitchUnlocked('fb_complexos'))pool.push(...FRETBOARD_SWITCH_POOLS.fb_complexos());
   if(pool.length<2)  pool=[...CHORDS,...CHORDS_DIAMOND];
   const seen=new Set();
   state.focusedPool=pool.filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});
@@ -3690,7 +3690,7 @@ function startSmartSession(){
 
 function genFocusedQ(){
   const pool=state.focusedPool;
-  if(!pool||pool.length<2){state.phase='treino_focado';render();return;}
+  if(!pool||pool.length<2){state.phase='treino_focado_menu';render();return;}
 
   if(state.isSmartSession){
     const ans=pool[Math.floor(Math.random()*pool.length)];

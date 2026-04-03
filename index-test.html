@@ -4046,6 +4046,17 @@ function renderTreinoFocadoMenu(){
       <button onclick="document.getElementById('tf-paywall-anchor').scrollIntoView({behavior:'smooth',block:'start'})" style="flex-shrink:0;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:10px;box-shadow:4px 4px 0 #111;padding:.4rem .85rem;font-family:var(--font-body);font-size:.82rem;font-weight:900;color:#fff;cursor:pointer;white-space:nowrap;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)">${state.lang==='en'?'Learn more':state.lang==='es'?'Saber más':'Saiba mais'}</button>
     </div>`:''}
 
+    ${hasHistory&&!hasSmartData?`
+    <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
+      <div style="display:flex;gap:.85rem;align-items:center">
+        <img src="forte.png" style="width:22%;flex-shrink:0;object-fit:contain" onerror="this.style.display='none'">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('training_suggestion')}</div>
+          <div style="font-size:.85rem;color:#555;font-weight:600;margin-top:.2rem">${state.lang==='en'?'No data yet':state.lang==='es'?'Sin datos aún':'Sem dados ainda'}</div>
+        </div>
+      </div>
+    </div>`:''}
+
     ${hasHistory&&hasSmartData?`
     <div style="width:100%;max-width:520px;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
       <div style="display:flex;gap:.85rem;align-items:center;margin-bottom:.75rem">

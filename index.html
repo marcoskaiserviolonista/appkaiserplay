@@ -6202,6 +6202,10 @@ auth.onAuthStateChanged(async user=>{
 
 // ── ONBOARDING SYSTEM ─────────────────────────────────────────
 const OB_STEPS=[
+  {centered:true,
+   pt:'BOAS VINDAS! Aqui é Marcos Kaiser e vou te ensinar como usar o App.',
+   en:'WELCOME! I\'m Marcos Kaiser and I\'ll show you how to use the App.',
+   es:'¡BIENVENIDO! Soy Marcos Kaiser y te enseñaré cómo usar la App.'},
   {id:'ob-harmonica',
    pt:'Ouça acordes e tente identificar o nome pelo som.',
    en:'Listen to chords and try to identify them by ear.',
@@ -6232,13 +6236,31 @@ function updateObOverlay(){
   if(state.onbStep!==null&&state.onbStep>=0&&state.phase==='start'){
     const step=OB_STEPS[state.onbStep];
     if(!step){obEnd();return;}
+    const txt=state.lang==='en'?step.en:state.lang==='es'?step.es:step.pt;
+    if(step.centered){
+      _drawCenteredModal(root,txt,'obNext()','obSkip()');
+      return;
+    }
     const target=document.getElementById(step.id);
     if(!target){root.innerHTML='';return;}
-    const txt=state.lang==='en'?step.en:state.lang==='es'?step.es:step.pt;
     _drawTooltip(root,target,txt,state.onbStep===OB_STEPS.length-1,'obNext()','obSkip()',state.onbStep+1,OB_STEPS.length);
     return;
   }
   root.innerHTML='';
+}
+function _drawCenteredModal(root,text,nextFn,skipFn){
+  const skipLabel=state.lang==='en'?'Skip':state.lang==='es'?'Saltar':'Pular';
+  const startLabel=state.lang==='en'?'Start tour':state.lang==='es'?'Comenzar':'Ver o tour';
+  root.innerHTML=`
+    <div style="position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.82);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:obFadeIn .22s ease">
+      <div style="background:#1c1c1c;border:2.5px solid #F5A623;border-radius:18px;padding:1.4rem 1.4rem 1.1rem;max-width:300px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,.8)">
+        <p style="font-size:1rem;color:#eee;font-weight:700;line-height:1.5;margin:0 0 1.2rem;text-align:center">${text}</p>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <button onclick="${skipFn}" style="background:transparent;border:none;color:#555;font-size:.78rem;font-weight:700;font-family:var(--font-body);cursor:pointer;padding:0;text-shadow:none">${skipLabel}</button>
+          <button onclick="${nextFn}" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:10px;padding:.4rem 1.1rem;font-family:var(--font-body);font-size:.85rem;font-weight:900;color:#111;cursor:pointer;text-shadow:none">${startLabel}</button>
+        </div>
+      </div>
+    </div>`;
 }
 function _drawTooltip(root,target,text,isLast,nextFn,skipFn,stepN,stepTotal,noNext){
   const rect=target.getBoundingClientRect();

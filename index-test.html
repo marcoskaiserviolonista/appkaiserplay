@@ -6245,6 +6245,9 @@ function updateObOverlay(){
     }
     const target=document.getElementById(step.id);
     if(!target){root.innerHTML='';return;}
+    document.body.style.overflow='';
+    target.scrollIntoView({behavior:'instant',block:'center'});
+    document.body.style.overflow='hidden';
     _drawTooltip(root,target,txt,state.onbStep===OB_STEPS.length-1,'obNext()','obSkip()',state.onbStep+1,OB_STEPS.length);
     return;
   }

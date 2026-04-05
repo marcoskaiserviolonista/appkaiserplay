@@ -4451,15 +4451,15 @@ function render(){
 }
 
 // ── Metrônomo: Engine ─────────────────────────────────────────
-const _metro={ctx:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
+const _metro={ctx:null,compressor:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
 
 function _metroClick(time){
   const ctx=_metro.ctx;
   const osc=ctx.createOscillator();
   const gain=ctx.createGain();
-  osc.connect(gain);gain.connect(ctx.destination);
+  osc.connect(gain);gain.connect(_metro.compressor);
   osc.frequency.value=1100;
-  gain.gain.setValueAtTime(0.7,time);
+  gain.gain.setValueAtTime(1.5,time);
   gain.gain.exponentialRampToValueAtTime(0.001,time+0.03);
   osc.start(time);osc.stop(time+0.03);
   // visual flash
@@ -4479,7 +4479,14 @@ function _metroSchedule(){
 }
 
 function _metroStart(){
-  if(!_metro.ctx)_metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(!_metro.ctx){
+    _metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const comp=_metro.ctx.createDynamicsCompressor();
+    comp.threshold.value=-6;comp.knee.value=3;comp.ratio.value=4;
+    comp.attack.value=0.001;comp.release.value=0.05;
+    comp.connect(_metro.ctx.destination);
+    _metro.compressor=comp;
+  }
   if(_metro.ctx.state==='suspended')_metro.ctx.resume();
   _metro.running=true;
   _metro.nextTime=_metro.ctx.currentTime+0.05;

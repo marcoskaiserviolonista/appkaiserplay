@@ -4610,25 +4610,21 @@ function renderStart(){
       <button id="ob-focused" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
         style="background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
         <img src="alvo.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-        <div style="font-size:.88rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
+        <div style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
       </button>
       <button id="ob-sala" onclick="playClickSfx('nav');startSalaDeAula()"
         style="background:linear-gradient(180deg,#1a2a1a 0%,#0e1a0e 100%);border:3px solid #2a5a2a;border-radius:16px;box-shadow:4px 4px 0 #051005;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
         <img src="chapeu-da-graduacao.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-        <div style="font-size:.88rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c66">${t('sala_de_aula')}</div>
+        <div style="font-size:1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c66">${t('sala_de_aula')}</div>
       </button>
     </div>
     <div class="section-title"></div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem">
-      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()"
-        style="background:linear-gradient(180deg,#222,#1a1a1a);border:3px solid #333;border-radius:16px;box-shadow:4px 4px 0 #111;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem;touch-action:manipulation">
-        <img src="metronomo.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-        <div style="font-size:1rem;font-weight:700;color:#e8e8e8;font-family:var(--font-body);letter-spacing:.01em">${t('metronome')}</div>
+      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()">
+        <img src="metronomo.png"><span class="nav-btn-label">${t('metronome')}</span>
       </button>
-      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()"
-        style="background:linear-gradient(180deg,#222,#1a1a1a);border:3px solid #333;border-radius:16px;box-shadow:4px 4px 0 #111;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem;touch-action:manipulation">
-        <img src="afinador.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-        <div style="font-size:1rem;font-weight:700;color:#e8e8e8;font-family:var(--font-body);letter-spacing:.01em">${t('tuner')}</div>
+      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()">
+        <img src="afinador.png"><span class="nav-btn-label">${t('tuner')}</span>
       </button>
     </div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem">

@@ -4451,7 +4451,7 @@ function render(){
 }
 
 // ── Metrônomo: Engine ─────────────────────────────────────────
-const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.25,lookahead:25};
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:30,lookahead:500};
 
 function _metroBuildNoise(ctx){
   // Buffer de ruído branco pré-gerado (50ms) — reutilizado em cada clique
@@ -4491,8 +4491,12 @@ function _metroSchedule(){
 }
 
 function _metroStartSilentLoop(ctx){
-  // Loop silencioso: mantém o AudioContext ativo com tela bloqueada
-  const buf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+  // Ruído ínfimo em loop: mantém AudioContext ativo no iOS com tela bloqueada
+  // Buffer silencioso puro é ignorado pelo iOS — amplitude 0.0001 é inaudível mas eficaz
+  const len=ctx.sampleRate;
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*0.0001;
   const src=ctx.createBufferSource();
   src.buffer=buf;src.loop=true;
   src.connect(ctx.destination);

@@ -4615,7 +4615,7 @@ function renderStart(){
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem">
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()"
         style="background:linear-gradient(180deg,#1a1a2e,#111122);border:3px solid #4a4a8a;border-radius:16px;box-shadow:4px 4px 0 #0a0a1a;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem;touch-action:manipulation">
-        <span style="font-size:1.3rem;flex-shrink:0">🥁</span>
+        <img src="metronomo.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
         <div style="font-size:.88rem;font-weight:900;color:#a0a0ff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #a0a0ff55">${t('metronome')}</div>
       </button>
       <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()"

@@ -3748,7 +3748,7 @@ function genFocusedQ(){
       const typeKeys=activeKeys.filter(k=>!isQualitySwitch(k));
       const seen=new Set();const typePool=[];
       for(const k of typeKeys){for(const c of FOCUSED_SWITCH_POOLS[k]()){if(!seen.has(c.id)){seen.add(c.id);typePool.push(c);}}}
-      const srcPool=typePool.length>=4?typePool:pool;
+      const srcPool=typePool.length>=2?typePool:pool;
       const ans=srcPool[Math.floor(Math.random()*srcPool.length)];
       const wrong=_pickWrong(ans,srcPool);
       state.chord=ans;

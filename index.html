@@ -4451,17 +4451,29 @@ function render(){
 }
 
 // ── Metrônomo: Engine ─────────────────────────────────────────
-const _metro={ctx:null,compressor:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.25,lookahead:25};
+
+function _metroBuildNoise(ctx){
+  // Buffer de ruído branco pré-gerado (50ms) — reutilizado em cada clique
+  const len=Math.ceil(ctx.sampleRate*0.05);
+  const buf=ctx.createBuffer(1,len,ctx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<len;i++)d[i]=Math.random()*2-1;
+  return buf;
+}
 
 function _metroClick(time){
   const ctx=_metro.ctx;
-  const osc=ctx.createOscillator();
+  // Ruído branco → filtro bandpass → simula madeira (sem pitch musical)
+  const noise=ctx.createBufferSource();
+  noise.buffer=_metro.noiseBuf;
+  const bp=ctx.createBiquadFilter();
+  bp.type='bandpass';bp.frequency.value=1400;bp.Q.value=1.2;
   const gain=ctx.createGain();
-  osc.connect(gain);gain.connect(_metro.compressor);
-  osc.frequency.value=1100;
-  gain.gain.setValueAtTime(4.0,time);
-  gain.gain.exponentialRampToValueAtTime(0.001,time+0.05);
-  osc.start(time);osc.stop(time+0.03);
+  noise.connect(bp);bp.connect(gain);gain.connect(_metro.compressor);
+  gain.gain.setValueAtTime(5.0,time);
+  gain.gain.exponentialRampToValueAtTime(0.001,time+0.018);
+  noise.start(time);noise.stop(time+0.02);
   // visual flash
   const delay=Math.max(0,(time-ctx.currentTime)*1000);
   setTimeout(()=>{
@@ -4478,6 +4490,16 @@ function _metroSchedule(){
   _metro.timerID=setTimeout(_metroSchedule,_metro.lookahead);
 }
 
+function _metroStartSilentLoop(ctx){
+  // Loop silencioso: mantém o AudioContext ativo com tela bloqueada
+  const buf=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);
+  const src=ctx.createBufferSource();
+  src.buffer=buf;src.loop=true;
+  src.connect(ctx.destination);
+  src.start();
+  _metro.silentNode=src;
+}
+
 function _metroStart(){
   if(!_metro.ctx){
     _metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
@@ -4486,6 +4508,8 @@ function _metroStart(){
     comp.attack.value=0.001;comp.release.value=0.05;
     comp.connect(_metro.ctx.destination);
     _metro.compressor=comp;
+    _metro.noiseBuf=_metroBuildNoise(_metro.ctx);
+    _metroStartSilentLoop(_metro.ctx);
   }
   if(_metro.ctx.state==='suspended')_metro.ctx.resume();
   _metro.running=true;

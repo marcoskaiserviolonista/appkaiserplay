@@ -2075,8 +2075,9 @@ function showToast(msg,sub){
 function spawnFloat(x,y,text,big){
   const el=document.createElement('div');
   el.className='xp-float';
-  el.style.left=(x-30)+'px';el.style.top=(y-20)+'px';
-  el.style.fontSize=big?'2.2rem':'1.1rem';
+  el.style.left=x+'px';el.style.top=(y-20)+'px';
+  el.style.transform='translateX(-50%)';
+  el.style.fontSize=big?'1.6rem':'1.1rem';
   el.style.color=big?'#FFD700':'#F5A623';
   el.textContent=text;
   document.getElementById('floats').appendChild(el);
@@ -4339,7 +4340,7 @@ function render(){
   if(!state.user&&!state.isGuest){state.phase='login';c.innerHTML=renderLogin();return;}
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
-  if(state.phase==='start'){c.innerHTML=renderStart();return;}
+  if(state.phase==='start'){c.innerHTML=renderStart();_checkPurchasePrompt();return;}
   if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
@@ -6331,15 +6332,70 @@ function obNext(){
 function obSkip(){obEnd();}
 function obEnd(){
   state.onbStep=null;
+  _obSetFlag('ob_done');
   document.body.style.overflow='';
   const el=document.getElementById('ob-root');if(el)el.innerHTML='';
 }
-// Inicialização automática
+// Inicialização automática — só na primeira vez (flag persistida em localStorage)
 function _maybeInitOb(){
-  if(state.phase==='start'&&state.onbStep===null){
+  if(state.phase==='start'&&state.onbStep===null&&!_obFlag('ob_done')){
     state.onbStep=0;
     document.body.style.overflow='hidden';
   }
+}
+
+// ── POPUP PERIÓDICO DE COMPRA (a cada 3 dias de uso) ─────────────
+let _purchasePromptChecked=false;
+function _checkPurchasePrompt(){
+  if(_purchasePromptChecked||state.fullAccess)return;
+  _purchasePromptChecked=true;
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    let days=JSON.parse(localStorage.getItem('kp_days_used')||'[]');
+    if(!days.includes(today)){days.push(today);localStorage.setItem('kp_days_used',JSON.stringify(days));}
+    const lastPrompt=localStorage.getItem('kp_last_prompt')||'';
+    const daysSinceLast=days.filter(d=>d>lastPrompt).length;
+    if(daysSinceLast>=3){
+      localStorage.setItem('kp_last_prompt',today);
+      setTimeout(_showPurchasePrompt,800);
+    }
+  }catch(e){}
+}
+function _showPurchasePrompt(){
+  if(document.getElementById('purchase-prompt-overlay'))return;
+  const overlay=document.createElement('div');
+  overlay.id='purchase-prompt-overlay';
+  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
+  overlay.innerHTML=`
+    <div style="background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+      <div style="margin-bottom:1.2rem;line-height:1.25">
+        <div style="font-size:1.05rem;font-weight:900;color:#4ade80;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em">${t('unlock_popup_headline')}</div>
+        <div style="font-size:.9rem;font-weight:700;color:#aaa;font-family:var(--font-body);margin-top:.25rem">${t('unlock_popup_sub')}</div>
+      </div>
+      <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
+        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+          <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+          <img src="alvo.png" style="width:1rem;height:1rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:.65rem">
+          <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">♾️</span>
+          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b3')}</span>
+        </div>
+      </div>
+      <button onclick="document.getElementById('purchase-prompt-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
+        style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);margin-bottom:.6rem;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:.5rem">
+        🔓 ${t('unlock_popup_cta')}
+      </button>
+      <button onclick="document.getElementById('purchase-prompt-overlay').remove()"
+        style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
+        ${t('unlock_popup_dismiss')}
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
 }
 
 // ── Fretboard: delegação de clique (registrado uma vez, nunca dentro do render) ──

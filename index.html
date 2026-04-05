@@ -578,6 +578,19 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .fb-ghost-btn:active{transform:scale(.97);filter:brightness(.88)}
 .fb-note-count{font-size:.7rem;color:#60dcff88;text-align:center;margin-bottom:.25rem;width:100%;max-width:520px;font-weight:600}
 .fb-result-hint{font-size:.88rem;font-weight:800;text-align:center;padding:.3rem 0;width:100%}
+/* ── Metrônomo ── */
+.metro-wrap{width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:1.25rem;padding-top:.5rem}
+.metro-bpm-display{font-size:5rem;font-weight:900;font-family:var(--font-title);color:#F5A623;line-height:1;letter-spacing:-.04em}
+.metro-bpm-label{font-size:.7rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.15em;margin-top:-.5rem}
+.metro-beat{width:22px;height:22px;border-radius:50%;background:#2a2a2a;transition:background .05s,box-shadow .05s}
+.metro-beat.active{background:#F5A623;box-shadow:0 0 18px #F5A62399}
+.metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:#2a2a2a;outline:none;cursor:pointer}
+.metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
+.metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
+.metro-adj-btn{width:52px;height:52px;border-radius:14px;border:3px solid #111;box-shadow:3px 3px 0 #111;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc;font-size:1.4rem;font-weight:900;font-family:var(--font-body);cursor:pointer;display:flex;align-items:center;justify-content:center;touch-action:manipulation}
+.metro-adj-btn:active{transform:scale(.94);filter:brightness(.85)}
+.metro-play-btn{width:100%;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
+.metro-play-btn:active{filter:brightness(.88);transform:scale(.98)}
 </style>
 
 </head>
@@ -680,11 +693,13 @@ const STRINGS = {
     choose_language:'Escolha seu idioma',
     section_about:'Sobre', section_legal:'Jurídico',
     rate_app:'Avalie o app', contact_support:'Contato / Suporte',
+    metronome:'Metrônomo', tuner:'Afinador',
+    metro_tap:'Toque para iniciar', metro_stop:'Parar', metro_start:'Iniciar',
     terms_conditions:'Termos e Condições', privacy_policy:'Política de Privacidade',
     terms_agree:'Ao continuar, você concorda com nossos', terms_and:'e a',
     terms_link:'Termos e Condições', privacy_link:'Política de Privacidade',
     rate_popup_title:'Você está curtindo o Kaiserplay Chords?', rate_popup_body:'Avalie o app e nos ajude a crescer!',
-    rate_now:'Avaliar agora ⭐', rate_later:'Deixar para depois',
+    rate_now:'Avaliar agora', rate_later:'Deixar para depois',
     display_name_updated:'Nome atualizado!', email_updated:'E-mail atualizado!', password_updated:'Senha atualizada!',
     // Game - General
     play:'Jogar', next:'Próxima', confirm:'Confirmar', back:'Voltar',
@@ -895,11 +910,13 @@ const STRINGS = {
     choose_language:'Choose your language',
     section_about:'About', section_legal:'Legal',
     rate_app:'Rate the app', contact_support:'Contact / Support',
+    metronome:'Metronome', tuner:'Tuner',
+    metro_tap:'Tap to start', metro_stop:'Stop', metro_start:'Start',
     terms_conditions:'Terms and Conditions', privacy_policy:'Privacy Policy',
     terms_agree:'By continuing, you agree to our', terms_and:'and our',
     terms_link:'Terms and Conditions', privacy_link:'Privacy Policy',
     rate_popup_title:'Enjoying Kaiserplay Chords?', rate_popup_body:'Leave a review and help us grow!',
-    rate_now:'Rate now ⭐', rate_later:'Maybe later',
+    rate_now:'Rate now', rate_later:'Maybe later',
     display_name_updated:'Name updated!', email_updated:'Email updated!', password_updated:'Password updated!',
     // Game - General
     play:'Play', next:'Next', confirm:'Confirm', back:'Back',
@@ -1110,11 +1127,13 @@ const STRINGS = {
     choose_language:'Elige tu idioma',
     section_about:'Acerca de', section_legal:'Legal',
     rate_app:'Calificar la app', contact_support:'Contacto / Soporte',
+    metronome:'Metrónomo', tuner:'Afinador',
+    metro_tap:'Toca para iniciar', metro_stop:'Detener', metro_start:'Iniciar',
     terms_conditions:'Términos y Condiciones', privacy_policy:'Política de Privacidad',
     terms_agree:'Al continuar, aceptas nuestros', terms_and:'y nuestra',
     terms_link:'Términos y Condiciones', privacy_link:'Política de Privacidad',
     rate_popup_title:'¿Estás disfrutando Kaiserplay Chords?', rate_popup_body:'¡Deja una reseña y ayúdanos a crecer!',
-    rate_now:'Calificar ahora ⭐', rate_later:'Quizás después',
+    rate_now:'Calificar ahora', rate_later:'Quizás después',
     display_name_updated:'¡Nombre actualizado!', email_updated:'¡Correo actualizado!', password_updated:'¡Contraseña actualizada!',
     // Game - General
     play:'Jugar', next:'Siguiente', confirm:'Confirmar', back:'Volver',
@@ -4091,7 +4110,7 @@ function renderTreinoFocadoMenu(){
     </div>`:''}
 
     <div style="width:100%;max-width:520px;margin-bottom:.75rem;padding:0 .1rem">
-      <div style="font-size:.82rem;font-weight:800;color:#60dcff99;text-transform:uppercase;letter-spacing:.1em">${state.lang==='en'?'Combine workouts the way you prefer':state.lang==='es'?'Combina los entrenamientos a tu manera':'Combine os treinos da forma que preferir'}</div>
+      <div style="font-size:.9rem;font-weight:800;color:#60dcffcc;text-transform:uppercase;letter-spacing:.1em;text-align:center">${state.lang==='en'?'Combine workouts the way you prefer':state.lang==='es'?'Combina los entrenamientos a tu manera':'Combine os treinos da forma que preferir'}</div>
     </div>
 
     <div style="width:100%;max-width:520px;background:#0e1a24;border:2px solid #60dcff33;border-radius:14px;padding:.85rem 1rem;margin-bottom:1.25rem">
@@ -4293,11 +4312,12 @@ function renderComprar(){
 
 let _saveTimer=null;
 let _saveMaxTimer=null;
-const _NAV_PHASES=new Set(['start','login','signup','forgot_password','set_display_name','perfil','levelup','desempenho','loja','inventario','niveis','treino_focado_menu','comprar']);
+const _NAV_PHASES=new Set(['start','login','signup','forgot_password','set_display_name','perfil','levelup','desempenho','loja','inventario','niveis','treino_focado_menu','comprar','metronomo','afinador']);
 let _lastPhase=null;
 let _obTimer=null;
 function render(){
   clearTimeout(_obTimer);_obTimer=setTimeout(updateObOverlay,60);
+  if(_metro.running&&state.phase!=='metronomo')_metroStop();
   const _cur=state.phase;
   if(_cur!==_lastPhase){
     const _prev=_lastPhase;_lastPhase=_cur;
@@ -4389,6 +4409,11 @@ function render(){
     return;
   }
   if(state.phase==='comprar'){c.innerHTML=renderComprar();return;}
+  if(state.phase==='metronomo'){c.innerHTML=renderMetronomo();return;}
+  if(state.phase==='afinador'){c.innerHTML=`
+    <div class="back-row"><button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
+    <div style="flex:1;min-width:0"><span style="font-size:1rem;font-weight:900;color:#7cdd7c">${t('tuner')}</span></div></div>
+    <div style="width:100%;max-width:520px;text-align:center;padding:3rem 1rem;color:#555;font-size:.95rem;font-weight:700">Em breve</div>`;return;}
   if(state.phase==='sala_de_aula'){c.innerHTML=renderSalaDeAula();return;}
   if(state.phase==='treino_focado_question'||state.phase==='treino_focado_answered'){c.innerHTML=renderTreinoFocado();return;}
   c.innerHTML=renderGame();
@@ -4423,6 +4448,108 @@ function render(){
     `;
     document.body.appendChild(overlay);
   }
+}
+
+// ── Metrônomo: Engine ─────────────────────────────────────────
+const _metro={ctx:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
+
+function _metroClick(time){
+  const ctx=_metro.ctx;
+  const osc=ctx.createOscillator();
+  const gain=ctx.createGain();
+  osc.connect(gain);gain.connect(ctx.destination);
+  osc.frequency.value=1100;
+  gain.gain.setValueAtTime(0.7,time);
+  gain.gain.exponentialRampToValueAtTime(0.001,time+0.03);
+  osc.start(time);osc.stop(time+0.03);
+  // visual flash
+  const delay=Math.max(0,(time-ctx.currentTime)*1000);
+  setTimeout(()=>{
+    const dot=document.getElementById('_metro-dot');
+    if(dot){dot.classList.add('active');setTimeout(()=>dot.classList.remove('active'),80);}
+  },delay);
+}
+
+function _metroSchedule(){
+  while(_metro.nextTime<_metro.ctx.currentTime+_metro.scheduleAhead){
+    _metroClick(_metro.nextTime);
+    _metro.nextTime+=60/_metro.bpm;
+  }
+  _metro.timerID=setTimeout(_metroSchedule,_metro.lookahead);
+}
+
+function _metroStart(){
+  if(!_metro.ctx)_metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
+  if(_metro.ctx.state==='suspended')_metro.ctx.resume();
+  _metro.running=true;
+  _metro.nextTime=_metro.ctx.currentTime+0.05;
+  _metroSchedule();
+  _metroUpdateUI();
+}
+
+function _metroStop(){
+  _metro.running=false;
+  if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+  _metroUpdateUI();
+}
+
+function _metroToggle(){
+  playClickSfx('click');
+  if(_metro.running)_metroStop();else _metroStart();
+}
+
+function _metroSetBpm(v){
+  _metro.bpm=Math.max(40,Math.min(200,v));
+  const val=document.getElementById('_metro-bpm-val');
+  const slider=document.getElementById('_metro-bpm-slider');
+  if(val)val.textContent=_metro.bpm;
+  if(slider)slider.value=_metro.bpm;
+}
+
+function _metroAdj(delta){_metroSetBpm(_metro.bpm+delta);}
+
+function _metroUpdateUI(){
+  const btn=document.getElementById('_metro-play-btn');
+  if(!btn)return;
+  if(_metro.running){
+    btn.textContent=t('metro_stop');
+    btn.style.background='linear-gradient(180deg,#333,#222)';
+    btn.style.color='#ccc';
+  }else{
+    btn.textContent=t('metro_start');
+    btn.style.background='linear-gradient(180deg,#ffbe4f,#F5A623)';
+    btn.style.color='#111';
+  }
+}
+
+function renderMetronomo(){
+  return `
+    <div class="back-row">
+      <button class="back-btn" onclick="playClickSfx('back');_metroStop();state.phase='start';render()">${t('back_btn')}</button>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <span style="font-size:1rem;font-weight:900;color:#a0a0ff;letter-spacing:.01em;white-space:nowrap">${t('metronome')}</span>
+      </div>
+    </div>
+    <div class="metro-wrap">
+      <div id="_metro-dot" class="metro-beat"></div>
+      <div>
+        <div class="metro-bpm-display" id="_metro-bpm-val">${_metro.bpm}</div>
+        <div class="metro-bpm-label">BPM</div>
+      </div>
+      <div style="width:100%;display:flex;align-items:center;gap:.75rem">
+        <button class="metro-adj-btn" onclick="_metroAdj(-5)">−5</button>
+        <input id="_metro-bpm-slider" type="range" min="40" max="200" value="${_metro.bpm}" class="metro-slider"
+          oninput="_metroSetBpm(+this.value)">
+        <button class="metro-adj-btn" onclick="_metroAdj(+5)">+5</button>
+      </div>
+      <div style="width:100%;display:flex;justify-content:center;gap:.75rem">
+        <button class="metro-adj-btn" style="width:72px" onclick="_metroAdj(-1)">−1</button>
+        <button class="metro-adj-btn" style="width:72px" onclick="_metroAdj(+1)">+1</button>
+      </div>
+      <button id="_metro-play-btn" class="metro-play-btn"
+        style="background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;box-shadow:5px 5px 0 #111;color:#111;text-shadow:none"
+        onclick="_metroToggle()">${t('metro_start')}</button>
+    </div>`;
 }
 
 // ── Render: Start ─────────────────────────────────────────────
@@ -4485,6 +4612,18 @@ function renderStart(){
       </button>
     </div>
     <div class="section-title"></div>
+    <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem">
+      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()"
+        style="background:linear-gradient(180deg,#1a1a2e,#111122);border:3px solid #4a4a8a;border-radius:16px;box-shadow:4px 4px 0 #0a0a1a;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem;touch-action:manipulation">
+        <span style="font-size:1.3rem;flex-shrink:0">🥁</span>
+        <div style="font-size:.88rem;font-weight:900;color:#a0a0ff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #a0a0ff55">${t('metronome')}</div>
+      </button>
+      <button onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()"
+        style="background:linear-gradient(180deg,#1a2a1a,#111a11);border:3px solid #3a6a3a;border-radius:16px;box-shadow:4px 4px 0 #0a150a;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem;touch-action:manipulation">
+        <span style="font-size:1.3rem;flex-shrink:0">🎸</span>
+        <div style="font-size:.88rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c55">${t('tuner')}</div>
+      </button>
+    </div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem">
       <button id="ob-loja" class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
       <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
@@ -6060,7 +6199,6 @@ function showRatingPrompt(){
   overlay.style.cssText='position:fixed;inset:0;background:#000a;z-index:9998;display:flex;align-items:center;justify-content:center;padding:1rem';
   overlay.innerHTML=`
     <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:18px;padding:1.5rem;max-width:300px;width:100%;text-align:center;box-shadow:6px 6px 0 #111">
-      <div style="font-size:2rem;margin-bottom:.4rem">⭐</div>
       <div style="font-size:.95rem;font-weight:900;color:#F5A623;margin-bottom:.5rem">${t('rate_popup_title')}</div>
       <div style="font-size:.82rem;color:#999;margin-bottom:1.2rem;line-height:1.5">${t('rate_popup_body')}</div>
       <button id="_rate-now" style="width:100%;padding:.75rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:12px;box-shadow:3px 3px 0 #111;color:#111;text-shadow:none;font-size:.9rem;font-weight:900;font-family:var(--font-body);cursor:pointer;margin-bottom:.6rem">${t('rate_now')}</button>

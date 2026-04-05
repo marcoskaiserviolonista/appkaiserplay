@@ -4474,30 +4474,26 @@ function renderStart(){
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
       <div class="start-desc">${t('start_desc')}</div>
     </div>
-    <div class="quadro-treinos">
-      <div class="quadro-label">escolha seu treino</div>
-      <div class="quadro-inner">
-        <button id="ob-harmonica" class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem">
-          <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
-        </button>
-        ${SHOW_CORDAS_JOURNEY?`<button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-top:.65rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
-          <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
-        </button>`:''}
-        <div class="quadro-sep"></div>
-        <div class="quadro-sec-grid">
-          <button id="ob-focused" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
-            style="background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
-            <img src="alvo.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-            <div style="font-size:.88rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
-          </button>
-          <button id="ob-sala" onclick="playClickSfx('nav');startSalaDeAula()"
-            style="background:linear-gradient(180deg,#1a2a1a 0%,#0e1a0e 100%);border:3px solid #2a5a2a;border-radius:16px;box-shadow:4px 4px 0 #051005;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
-            <img src="chapeu-da-graduacao.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
-            <div style="font-size:.88rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c66">${t('sala_de_aula')}</div>
-          </button>
-        </div>
-      </div>
+    <div class="section-title">Escolha seu Treino</div>
+    <button id="ob-harmonica" class="cta-btn" onclick="playClickSfx('nav');startGame()" style="display:flex;align-items:center;justify-content:center;gap:.6rem;margin-bottom:.75rem">
+      <img src="jornada-harmonica.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('harmonic_journey')}
+    </button>
+    ${SHOW_CORDAS_JOURNEY?`<button class="cta-btn" onclick="playClickSfx('nav');startCordas()" style="margin-bottom:.75rem;background:linear-gradient(180deg,#a855f7 0%,#7c3aed 100%);display:flex;align-items:center;justify-content:center;gap:.6rem">
+      <img src="jornada-cordas.png" style="width:28px;height:28px;object-fit:contain;flex-shrink:0">${t('cordas_journey')}
+    </button>`:''}
+    <div class="quadro-sec-grid" style="margin-bottom:.75rem">
+      <button id="ob-focused" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='treino_focado_menu';render()"
+        style="background:linear-gradient(180deg,#1a2a3a 0%,#0e1a2a 100%);border:3px solid #2a4a6a;border-radius:16px;box-shadow:4px 4px 0 #0a1520;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
+        <img src="alvo.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
+        <div style="font-size:.88rem;font-weight:900;color:#60dcff;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #60dcff66">${t('focused_training')}</div>
+      </button>
+      <button id="ob-sala" onclick="playClickSfx('nav');startSalaDeAula()"
+        style="background:linear-gradient(180deg,#1a2a1a 0%,#0e1a0e 100%);border:3px solid #2a5a2a;border-radius:16px;box-shadow:4px 4px 0 #051005;cursor:pointer;padding:.85rem .75rem;display:flex;align-items:center;justify-content:center;gap:.55rem">
+        <img src="chapeu-da-graduacao.png" style="width:1.5rem;height:1.5rem;flex-shrink:0;object-fit:contain">
+        <div style="font-size:.88rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body);letter-spacing:.01em;text-shadow:0 0 12px #7cdd7c66">${t('sala_de_aula')}</div>
+      </button>
     </div>
+    <div class="section-title"></div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem">
       <button id="ob-loja" class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
       <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
@@ -4505,7 +4501,7 @@ function renderStart(){
     <div class="nav-grid" style="margin-bottom:.75rem">
       <button id="ob-niveis" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
     </div>
-    <div class="section-title" style="margin-top:.25rem">${t('your_stats')}</div>
+    <div class="section-title">${t('your_stats')}</div>
     <div class="user-stats">
       <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>
       <div class="user-stat-card"><span class="us-icon">🎯</span><div><div class="us-val">${acc}%</div><div class="us-lbl">${t('hit_rate')}</div></div></div>

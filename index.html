@@ -3744,8 +3744,13 @@ function genFocusedQ(){
       state.qualitySelected=null;
       state.result=null;
     } else {
-      const ans=pool[Math.floor(Math.random()*pool.length)];
-      const wrong=_pickWrong(ans,pool);
+      // 4-choice: usa só os pools de switches de tipo (não qualidade)
+      const typeKeys=activeKeys.filter(k=>!isQualitySwitch(k));
+      const seen=new Set();const typePool=[];
+      for(const k of typeKeys){for(const c of FOCUSED_SWITCH_POOLS[k]()){if(!seen.has(c.id)){seen.add(c.id);typePool.push(c);}}}
+      const srcPool=typePool.length>=4?typePool:pool;
+      const ans=srcPool[Math.floor(Math.random()*srcPool.length)];
+      const wrong=_pickWrong(ans,srcPool);
       state.chord=ans;
       state.isQuality=false;
       state.qualityAnswer=null;

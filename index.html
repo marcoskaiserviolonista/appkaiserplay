@@ -4459,8 +4459,8 @@ function _metroClick(time){
   const gain=ctx.createGain();
   osc.connect(gain);gain.connect(_metro.compressor);
   osc.frequency.value=1100;
-  gain.gain.setValueAtTime(1.5,time);
-  gain.gain.exponentialRampToValueAtTime(0.001,time+0.03);
+  gain.gain.setValueAtTime(4.0,time);
+  gain.gain.exponentialRampToValueAtTime(0.001,time+0.05);
   osc.start(time);osc.stop(time+0.03);
   // visual flash
   const delay=Math.max(0,(time-ctx.currentTime)*1000);
@@ -4482,7 +4482,7 @@ function _metroStart(){
   if(!_metro.ctx){
     _metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
     const comp=_metro.ctx.createDynamicsCompressor();
-    comp.threshold.value=-6;comp.knee.value=3;comp.ratio.value=4;
+    comp.threshold.value=-20;comp.knee.value=1;comp.ratio.value=20;
     comp.attack.value=0.001;comp.release.value=0.05;
     comp.connect(_metro.ctx.destination);
     _metro.compressor=comp;

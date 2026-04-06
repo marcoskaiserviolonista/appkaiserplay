@@ -585,6 +585,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .metro-beat{width:22px;height:22px;border-radius:50%;background:#2a2a2a;transition:background .05s,box-shadow .05s}
 .metro-beat.active{background:#F5A623;box-shadow:0 0 18px #F5A62399}
 @keyframes tunerComplete{0%{opacity:0;transform:scale(.85) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes tunerPerfect{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1.08)}35%{opacity:1;transform:scale(1)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.95)}}
 .metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:#2a2a2a;outline:none;cursor:pointer}
 .metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
 .metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
@@ -887,7 +888,7 @@ const STRINGS = {
     streak_congrats_pre:'Parabéns, você está há',
     streak_congrats_pos:'dias ativos!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
-    tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'🎸 Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',
+    tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',tuner_perfect:'✦ Afinação Perfeita ✦',
     tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
     tuner_std:'Padrão',tuner_half_down:'Meio Tom ↓',
   },
@@ -1108,7 +1109,7 @@ const STRINGS = {
     streak_congrats_pre:'Congrats, you\'ve been active for',
     streak_congrats_pos:'days!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
-    tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'🎸 Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',
+    tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',tuner_perfect:'✦ Perfect Tune ✦',
     tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
     tuner_std:'Standard',tuner_half_down:'Half Step ↓',
   },
@@ -1329,7 +1330,7 @@ const STRINGS = {
     streak_congrats_pre:'¡Felicidades, llevas',
     streak_congrats_pos:'días activos!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
-    tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'🎸 ¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',
+    tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',tuner_perfect:'✦ Afinación Perfecta ✦',
     tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
     tuner_std:'Estándar',tuner_half_down:'Semitono ↓',
   }
@@ -4655,8 +4656,11 @@ const _tuner={
   inTuneMs:1200,
   allTunedShown:false,
   lastInTuneSfxStr:-1,
-  // Smoothed target (prevents octave-error spikes from jerking the needle)
+  // Median filter buffer — estabiliza leitura, elimina saltos
+  centsBuf:[],centsBufSize:5,
   stableCents:0,
+  // Perfect-tune text animation state
+  perfectShownAt:0,
 };
 
 function _tunerNote2Midi(name){
@@ -4723,6 +4727,7 @@ function _tunerProcess(result){
     // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
       _tuner.noSignal=true;_tuner.targetCents=0;_tuner.stableCents=0;
+      _tuner.centsBuf=[];
       _tuner.stringInTuneStart=_tuner.stringInTuneStart.map(()=>0);
     }
     return;
@@ -4739,16 +4744,21 @@ function _tunerProcess(result){
   });
   if(closest>=0&&_tuner.selectedString!==closest){
     _tuner.selectedString=closest;
+    _tuner.centsBuf=[];_tuner.targetCents=0;_tuner.stableCents=0;
     _tunerRefreshControls();
   }
 
   const targetMidi=_tuner.selectedString>=0?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
   const rawCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
-  // Adaptive exponential filter: large jumps (octave errors) blend slowly, small changes quickly
-  const delta=Math.abs(rawCents-_tuner.stableCents);
-  const blend=delta>25?0.15:delta>10?0.35:0.6;
-  _tuner.stableCents=_tuner.stableCents*(1-blend)+rawCents*blend;
-  _tuner.targetCents=_tuner.stableCents;
+  // Median filter: acumula últimas N leituras, usa mediana para eliminar outliers/spikes
+  _tuner.centsBuf.push(rawCents);
+  if(_tuner.centsBuf.length>_tuner.centsBufSize)_tuner.centsBuf.shift();
+  const sorted=[..._tuner.centsBuf].sort((a,b)=>a-b);
+  const median=sorted[Math.floor(sorted.length/2)];
+  // Delta gate: flutuações pequenas (<3¢) são suavizadas; mudanças reais entram imediatamente
+  const dlt=Math.abs(median-_tuner.targetCents);
+  _tuner.targetCents=dlt<3?_tuner.targetCents*0.7+median*0.3:median;
+  _tuner.stableCents=_tuner.targetCents;
   const {note,octave}=_tunerMidi2Label(targetMidi);
   _tuner.noteName=note;_tuner.octave=octave;
 }
@@ -4815,15 +4825,26 @@ function _tunerUpdateDOM(){
   const col=_tuner.noSignal?'#3a3a3a':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
   if(needle)needle.setAttribute('stroke',col);
   if(ndot)ndot.setAttribute('fill',col);
-  // Center perfect-tune line: glows when needle is exactly on it
+  // Center perfect-tune zone: glow + animation when needle exactly centered
   const cline=document.getElementById('_tn-cline');
   if(cline){
-    cline.setAttribute('stroke',perfect?'#60dcff':'#60dcff55');
-    cline.setAttribute('stroke-width',perfect?'3':'1.5');
-    cline.style.filter=perfect?'drop-shadow(0 0 5px #60dcff)':'none';
+    cline.style.filter=perfect?'drop-shadow(0 0 6px #60dcff)':'none';
   }
   const gz=document.getElementById('_tn-gzone');
   if(gz){gz.style.filter=inTune?'drop-shadow(0 0 8px #5ad45a)':'none';gz.style.opacity=inTune?'1':'0.75';}
+  // "Afinação perfeita" pop text — aparece uma vez ao entrar na zona perfeita
+  const perfTxt=document.getElementById('_tn-perfect-txt');
+  if(perfTxt){
+    const now2=performance.now();
+    if(perfect&&now2-_tuner.perfectShownAt>2000){
+      _tuner.perfectShownAt=now2;
+      perfTxt.style.animation='none';
+      void perfTxt.offsetWidth;
+      perfTxt.style.animation='tunerPerfect 1.6s ease forwards';
+    } else if(!perfect){
+      perfTxt.style.animation='none';
+    }
+  }
   const notEl=document.getElementById('_tn-note');
   if(notEl){
     notEl.textContent=_tuner.noSignal?'─':(_tuner.noteName||'─');
@@ -5044,12 +5065,18 @@ function renderAfinador(){
         ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,137,1,'#383838')).join('')}
         <text x="4" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♭</text>
         <text x="273" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♯</text>
-        <line id="_tn-cline" x1="150" y1="25" x2="150" y2="62" stroke="#60dcff55" stroke-width="1.5" stroke-linecap="round"/>
+        <!-- Wider perfect-tune zone (±2¢) in cyan on top of green -->
+        <path d="${aseg(-2,2,92,128)}" fill="#60dcff" opacity=".18"/>
+        <!-- Center line — glows via JS when needle exactly centered -->
+        <line id="_tn-cline" x1="150" y1="25" x2="150" y2="62" stroke="#60dcff" stroke-width="2" stroke-linecap="round" opacity=".5"/>
         <line id="_tn-needle" x1="150" y1="155" x2="${lx0}" y2="${ly0}" stroke="#3a3a3a" stroke-width="3" stroke-linecap="round"/>
         <polygon id="_tn-ndot" points="${arrow0}" fill="#3a3a3a"/>
         <circle cx="150" cy="155" r="9" fill="#252525" stroke="#3a3a3a" stroke-width="2"/>
         <circle cx="150" cy="155" r="4" fill="#555"/>
       </svg>
+
+      <!-- "Afinação perfeita" pop text -->
+      <div id="_tn-perfect-txt" style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.04em;text-shadow:0 0 12px #60dcff88;opacity:0;pointer-events:none;min-height:1.4rem;text-align:center">${t('tuner_perfect')||'Afinação Perfeita'}</div>
 
       <div class="tuner-note-display">
         <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span><sup id="_tn-oct" class="tuner-octave"></sup>
@@ -5066,14 +5093,10 @@ function renderAfinador(){
 
       <!-- All-tuned completion banner -->
       <div id="_tn-complete" style="display:${allTuned?'flex':'none'};flex-direction:column;align-items:center;gap:.5rem;width:100%;max-width:320px;background:linear-gradient(180deg,#1a3a1a,#112211);border:2px solid #7cdd7c44;border-radius:16px;padding:1rem;margin-top:.5rem;animation:tunerComplete .5s ease">
-        <div style="font-size:2rem">🎸</div>
+        <img src="tuner-headstock.png" alt="" aria-hidden="true" style="width:52px;height:52px;object-fit:contain">
         <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')||'Violão Afinado!'}</div>
         <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')||'Todas as cordas no ponto ✓'}</div>
       </div>
-
-      <!-- Decorative wizard -->
-      <img src="afinador-wizard.png" alt="" aria-hidden="true"
-        style="width:180px;max-width:55%;opacity:.75;margin-top:.5rem;pointer-events:none;user-select:none">
     </div>`;
 }
 

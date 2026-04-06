@@ -610,7 +610,6 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-preset-row{display:flex;gap:.35rem;padding:.1rem .1rem .2rem}
 .tuner-preset-btn{padding:.3rem .6rem;border-radius:8px;border:2px solid #333;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;white-space:nowrap;background:linear-gradient(180deg,#1e1e1e,#151515);color:#666;transition:filter .08s}
 .tuner-preset-btn:active{filter:brightness(.85)}
-.tuner-edit-btn{flex-shrink:0;padding:.3rem .55rem;border-radius:8px;border:2px solid #444;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;background:linear-gradient(180deg,#222,#1a1a1a);color:#888}
 .tuner-mic-btn{width:100%;max-width:320px;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 </style>
@@ -890,7 +889,7 @@ const STRINGS = {
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
     tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',tuner_perfect:'✦ Afinação Perfeita ✦',
     tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
-    tuner_std:'Padrão',tuner_half_down:'Meio Tom ↓',
+    tuner_std:'Afinação padrão',tuner_alt:'Afinação alternativa',tuner_half_down:'Meio Tom ↓',
   },
   en: {
     // Navigation
@@ -1111,7 +1110,7 @@ const STRINGS = {
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
     tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',tuner_perfect:'✦ Perfect Tune ✦',
     tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
-    tuner_std:'Standard',tuner_half_down:'Half Step ↓',
+    tuner_std:'Standard tuning',tuner_alt:'Alternative tuning',tuner_half_down:'Half Step ↓',
   },
   es: {
     // Navegación
@@ -1332,7 +1331,7 @@ const STRINGS = {
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
     tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',tuner_perfect:'✦ Afinación Perfecta ✦',
     tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
-    tuner_std:'Estándar',tuner_half_down:'Semitono ↓',
+    tuner_std:'Afinación estándar',tuner_alt:'Afinación alternativa',tuner_half_down:'Semitono ↓',
   }
 };
 function t(key){
@@ -4646,7 +4645,7 @@ const _tuner={
   lastSignalTime:0,holdMs:2000,
   selectedString:-1,
   tuning:['E2','A2','D3','G3','B3','E4'],
-  editMode:false,
+  altTuning:false,
   noSignal:true,
   lastEnergy:0,
   a4:440,
@@ -4681,7 +4680,7 @@ function _tunerYIN(buf,sr){
   let energy=0;
   for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
   _tuner.lastEnergy=energy/N;
-  if(_tuner.lastEnergy<0.000008)return null;
+  if(_tuner.lastEnergy<0.0000015)return null;
   // Frequency range for guitar: 55Hz (A1) to 1400Hz
   const tauMin=Math.max(2,Math.floor(sr/1400));
   const tauMax=Math.min(half-1,Math.floor(sr/55));
@@ -4701,7 +4700,7 @@ function _tunerYIN(buf,sr){
     dn[tau]=rs>0?(d[tau]*tau/rs):1;
   }
   // Step 3: First local minimum below threshold (0.15 is practical for guitar)
-  const thr=0.15;
+  const thr=0.20;
   let found=-1;
   for(let tau=tauMin;tau<tauMax-1;tau++){
     if(dn[tau]<thr&&dn[tau]<=dn[tau-1]&&dn[tau]<=dn[tau+1]){found=tau;break;}
@@ -4715,7 +4714,7 @@ function _tunerYIN(buf,sr){
     if(Math.abs(den)>1e-10)bt=found+(c-a)/den;
   }
   const confidence=1-dn[found];
-  if(confidence<0.4)return null;
+  if(confidence<0.3)return null;
   return {freq:sr/bt,confidence};
 }
 
@@ -4723,7 +4722,7 @@ function _tunerProcess(result){
   const now=performance.now();
   if(!result){
     // String still vibrating but YIN can't lock — hold the last reading
-    if(_tuner.lastEnergy>0.000008){_tuner.lastSignalTime=now;return;}
+    if(_tuner.lastEnergy>0.0000015){_tuner.lastSignalTime=now;return;}
     // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
       _tuner.noSignal=true;_tuner.targetCents=0;_tuner.stableCents=0;
@@ -4960,9 +4959,9 @@ function _tunerSelectString(idx){
   _tuner.selectedString=(_tuner.selectedString===idx)?-1:idx;
   _tunerRefreshControls();
 }
-function _tunerToggleEdit(){
+function _tunerSetAltTuning(val){
   playClickSfx('soft');
-  _tuner.editMode=!_tuner.editMode;
+  _tuner.altTuning=val;
   _tunerRefreshControls();
 }
 function _tunerCustomNote(strIdx,delta){
@@ -4976,14 +4975,14 @@ function _tunerBuildStrBtns(){
   return _tuner.tuning.map((noteStr,i)=>{
     const {note}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
     const strNum=6-i;
-    if(_tuner.editMode){
+    if(_tuner.altTuning){
       return `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer" onclick="_tunerCustomNote(${i},1)">▲</button>
+        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer;touch-action:manipulation" onclick="_tunerCustomNote(${i},1)">▲</button>
         <div style="width:44px;height:26px;border-radius:8px;border:2px solid #555;background:#1e1e1e;display:flex;flex-direction:column;align-items:center;justify-content:center">
           <span style="font-size:.45rem;color:#555;line-height:1">${strNum}</span>
           <span style="font-size:.95rem;font-weight:900;font-family:var(--font-title);color:#ddd;line-height:1">${note}</span>
         </div>
-        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer" onclick="_tunerCustomNote(${i},-1)">▼</button>
+        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer;touch-action:manipulation" onclick="_tunerCustomNote(${i},-1)">▼</button>
       </div>`;
     }
     const isTuned=_tuner.stringTuned[i];
@@ -4998,23 +4997,26 @@ function _tunerBuildStrBtns(){
     } else {
       bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
     }
-    return `<button id="_tn-str-${i}" class="tuner-str-btn"
-      style="background:${bg};color:${color};border-color:${border};${isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':''}"
-      onclick="_tunerSelectString(${i})">
+    return `<div id="_tn-str-${i}" class="tuner-str-btn"
+      style="background:${bg};color:${color};border-color:${border};${isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':''}cursor:default">
       <span class="str-num">${strNum}</span>
       <span class="str-note-name">${note}</span>
       ${extra}
-    </button>`;
+    </div>`;
   }).join('');
 }
 function _tunerRefreshControls(){
   const sr=document.getElementById('_tn-str-row');
   if(sr)sr.innerHTML=_tunerBuildStrBtns();
-  const eb=document.getElementById('_tn-edit-btn');
-  if(eb){
-    eb.textContent=_tuner.editMode?t('tuner_done'):t('tuner_custom');
-    eb.style.borderColor=_tuner.editMode?'#7cdd7c':'#444';
-    eb.style.color=_tuner.editMode?'#7cdd7c':'#888';
+  const tp=document.getElementById('_tn-tuning-toggle');
+  if(tp){
+    const btns=tp.querySelectorAll('button');
+    btns[0].style.background=!_tuner.altTuning?'#F5A623':'#1a1a1a';
+    btns[0].style.color=!_tuner.altTuning?'#111':'#666';
+    btns[0].style.borderColor=!_tuner.altTuning?'#F5A623':'#333';
+    btns[1].style.background=_tuner.altTuning?'#60dcff':'#1a1a1a';
+    btns[1].style.color=_tuner.altTuning?'#111':'#666';
+    btns[1].style.borderColor=_tuner.altTuning?'#60dcff':'#333';
   }
 }
 
@@ -5047,7 +5049,6 @@ function renderAfinador(){
       <div style="flex:1;min-width:0;overflow:hidden">
         <span style="font-size:1rem;font-weight:900;color:#7cdd7c;letter-spacing:.01em;white-space:nowrap">${t('tuner')}</span>
       </div>
-      <button id="_tn-edit-btn" class="tuner-edit-btn" onclick="_tunerToggleEdit()">${t('tuner_custom')}</button>
     </div>
     <div class="tuner-wrap">
       <svg viewBox="0 0 300 160" class="tuner-svg" aria-hidden="true">
@@ -5087,6 +5088,12 @@ function renderAfinador(){
 
       <!-- String indicators -->
       <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
+
+      <!-- Tuning mode toggle -->
+      <div id="_tn-tuning-toggle" style="display:flex;gap:.4rem;margin-top:.45rem;margin-bottom:.1rem">
+        <button onclick="_tunerSetAltTuning(false)" style="flex:1;padding:.35rem .5rem;border-radius:10px;border:2px solid ${!_tuner.altTuning?'#F5A623':'#333'};background:${!_tuner.altTuning?'#F5A623':'#1a1a1a'};color:${!_tuner.altTuning?'#111':'#666'};font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation">${t('tuner_std')}</button>
+        <button onclick="_tunerSetAltTuning(true)" style="flex:1;padding:.35rem .5rem;border-radius:10px;border:2px solid ${_tuner.altTuning?'#60dcff':'#333'};background:${_tuner.altTuning?'#60dcff':'#1a1a1a'};color:${_tuner.altTuning?'#111':'#666'};font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation">${t('tuner_alt')}</button>
+      </div>
 
       <!-- Input level meter -->
       <div style="width:100%;max-width:320px;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin-top:.1rem">

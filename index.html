@@ -4451,7 +4451,7 @@ function render(){
 }
 
 // ── Metrônomo: Engine ─────────────────────────────────────────
-const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:30,lookahead:500};
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
 
 function _metroBuildNoise(ctx){
   // Buffer de ruído branco pré-gerado (50ms) — reutilizado em cada clique
@@ -4483,6 +4483,7 @@ function _metroClick(time){
 }
 
 function _metroSchedule(){
+  if(!_metro.running)return;
   while(_metro.nextTime<_metro.ctx.currentTime+_metro.scheduleAhead){
     _metroClick(_metro.nextTime);
     _metro.nextTime+=60/_metro.bpm;
@@ -4505,6 +4506,7 @@ function _metroStartSilentLoop(ctx){
 }
 
 function _metroStart(){
+  if(_metro.running)return;
   if(!_metro.ctx){
     _metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
     const comp=_metro.ctx.createDynamicsCompressor();
@@ -4525,6 +4527,7 @@ function _metroStart(){
 function _metroStop(){
   _metro.running=false;
   if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+  if(_metro.ctx&&_metro.ctx.state==='running')_metro.ctx.suspend();
   _metroUpdateUI();
 }
 

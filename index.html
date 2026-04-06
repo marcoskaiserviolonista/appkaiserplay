@@ -4655,6 +4655,8 @@ const _tuner={
   inTuneMs:1200,
   allTunedShown:false,
   lastInTuneSfxStr:-1,
+  // Smoothed target (prevents octave-error spikes from jerking the needle)
+  stableCents:0,
 };
 
 function _tunerNote2Midi(name){
@@ -4720,7 +4722,7 @@ function _tunerProcess(result){
     if(_tuner.lastEnergy>0.000008){_tuner.lastSignalTime=now;return;}
     // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
-      _tuner.noSignal=true;_tuner.targetCents=0;
+      _tuner.noSignal=true;_tuner.targetCents=0;_tuner.stableCents=0;
       _tuner.stringInTuneStart=_tuner.stringInTuneStart.map(()=>0);
     }
     return;
@@ -4741,30 +4743,14 @@ function _tunerProcess(result){
   }
 
   const targetMidi=_tuner.selectedString>=0?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
-  _tuner.targetCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
+  const rawCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
+  // Adaptive exponential filter: large jumps (octave errors) blend slowly, small changes quickly
+  const delta=Math.abs(rawCents-_tuner.stableCents);
+  const blend=delta>25?0.15:delta>10?0.35:0.6;
+  _tuner.stableCents=_tuner.stableCents*(1-blend)+rawCents*blend;
+  _tuner.targetCents=_tuner.stableCents;
   const {note,octave}=_tunerMidi2Label(targetMidi);
   _tuner.noteName=note;_tuner.octave=octave;
-
-  // Track per-string in-tune state
-  const idx=_tuner.selectedString;
-  if(idx>=0){
-    if(Math.abs(_tuner.targetCents)<5){
-      if(!_tuner.stringInTuneStart[idx])_tuner.stringInTuneStart[idx]=now;
-      if(!_tuner.stringTuned[idx]&&now-_tuner.stringInTuneStart[idx]>_tuner.inTuneMs){
-        _tuner.stringTuned[idx]=true;
-        if(_tuner.lastInTuneSfxStr!==idx){_tuner.lastInTuneSfxStr=idx;_tunerPlayInTuneSfx();}
-        _tunerRefreshControls();
-        _tunerCheckAllTuned();
-      }
-    } else {
-      _tuner.stringInTuneStart[idx]=0;
-      if(Math.abs(_tuner.targetCents)>15&&_tuner.stringTuned[idx]){
-        _tuner.stringTuned[idx]=false;
-        _tuner.allTunedShown=false;
-        _tunerRefreshControls();
-      }
-    }
-  }
 }
 
 function _tunerPlayInTuneSfx(){
@@ -4810,16 +4796,32 @@ function _tunerUpdateDOM(){
   const c=_tuner.smoothCents;
   const a=(90-c*1.8)*Math.PI/180;
   const nl=108,cx=150,cy=155;
-  const tx=(cx+nl*Math.cos(a)).toFixed(1),ty=(cy-nl*Math.sin(a)).toFixed(1);
+  const cos_a=Math.cos(a),sin_a=Math.sin(a);
+  // Needle line stops before arrowhead
+  const lineR=97,arrowLen=11,arrowW=5;
+  const lx=(cx+lineR*cos_a).toFixed(1),ly=(cy-lineR*sin_a).toFixed(1);
+  // Arrowhead tip and base
+  const tipx=cx+nl*cos_a,tipy=cy-nl*sin_a;
+  const bx=cx+(nl-arrowLen)*cos_a,by=cy-(nl-arrowLen)*sin_a;
+  const ex=-sin_a,ey=-cos_a;
+  const arrowPts=`${tipx.toFixed(1)},${tipy.toFixed(1)} ${(bx+ex*arrowW).toFixed(1)},${(by+ey*arrowW).toFixed(1)} ${(bx-ex*arrowW).toFixed(1)},${(by-ey*arrowW).toFixed(1)}`;
   const needle=document.getElementById('_tn-needle');
   const ndot=document.getElementById('_tn-ndot');
-  if(needle){needle.setAttribute('x2',tx);needle.setAttribute('y2',ty);}
-  if(ndot){ndot.setAttribute('cx',tx);ndot.setAttribute('cy',ty);}
+  if(needle){needle.setAttribute('x2',lx);needle.setAttribute('y2',ly);}
+  if(ndot)ndot.setAttribute('points',arrowPts);
+  const perfect=!_tuner.noSignal&&Math.abs(c)<2;
   const inTune=!_tuner.noSignal&&Math.abs(c)<5;
   const close=!_tuner.noSignal&&Math.abs(c)<15;
   const col=_tuner.noSignal?'#3a3a3a':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
   if(needle)needle.setAttribute('stroke',col);
   if(ndot)ndot.setAttribute('fill',col);
+  // Center perfect-tune line: glows when needle is exactly on it
+  const cline=document.getElementById('_tn-cline');
+  if(cline){
+    cline.setAttribute('stroke',perfect?'#60dcff':'#60dcff55');
+    cline.setAttribute('stroke-width',perfect?'3':'1.5');
+    cline.style.filter=perfect?'drop-shadow(0 0 5px #60dcff)':'none';
+  }
   const gz=document.getElementById('_tn-gzone');
   if(gz){gz.style.filter=inTune?'drop-shadow(0 0 8px #5ad45a)':'none';gz.style.opacity=inTune?'1':'0.75';}
   const notEl=document.getElementById('_tn-note');
@@ -4854,14 +4856,31 @@ function _tunerAnimLoop(){
       _tunerProcess(_tunerYIN(_tuner.buffer,_tuner.ctx.sampleRate));
     }
   }
-  // Spring physics — segue targetCents rapidamente, volta ao centro suavemente quando sem sinal
+  // Spring physics — suave e preciso
   const target=_tuner.noSignal?0:_tuner.targetCents;
   const diff=target-_tuner.smoothCents;
-  // Mola mais forte ao seguir sinal ativo, mais fraca ao voltar ao centro (parece mais natural)
-  const spring=_tuner.noSignal?0.08:0.28;
-  const damp=0.68;
+  const spring=_tuner.noSignal?0.05:0.14;
+  const damp=0.82;
   _tuner.needleVel=_tuner.needleVel*damp+diff*spring;
   _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
+
+  // Per-string in-tune tracking — verifica DEPOIS do smoothing (agulha realmente parada no centro)
+  const _si=_tuner.selectedString;
+  if(_si>=0&&!_tuner.noSignal){
+    if(Math.abs(_tuner.smoothCents)<5){
+      if(!_tuner.stringInTuneStart[_si])_tuner.stringInTuneStart[_si]=now;
+      if(!_tuner.stringTuned[_si]&&now-_tuner.stringInTuneStart[_si]>_tuner.inTuneMs){
+        _tuner.stringTuned[_si]=true;
+        if(_tuner.lastInTuneSfxStr!==_si){_tuner.lastInTuneSfxStr=_si;_tunerPlayInTuneSfx();}
+        _tunerRefreshControls();_tunerCheckAllTuned();
+      }
+    } else {
+      _tuner.stringInTuneStart[_si]=0;
+      if(Math.abs(_tuner.smoothCents)>12&&_tuner.stringTuned[_si]){
+        _tuner.stringTuned[_si]=false;_tuner.allTunedShown=false;_tunerRefreshControls();
+      }
+    }
+  } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
   _tunerUpdateDOM();
   _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);
 }
@@ -4990,7 +5009,14 @@ function renderAfinador(){
     const [x1,y1]=apt(c,r1),[x2,y2]=apt(c,r2);
     return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
   }
-  const [nx,ny]=apt(0,108);
+  // Initial arrowhead at 0 cents (pointing straight up)
+  const nl=108,lineR=97,arrowLen=11,arrowW=5;
+  const a0=Math.PI/2;
+  const lx0=(150+lineR*Math.cos(a0)).toFixed(1),ly0=(155-lineR*Math.sin(a0)).toFixed(1);
+  const tipx0=(150+nl*Math.cos(a0)).toFixed(1),tipy0=(155-nl*Math.sin(a0)).toFixed(1);
+  const bx0=150+(nl-arrowLen)*Math.cos(a0),by0=155-(nl-arrowLen)*Math.sin(a0);
+  const ex0=-Math.sin(a0),ey0=-Math.cos(a0);
+  const arrow0=`${tipx0},${tipy0} ${(bx0+ex0*arrowW).toFixed(1)},${(by0+ey0*arrowW).toFixed(1)} ${(bx0-ex0*arrowW).toFixed(1)},${(by0-ey0*arrowW).toFixed(1)}`;
   const allTuned=_tuner.stringTuned.every(v=>v);
   return `
     <div class="back-row">
@@ -5006,23 +5032,21 @@ function renderAfinador(){
           <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
         <path d="${aseg(-50,50,88,130)}" fill="#181818"/>
-        <path d="${aseg(-50,50,88,130)}" fill="none" stroke="#2a2a2a" stroke-width="1"/>
         <path d="${aseg(-50,-15,88,130)}" fill="#c03030" opacity=".8"/>
         <path d="${aseg(15,50,88,130)}"   fill="#c03030" opacity=".8"/>
         <path d="${aseg(-15,-5,88,130)}"  fill="#c07020" opacity=".85"/>
         <path d="${aseg(5,15,88,130)}"    fill="#c07020" opacity=".85"/>
         <path id="_tn-gzone" d="${aseg(-5,5,88,130)}" fill="#38a838" opacity=".9"/>
         <path d="${aseg(-50,50,88,93)}" fill="#111" opacity=".6"/>
-        ${tick(-50,130,142,2,'#666')}${tick(-25,130,138,1.5,'#555')}
+        ${tick(-25,130,139,1.5,'#555')}
         ${tick(0,130,145,2.5,'#999')}
-        ${tick(25,130,138,1.5,'#555')}${tick(50,130,142,2,'#666')}
-        ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,138,1,'#383838')).join('')}
-        <text x="8" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♭</text>
-        <text x="283" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♯</text>
-        <line x1="150" y1="85" x2="150" y2="155" stroke="#ffffff18" stroke-width="1" stroke-dasharray="4,4"/>
-        <line x1="152" y1="157" x2="${(parseFloat(nx)+2).toFixed(1)}" y2="${(parseFloat(ny)+2).toFixed(1)}" stroke="#00000066" stroke-width="4" stroke-linecap="round"/>
-        <line id="_tn-needle" x1="150" y1="155" x2="${nx}" y2="${ny}" stroke="#3a3a3a" stroke-width="3.5" stroke-linecap="round"/>
-        <circle id="_tn-ndot" cx="${nx}" cy="${ny}" r="5.5" fill="#3a3a3a"/>
+        ${tick(25,130,139,1.5,'#555')}
+        ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,137,1,'#383838')).join('')}
+        <text x="4" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♭</text>
+        <text x="273" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♯</text>
+        <line id="_tn-cline" x1="150" y1="25" x2="150" y2="62" stroke="#60dcff55" stroke-width="1.5" stroke-linecap="round"/>
+        <line id="_tn-needle" x1="150" y1="155" x2="${lx0}" y2="${ly0}" stroke="#3a3a3a" stroke-width="3" stroke-linecap="round"/>
+        <polygon id="_tn-ndot" points="${arrow0}" fill="#3a3a3a"/>
         <circle cx="150" cy="155" r="9" fill="#252525" stroke="#3a3a3a" stroke-width="2"/>
         <circle cx="150" cy="155" r="4" fill="#555"/>
       </svg>
@@ -5046,6 +5070,10 @@ function renderAfinador(){
         <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')||'Violão Afinado!'}</div>
         <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')||'Todas as cordas no ponto ✓'}</div>
       </div>
+
+      <!-- Decorative wizard -->
+      <img src="afinador-wizard.png" alt="" aria-hidden="true"
+        style="width:180px;max-width:55%;opacity:.75;margin-top:.5rem;pointer-events:none;user-select:none">
     </div>`;
 }
 

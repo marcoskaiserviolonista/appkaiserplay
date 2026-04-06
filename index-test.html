@@ -4885,28 +4885,16 @@ function _tunerUpdateDOM(){
     rn.style.background=_tuner.noSignal?'#2a2a2a':col;
     rn.style.boxShadow=_tuner.noSignal?'none':`0 0 8px ${col},0 0 16px ${col}66`;
   }
-  // ── Barra de confirmação (enche em 1s; threshold 7¢ + grace 250ms para cordas graves) ──
+  // ── Barra de confirmação (enche em 1s; esvazia ao sair da zona) ──
   const barInTune=!_tuner.noSignal&&Math.abs(c)<7;
   const barEl=document.getElementById('_tn-tune-bar');
   if(barEl){
     const nowBar=performance.now();
-    if(_tuner.noSignal){
+    if(!barInTune){
       _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
-      barEl.style.width='0%';barEl.style.transition='width .1s,background .3s';
-    } else if(!barInTune){
-      if(_tuner.inTuneBarStart>0){
-        // Brief gap — aguarda 250ms antes de resetar (estabilidade em cordas graves)
-        if(!_tuner.inTuneBarGapStart)_tuner.inTuneBarGapStart=nowBar;
-        if(nowBar-_tuner.inTuneBarGapStart>250){
-          _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
-          barEl.style.width='0%';barEl.style.transition='width .1s,background .3s';
-        }
-        // else: dentro do grace — barra pausa no lugar atual
-      } else {
-        _tuner.inTuneBarGapStart=0;
-      }
+      barEl.style.width='0%';barEl.style.transition='width .35s,background .2s';
+      barEl.style.background='linear-gradient(90deg,#1a4a1a,#7cdd7c)';
     } else {
-      _tuner.inTuneBarGapStart=0;
       if(!_tuner.inTuneBarStart)_tuner.inTuneBarStart=nowBar;
       const pct=Math.min(100,(nowBar-_tuner.inTuneBarStart)/1000*100);
       barEl.style.width=pct+'%';

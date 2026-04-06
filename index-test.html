@@ -4481,10 +4481,11 @@ function render(){
 }
 
 // ── Metrônomo: Engine ─────────────────────────────────────────
-const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:0.1,lookahead:25};
+// scheduleAhead: 5s — garante beats no buffer mesmo com setTimeout throttled pela tela bloqueada
+// lookahead: 500ms — raro o suficiente para não gastar CPU, mas suficiente para reabastecer
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:5.0,lookahead:500,pendingSrc:[]};
 
 function _metroBuildNoise(ctx){
-  // Buffer de ruído branco pré-gerado (50ms) — reutilizado em cada clique
   const len=Math.ceil(ctx.sampleRate*0.05);
   const buf=ctx.createBuffer(1,len,ctx.sampleRate);
   const d=buf.getChannelData(0);
@@ -4494,7 +4495,6 @@ function _metroBuildNoise(ctx){
 
 function _metroClick(time){
   const ctx=_metro.ctx;
-  // Ruído branco → filtro bandpass → simula madeira (sem pitch musical)
   const noise=ctx.createBufferSource();
   noise.buffer=_metro.noiseBuf;
   const bp=ctx.createBiquadFilter();
@@ -4504,9 +4504,11 @@ function _metroClick(time){
   gain.gain.setValueAtTime(5.0,time);
   gain.gain.exponentialRampToValueAtTime(0.001,time+0.018);
   noise.start(time);noise.stop(time+0.02);
-  // visual flash
+  _metro.pendingSrc.push(noise);
+  noise.onended=()=>{const i=_metro.pendingSrc.indexOf(noise);if(i>=0)_metro.pendingSrc.splice(i,1);};
+  // visual flash (best-effort; tela pode estar bloqueada)
   const delay=Math.max(0,(time-ctx.currentTime)*1000);
-  setTimeout(()=>{
+  if(delay<2000)setTimeout(()=>{
     const dot=document.getElementById('_metro-dot');
     if(dot){dot.classList.add('active');setTimeout(()=>dot.classList.remove('active'),80);}
   },delay);
@@ -4522,8 +4524,7 @@ function _metroSchedule(){
 }
 
 function _metroStartSilentLoop(ctx){
-  // Ruído ínfimo em loop: mantém AudioContext ativo no iOS com tela bloqueada
-  // Buffer silencioso puro é ignorado pelo iOS — amplitude 0.0001 é inaudível mas eficaz
+  // Ruído ínfimo em loop: mantém AudioContext ativo com tela bloqueada (iOS e Android)
   const len=ctx.sampleRate;
   const buf=ctx.createBuffer(1,len,ctx.sampleRate);
   const d=buf.getChannelData(0);
@@ -4557,9 +4558,20 @@ function _metroStart(){
 function _metroStop(){
   _metro.running=false;
   if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+  // Cancela todos os beats pré-agendados imediatamente
+  const now=_metro.ctx?_metro.ctx.currentTime:0;
+  _metro.pendingSrc.forEach(s=>{try{s.stop(now);}catch(e){}});
+  _metro.pendingSrc=[];
   if(_metro.ctx&&_metro.ctx.state==='running')_metro.ctx.suspend();
   _metroUpdateUI();
 }
+
+// Retoma AudioContext se o browser suspendeu ao bloquear a tela
+document.addEventListener('visibilitychange',()=>{
+  if(!document.hidden&&_metro.running&&_metro.ctx&&_metro.ctx.state==='suspended'){
+    _metro.ctx.resume();
+  }
+});
 
 function _metroToggle(){
   playClickSfx('click');
@@ -4622,14 +4634,6 @@ function renderMetronomo(){
 
 // ── Afinador Engine ───────────────────────────────────────────
 const _TUNER_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
-const _TUNER_PRESETS={
-  standard:{pt:'Padrão',  en:'Standard', es:'Estándar', notes:['E2','A2','D3','G3','B3','E4']},
-  dropD:   {pt:'Drop D',  en:'Drop D',   es:'Drop D',   notes:['D2','A2','D3','G3','B3','E4']},
-  openG:   {pt:'Open G',  en:'Open G',   es:'Open G',   notes:['D2','G2','D3','G3','B3','D4']},
-  openD:   {pt:'Open D',  en:'Open D',   es:'Open D',   notes:['D2','A2','D3','F#3','A3','D4']},
-  dadgad:  {pt:'DADGAD',  en:'DADGAD',   es:'DADGAD',   notes:['D2','A2','D3','G3','A3','D4']},
-  halfDown:{pt:'Meio Tom↓',en:'Half Step↓',es:'Semitono↓',notes:['Eb2','Ab2','Db3','Gb3','Bb3','Eb4']},
-};
 const _tuner={
   ctx:null,source:null,analyser:null,stream:null,
   running:false,animFrame:null,
@@ -4639,11 +4643,10 @@ const _tuner={
   lastDetect:0,detectInterval:60,
   lastSignalTime:0,holdMs:800,
   selectedString:-1,
-  preset:'standard',
   tuning:['E2','A2','D3','G3','B3','E4'],
-  customTuning:['E2','A2','D3','G3','B3','E4'],
   editMode:false,
   noSignal:true,
+  lastEnergy:0,
   a4:440,
 };
 
@@ -4664,7 +4667,8 @@ function _tunerYIN(buf,sr){
   // Noise gate
   let energy=0;
   for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
-  if(energy/N<0.00005)return null;
+  _tuner.lastEnergy=energy/N;
+  if(_tuner.lastEnergy<0.00005)return null;
   // Frequency range for guitar: 55Hz (A1) to 1400Hz
   const tauMin=Math.max(2,Math.floor(sr/1400));
   const tauMax=Math.min(half-1,Math.floor(sr/55));
@@ -4754,6 +4758,13 @@ function _tunerUpdateDOM(){
     else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';}
     else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';}
   }
+  // Input level meter
+  const lvl=document.getElementById('_tn-level-bar');
+  if(lvl&&_tuner.running){
+    const pct=Math.min(100,Math.sqrt((_tuner.lastEnergy||0))*800);
+    lvl.style.width=pct+'%';
+    lvl.style.background=pct>60?'#7cdd7c':pct>20?'#F5A623':'#555';
+  }
 }
 
 function _tunerAnimLoop(){
@@ -4778,16 +4789,27 @@ function _tunerAnimLoop(){
 async function _tunerStart(){
   if(_tuner.running)return;
   try{
-    const stream=await navigator.mediaDevices.getUserMedia({
-      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false
-    });
+    // Try with processing disabled for best pitch detection; fallback to plain audio
+    let stream;
+    try{
+      stream=await navigator.mediaDevices.getUserMedia({
+        audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false
+      });
+    }catch(e){
+      stream=await navigator.mediaDevices.getUserMedia({audio:true,video:false});
+    }
     _tuner.stream=stream;
     _tuner.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    // Some browsers start AudioContext suspended even on user gesture
+    if(_tuner.ctx.state==='suspended')await _tuner.ctx.resume();
     _tuner.source=_tuner.ctx.createMediaStreamSource(stream);
     _tuner.analyser=_tuner.ctx.createAnalyser();
     _tuner.analyser.fftSize=_tuner.bufSize;
     _tuner.analyser.smoothingTimeConstant=0;
     _tuner.source.connect(_tuner.analyser);
+    // Connect through muted gain to destination — required on some browsers for the graph to process
+    const _mute=_tuner.ctx.createGain();_mute.gain.value=0;
+    _tuner.analyser.connect(_mute);_mute.connect(_tuner.ctx.destination);
     _tuner.buffer=new Float32Array(_tuner.bufSize);
     _tuner.running=true;
     _tuner.lastDetect=0;_tuner.lastSignalTime=0;
@@ -4826,26 +4848,16 @@ function _tunerSelectString(idx){
   _tuner.noSignal=true;
   _tunerRefreshControls();
 }
-function _tunerSelectPreset(name){
-  playClickSfx('soft');
-  _tuner.preset=name;
-  _tuner.tuning=[..._TUNER_PRESETS[name].notes];
-  _tuner.customTuning=[..._TUNER_PRESETS[name].notes];
-  _tuner.selectedString=-1;_tuner.editMode=false;
-  _tunerRefreshControls();
-}
 function _tunerToggleEdit(){
   playClickSfx('soft');
   _tuner.editMode=!_tuner.editMode;
   _tunerRefreshControls();
 }
 function _tunerCustomNote(strIdx,delta){
-  const midi=_tunerNote2Midi(_tuner.customTuning[strIdx]);
+  const midi=_tunerNote2Midi(_tuner.tuning[strIdx]);
   const nm=Math.max(28,Math.min(76,midi+delta));
   const {note,octave}=_tunerMidi2Label(nm);
-  _tuner.customTuning[strIdx]=note+octave;
-  _tuner.tuning=[..._tuner.customTuning];
-  _tuner.preset='custom';
+  _tuner.tuning[strIdx]=note+octave;
   _tunerRefreshControls();
 }
 function _tunerBuildStrBtns(){
@@ -4871,20 +4883,9 @@ function _tunerBuildStrBtns(){
     </button>`;
   }).join('');
 }
-function _tunerBuildPresetBtns(){
-  return Object.entries(_TUNER_PRESETS).map(([k,v])=>{
-    const isAct=_tuner.preset===k;
-    const label=v[state.lang]||v.pt;
-    return `<button class="tuner-preset-btn"
-      style="background:${isAct?'linear-gradient(180deg,#2a3f6a,#1e2e50)':'linear-gradient(180deg,#1e1e1e,#151515)'};border-color:${isAct?'#4a70bb':'#333'};color:${isAct?'#90b8ff':'#666'}"
-      onclick="_tunerSelectPreset('${k}')">${label}</button>`;
-  }).join('');
-}
 function _tunerRefreshControls(){
   const sr=document.getElementById('_tn-str-row');
   if(sr)sr.innerHTML=_tunerBuildStrBtns();
-  const pr=document.getElementById('_tn-preset-row');
-  if(pr)pr.innerHTML=_tunerBuildPresetBtns();
   const eb=document.getElementById('_tn-edit-btn');
   if(eb){
     eb.textContent=_tuner.editMode?t('tuner_done'):t('tuner_custom');
@@ -4963,12 +4964,14 @@ function renderAfinador(){
       <!-- String selector -->
       <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
 
-      <!-- Preset + edit controls -->
-      <div class="tuner-controls-row">
-        <div class="tuner-preset-scroll">
-          <div id="_tn-preset-row" class="tuner-preset-row">${_tunerBuildPresetBtns()}</div>
-        </div>
+      <!-- Edit controls -->
+      <div style="display:flex;justify-content:flex-end;width:100%;max-width:320px">
         <button id="_tn-edit-btn" class="tuner-edit-btn" onclick="_tunerToggleEdit()">${t('tuner_custom')}</button>
+      </div>
+
+      <!-- Input level meter -->
+      <div style="width:100%;max-width:320px;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden">
+        <div id="_tn-level-bar" style="height:100%;width:0%;border-radius:3px;transition:width .05s"></div>
       </div>
 
       <!-- Microphone button -->

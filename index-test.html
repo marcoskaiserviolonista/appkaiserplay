@@ -601,9 +601,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-octave{font-size:1.5rem;font-family:var(--font-body);color:#555;font-weight:700;align-self:flex-start;margin-top:.5rem}
 .tuner-cents-display{font-size:1.05rem;font-weight:700;font-family:var(--font-body);min-height:1.6rem;letter-spacing:.04em;text-align:center}
 .tuner-str-row{display:flex;gap:.45rem;justify-content:center;width:100%;max-width:320px}
-.tuner-str-btn{flex:1;max-width:46px;height:54px;border-radius:12px;border:2px solid #333;box-shadow:2px 2px 0 #111;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;gap:1px;padding:0;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc;transition:transform .08s}
-.tuner-str-btn:active{transform:scale(.92)}
-.tuner-str-btn .str-num{font-size:.5rem;font-weight:700;opacity:.55;line-height:1}
+.tuner-str-btn{flex:1;max-width:46px;height:48px;border-radius:12px;border:2px solid #333;box-shadow:2px 2px 0 #111;display:flex;flex-direction:column;align-items:center;justify-content:space-between;cursor:default;gap:0;padding:3px 0;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc}
 .tuner-str-btn .str-note-name{font-size:1.1rem;font-weight:900;font-family:var(--font-title);line-height:1}
 .tuner-controls-row{display:flex;align-items:center;gap:.5rem;width:100%;max-width:320px}
 .tuner-preset-scroll{flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -4974,33 +4972,27 @@ function _tunerCustomNote(strIdx,delta){
 function _tunerBuildStrBtns(){
   return _tuner.tuning.map((noteStr,i)=>{
     const {note}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
-    const strNum=6-i;
-    if(_tuner.altTuning){
-      return `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
-        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer;touch-action:manipulation" onclick="_tunerCustomNote(${i},1)">▲</button>
-        <div style="width:44px;height:26px;border-radius:8px;border:2px solid #555;background:#1e1e1e;display:flex;flex-direction:column;align-items:center;justify-content:center">
-          <span style="font-size:.45rem;color:#555;line-height:1">${strNum}</span>
-          <span style="font-size:.95rem;font-weight:900;font-family:var(--font-title);color:#ddd;line-height:1">${note}</span>
-        </div>
-        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer;touch-action:manipulation" onclick="_tunerCustomNote(${i},-1)">▼</button>
-      </div>`;
-    }
     const isTuned=_tuner.stringTuned[i];
     const isAct=_tuner.selectedString===i&&!isTuned;
-    let bg,border,color,extra='';
+    let bg,border,color;
     if(isTuned){
       bg='linear-gradient(180deg,#3dbd3d,#2a8a2a)';border='#7cdd7c';color='#fff';
-      extra=`<span style="font-size:.7rem;line-height:1;margin-top:1px">✓</span>`;
     } else if(isAct){
       bg='linear-gradient(180deg,#ffbe4f,#F5A623)';border='#F5A623';color='#111';
-      extra='';
     } else {
       bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
     }
-    return `<div id="_tn-str-${i}" class="tuner-str-btn"
-      style="background:${bg};color:${color};border-color:${border};${isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':''}cursor:default">
-      <span class="str-num">${strNum}</span>
-      <span class="str-note-name">${note}</span>
+    const glow=isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':'';
+    if(_tuner.altTuning){
+      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}">
+        <button style="width:100%;flex:0 0 14px;border:none;background:transparent;color:#999;font-size:.6rem;cursor:pointer;touch-action:manipulation;line-height:1" onclick="_tunerCustomNote(${i},1)">▲</button>
+        <span class="str-note-name" style="text-shadow:0 1px 3px #000">${note}</span>
+        <button style="width:100%;flex:0 0 14px;border:none;background:transparent;color:#999;font-size:.6rem;cursor:pointer;touch-action:manipulation;line-height:1" onclick="_tunerCustomNote(${i},-1)">▼</button>
+      </div>`;
+    }
+    const extra=isTuned?`<span style="font-size:.65rem;line-height:1">✓</span>`:'';
+    return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}justify-content:center;gap:1px">
+      <span class="str-note-name" style="text-shadow:0 1px 3px #000">${note}</span>
       ${extra}
     </div>`;
   }).join('');
@@ -5011,12 +5003,15 @@ function _tunerRefreshControls(){
   const tp=document.getElementById('_tn-tuning-toggle');
   if(tp){
     const btns=tp.querySelectorAll('button');
-    btns[0].style.background=!_tuner.altTuning?'#F5A623':'#1a1a1a';
-    btns[0].style.color=!_tuner.altTuning?'#111':'#666';
-    btns[0].style.borderColor=!_tuner.altTuning?'#F5A623':'#333';
-    btns[1].style.background=_tuner.altTuning?'#60dcff':'#1a1a1a';
-    btns[1].style.color=_tuner.altTuning?'#111':'#666';
-    btns[1].style.borderColor=_tuner.altTuning?'#60dcff':'#333';
+    function _applyToggleStyle(btn,active){
+      btn.style.background=active?'#383838':'#0d0d0d';
+      btn.style.color=active?'#fff':'#444';
+      btn.style.textShadow=active?'0 1px 3px #000':'none';
+      btn.style.boxShadow=active?'0 2px 0 #000':'inset 0 2px 3px rgba(0,0,0,.7)';
+      btn.style.transform=active?'translateY(-1px)':'none';
+    }
+    _applyToggleStyle(btns[0],!_tuner.altTuning);
+    _applyToggleStyle(btns[1],_tuner.altTuning);
   }
 }
 
@@ -5090,9 +5085,9 @@ function renderAfinador(){
       <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
 
       <!-- Tuning mode toggle -->
-      <div id="_tn-tuning-toggle" style="display:flex;gap:.4rem;margin-top:.45rem;margin-bottom:.1rem">
-        <button onclick="_tunerSetAltTuning(false)" style="flex:1;padding:.35rem .5rem;border-radius:10px;border:2px solid ${!_tuner.altTuning?'#F5A623':'#333'};background:${!_tuner.altTuning?'#F5A623':'#1a1a1a'};color:${!_tuner.altTuning?'#111':'#666'};font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation">${t('tuner_std')}</button>
-        <button onclick="_tunerSetAltTuning(true)" style="flex:1;padding:.35rem .5rem;border-radius:10px;border:2px solid ${_tuner.altTuning?'#60dcff':'#333'};background:${_tuner.altTuning?'#60dcff':'#1a1a1a'};color:${_tuner.altTuning?'#111':'#666'};font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation">${t('tuner_alt')}</button>
+      <div id="_tn-tuning-toggle" style="display:flex;gap:3px;margin-top:.45rem;margin-bottom:.1rem;width:100%;max-width:320px;background:#111;border:2px solid #1e1e1e;border-radius:12px;padding:3px">
+        <button onclick="_tunerSetAltTuning(false)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${!_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_std')}</button>
+        <button onclick="_tunerSetAltTuning(true)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_alt')}</button>
       </div>
 
       <!-- Input level meter -->

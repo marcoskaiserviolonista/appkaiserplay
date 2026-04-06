@@ -4879,13 +4879,13 @@ function _tunerAnimLoop(){
       _tunerProcess(_tunerYIN(_tuner.buffer,_tuner.ctx.sampleRate));
     }
   }
-  // Spring physics — suave e preciso
+  // Filtro exponencial adaptativo de primeira ordem — zero oscilação, matematicamente impossível
+  // Longe do alvo: blend alto (resposta rápida) | Perto: blend baixo (estabilidade)
   const target=_tuner.noSignal?0:_tuner.targetCents;
-  const diff=target-_tuner.smoothCents;
-  const spring=_tuner.noSignal?0.04:0.10;
-  const damp=0.85;
-  _tuner.needleVel=_tuner.needleVel*damp+diff*spring;
-  _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
+  const gap=Math.abs(target-_tuner.smoothCents);
+  const blend=_tuner.noSignal?0.06:gap>20?0.30:gap>5?0.18:0.09;
+  _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents*(1-blend)+target*blend));
+  _tuner.needleVel=0;
 
   // Per-string in-tune tracking — verifica DEPOIS do smoothing (agulha realmente parada no centro)
   const _si=_tuner.selectedString;

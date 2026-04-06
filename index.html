@@ -585,7 +585,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .metro-beat{width:22px;height:22px;border-radius:50%;background:#2a2a2a;transition:background .05s,box-shadow .05s}
 .metro-beat.active{background:#F5A623;box-shadow:0 0 18px #F5A62399}
 @keyframes tunerComplete{0%{opacity:0;transform:scale(.85) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes tunerPerfect{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1.08)}35%{opacity:1;transform:scale(1)}75%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.95)}}
+@keyframes tunerPerfect{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}28%{opacity:1;transform:translate(-50%,-50%) scale(1)}72%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
 .metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:#2a2a2a;outline:none;cursor:pointer}
 .metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
 .metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
@@ -611,9 +611,9 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-mic-btn{width:100%;max-width:320px;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 /* ── Afinador v2 — Círculo + LEDs + Régua ── */
-@keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}}
-.tn-circle-outer{position:relative;width:190px;height:190px;margin:0 auto .1rem}
-.tn-pulse-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:2px solid currentColor;pointer-events:none;width:174px;height:174px}
+@keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.38)}}
+.tn-circle-outer{position:relative;width:190px;height:190px;margin:1.4rem auto .1rem}
+.tn-pulse-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid currentColor;pointer-events:none;width:174px;height:174px}
 .tn-pulse-ring-1{animation:tnPulse 1.8s ease-out infinite}
 .tn-pulse-ring-2{animation:tnPulse 1.8s ease-out .7s infinite}
 .tn-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:158px;height:158px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#1c1c1c,#0d0d0d);border:2px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;transition:border-color .25s,box-shadow .25s;z-index:2}
@@ -635,6 +635,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tn-rz-ar{left:67%;width:13%;background:linear-gradient(90deg,#8a4500,#4a2200)}
 .tn-rz-rr{left:80%;width:20%;background:linear-gradient(90deg,#802020,#4a0e0e)}
 .tn-ruler-needle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:18px;border-radius:2px;background:#2a2a2a;transition:left .12s cubic-bezier(.25,.8,.25,1),background .25s,box-shadow .25s;pointer-events:none}
+.tn-ruler-center-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:14px;border-radius:2px;background:#60dcff;box-shadow:0 0 5px #60dcff,0 0 12px #60dcff66;pointer-events:none;z-index:3}
 .tn-ruler-ticks{display:flex;justify-content:space-between;align-items:flex-start;margin-top:2px}
 .tn-rtick-maj{width:1.5px;height:10px;background:#252525;border-radius:1px;margin:0 auto}
 .tn-rtick-min{width:1px;height:6px;background:#1a1a1a;border-radius:1px}
@@ -914,7 +915,7 @@ const STRINGS = {
     streak_congrats_pre:'Parabéns, você está há',
     streak_congrats_pos:'dias ativos!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
-    tuner_title:'Afinador de Alta Precisão',
+    tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'o melhor afinador do mundo',
     tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',tuner_perfect:'✦ Afinação Perfeita ✦',
     tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
     tuner_std:'Afinação padrão',tuner_alt:'Afinação alternativa',tuner_half_down:'Meio Tom ↓',
@@ -1136,7 +1137,7 @@ const STRINGS = {
     streak_congrats_pre:'Congrats, you\'ve been active for',
     streak_congrats_pos:'days!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
-    tuner_title:'High Precision Tuner',
+    tuner_title:'High Precision Tuner',tuner_subtitle:'the world\'s best tuner',
     tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',tuner_perfect:'✦ Perfect Tune ✦',
     tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
     tuner_std:'Standard tuning',tuner_alt:'Alternative tuning',tuner_half_down:'Half Step ↓',
@@ -1358,7 +1359,7 @@ const STRINGS = {
     streak_congrats_pre:'¡Felicidades, llevas',
     streak_congrats_pos:'días activos!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
-    tuner_title:'Afinador de Alta Precisión',
+    tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'el mejor afinador del mundo',
     tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',tuner_perfect:'✦ Afinación Perfecta ✦',
     tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
     tuner_std:'Afinación estándar',tuner_alt:'Afinación alternativa',tuner_half_down:'Semitono ↓',
@@ -4838,7 +4839,7 @@ function _tunerUpdateDOM(){
   const perfect=!_tuner.noSignal&&Math.abs(c)<2;
   const inTune=!_tuner.noSignal&&Math.abs(c)<5;
   const close=!_tuner.noSignal&&Math.abs(c)<15;
-  const col=_tuner.noSignal?'#3a3a3a':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
+  const col=_tuner.noSignal?'#3a3a3a':perfect?'#60dcff':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
   // ── Círculo: borda + glow ──
   const circ=document.getElementById('_tn-circle');
   if(circ){
@@ -4867,7 +4868,7 @@ function _tunerUpdateDOM(){
     const active=onSide&&abs<=_LED_THRESH[i];
     if(!active){el.style.cssText=(i===5?'width:18px;height:18px':'');continue;}
     if(_LED_TYPE[i]==='grn'){
-      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#3fc060;border-color:#5ce07a;box-shadow:'+(perfect?'0 0 14px #3fc060cc,0 0 26px #3fc06088':'0 0 10px #3fc06099,0 0 18px #3fc06044');
+      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:'+col+';border-color:'+col+'cc;box-shadow:0 0 12px '+col+'aa,0 0 22px '+col+'55';
     }else if(_LED_TYPE[i]==='amb'){
       el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#c07020;border-color:#e09020;box-shadow:0 0 8px #c0702099,0 0 14px #c0702044';
     }else{
@@ -4950,9 +4951,7 @@ function _tunerAnimLoop(){
       }
     } else {
       _tuner.stringInTuneStart[_si]=0;
-      if(Math.abs(_tuner.smoothCents)>12&&_tuner.stringTuned[_si]){
-        _tuner.stringTuned[_si]=false;_tuner.allTunedShown=false;_tunerRefreshControls();
-      }
+      // Corda afinada permanece travada — só destravar via toque manual
     }
   } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
   _tunerUpdateDOM();
@@ -5008,6 +5007,11 @@ function _tunerStop(){
 }
 function _tunerSelectString(idx){
   playClickSfx('soft');
+  if(_tuner.stringTuned[idx]){
+    _tuner.stringTuned[idx]=false;
+    _tuner.allTunedShown=false;
+    _tuner.centsBuf=[];_tuner.targetCents=0;_tuner.stableCents=0;
+  }
   _tuner.selectedString=(_tuner.selectedString===idx)?-1:idx;
   _tunerRefreshControls();
 }
@@ -5081,17 +5085,15 @@ function renderAfinador(){
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');_tunerStop();state.phase='start';render()">${t('back_btn')}</button>
-      <div style="flex:1;min-width:0;overflow:hidden">
-        <span style="font-size:1rem;font-weight:900;color:#7cdd7c;letter-spacing:.01em;white-space:nowrap">${t('tuner')}</span>
-      </div>
     </div>
-    <div style="width:100%;max-width:520px;text-align:center;padding:.6rem 1rem .15rem">
+    <div style="width:100%;max-width:520px;text-align:center;padding:.4rem 1rem 0">
       <div style="font-size:1.65rem;font-weight:700;font-family:var(--font-title);background:linear-gradient(135deg,#ffffff 20%,#60dcff 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.01em;line-height:1.15">${t('tuner_title')}</div>
-      <div style="width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.4rem auto 0"></div>
+      <div style="font-size:.62rem;font-weight:700;color:#2a4a5a;letter-spacing:.12em;text-transform:uppercase;margin-top:.25rem">${t('tuner_subtitle')}</div>
+      <div style="width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.3rem auto 0"></div>
     </div>
     <div class="tuner-wrap">
 
-      <!-- Círculo com pulse rings -->
+      <!-- Círculo com pulse rings e overlay "Afinação Perfeita" -->
       <div class="tn-circle-outer">
         <div class="tn-pulse-ring tn-pulse-ring-1" id="_tn-ring1" style="color:#3a3a3a"></div>
         <div class="tn-pulse-ring tn-pulse-ring-2" id="_tn-ring2" style="color:#3a3a3a"></div>
@@ -5099,10 +5101,9 @@ function renderAfinador(){
           <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span>
           <span id="_tn-oct" class="tn-circle-oct"></span>
         </div>
+        <!-- Overlay "Afinação Perfeita" — aparece sobre o círculo -->
+        <div id="_tn-perfect-txt" style="position:absolute;top:50%;left:50%;width:100%;text-align:center;font-size:1.05rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.06em;text-shadow:0 0 14px #60dcff,0 0 28px #60dcff88;opacity:0;pointer-events:none;z-index:10">${t('tuner_perfect')}</div>
       </div>
-
-      <!-- Texto "Afinação Perfeita" -->
-      <div id="_tn-perfect-txt" style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.04em;text-shadow:0 0 12px #60dcff88;opacity:0;pointer-events:none;min-height:1.4rem;text-align:center">${t('tuner_perfect')}</div>
 
       <!-- Cents / status -->
       <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
@@ -5139,6 +5140,7 @@ function renderAfinador(){
             <div class="tn-rz tn-rz-rr"></div>
           </div>
           <div class="tn-ruler-needle" id="_tn-ruler-needle"></div>
+          <div class="tn-ruler-center-mark"></div>
         </div>
         <div class="tn-ruler-ticks">
           <div style="text-align:center"><div class="tn-rtick-maj"></div><div class="tn-rtick-lbl">−50</div></div>

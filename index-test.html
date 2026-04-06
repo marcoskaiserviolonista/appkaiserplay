@@ -591,6 +591,26 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .metro-adj-btn:active{transform:scale(.94);filter:brightness(.85)}
 .metro-play-btn{width:100%;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
 .metro-play-btn:active{filter:brightness(.88);transform:scale(.98)}
+/* ── Afinador ── */
+.tuner-wrap{width:100%;max-width:520px;display:flex;flex-direction:column;align-items:center;gap:.85rem;padding-bottom:2rem}
+.tuner-svg{width:100%;max-width:300px}
+.tuner-note-display{display:flex;align-items:baseline;justify-content:center;gap:.15rem;min-height:4.5rem}
+.tuner-note-name{font-size:5rem;font-family:var(--font-title);font-weight:700;line-height:1;transition:color .12s}
+.tuner-octave{font-size:1.5rem;font-family:var(--font-body);color:#555;font-weight:700;align-self:flex-start;margin-top:.5rem}
+.tuner-cents-display{font-size:1.05rem;font-weight:700;font-family:var(--font-body);min-height:1.6rem;letter-spacing:.04em;text-align:center}
+.tuner-str-row{display:flex;gap:.45rem;justify-content:center;width:100%;max-width:320px}
+.tuner-str-btn{flex:1;max-width:46px;height:54px;border-radius:12px;border:2px solid #333;box-shadow:2px 2px 0 #111;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;touch-action:manipulation;gap:1px;padding:0;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc;transition:transform .08s}
+.tuner-str-btn:active{transform:scale(.92)}
+.tuner-str-btn .str-num{font-size:.5rem;font-weight:700;opacity:.55;line-height:1}
+.tuner-str-btn .str-note-name{font-size:1.1rem;font-weight:900;font-family:var(--font-title);line-height:1}
+.tuner-controls-row{display:flex;align-items:center;gap:.5rem;width:100%;max-width:320px}
+.tuner-preset-scroll{flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tuner-preset-row{display:flex;gap:.35rem;padding:.1rem .1rem .2rem}
+.tuner-preset-btn{padding:.3rem .6rem;border-radius:8px;border:2px solid #333;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;white-space:nowrap;background:linear-gradient(180deg,#1e1e1e,#151515);color:#666;transition:filter .08s}
+.tuner-preset-btn:active{filter:brightness(.85)}
+.tuner-edit-btn{flex-shrink:0;padding:.3rem .55rem;border-radius:8px;border:2px solid #444;font-size:.72rem;font-weight:700;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;background:linear-gradient(180deg,#222,#1a1a1a);color:#888}
+.tuner-mic-btn{width:100%;max-width:320px;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
+.tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 </style>
 
 </head>
@@ -865,6 +885,10 @@ const STRINGS = {
     streak_days:'dias seguidos',
     streak_congrats_pre:'Parabéns, você está há',
     streak_congrats_pos:'dias ativos!',
+    tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
+    tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',
+    tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
+    tuner_std:'Padrão',tuner_half_down:'Meio Tom ↓',
   },
   en: {
     // Navigation
@@ -1082,6 +1106,10 @@ const STRINGS = {
     streak_days:'days in a row',
     streak_congrats_pre:'Congrats, you\'ve been active for',
     streak_congrats_pos:'days!',
+    tuner_start:'Enable Microphone',tuner_stop:'Disable',
+    tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',
+    tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
+    tuner_std:'Standard',tuner_half_down:'Half Step ↓',
   },
   es: {
     // Navegación
@@ -1299,6 +1327,10 @@ const STRINGS = {
     streak_days:'días seguidos',
     streak_congrats_pre:'¡Felicidades, llevas',
     streak_congrats_pos:'días activos!',
+    tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
+    tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',
+    tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
+    tuner_std:'Estándar',tuner_half_down:'Semitono ↓',
   }
 };
 function t(key){
@@ -4318,6 +4350,7 @@ let _obTimer=null;
 function render(){
   clearTimeout(_obTimer);_obTimer=setTimeout(updateObOverlay,60);
   if(_metro.running&&state.phase!=='metronomo')_metroStop();
+  if(typeof _tuner!=='undefined'&&_tuner.running&&state.phase!=='afinador')_tunerStop();
   const _cur=state.phase;
   if(_cur!==_lastPhase){
     const _prev=_lastPhase;_lastPhase=_cur;
@@ -4410,10 +4443,7 @@ function render(){
   }
   if(state.phase==='comprar'){c.innerHTML=renderComprar();return;}
   if(state.phase==='metronomo'){c.innerHTML=renderMetronomo();return;}
-  if(state.phase==='afinador'){c.innerHTML=`
-    <div class="back-row"><button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
-    <div style="flex:1;min-width:0"><span style="font-size:1rem;font-weight:900;color:#7cdd7c">${t('tuner')}</span></div></div>
-    <div style="width:100%;max-width:520px;text-align:center;padding:3rem 1rem;color:#555;font-size:.95rem;font-weight:700">Em breve</div>`;return;}
+  if(state.phase==='afinador'){c.innerHTML=renderAfinador();return;}
   if(state.phase==='sala_de_aula'){c.innerHTML=renderSalaDeAula();return;}
   if(state.phase==='treino_focado_question'||state.phase==='treino_focado_answered'){c.innerHTML=renderTreinoFocado();return;}
   c.innerHTML=renderGame();
@@ -4587,6 +4617,349 @@ function renderMetronomo(){
       <button id="_metro-play-btn" class="metro-play-btn"
         style="background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;box-shadow:5px 5px 0 #111;color:#111;text-shadow:none"
         onclick="_metroToggle()">${t('metro_start')}</button>
+    </div>`;
+}
+
+// ── Afinador Engine ───────────────────────────────────────────
+const _TUNER_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const _TUNER_PRESETS={
+  standard:{pt:'Padrão',  en:'Standard', es:'Estándar', notes:['E2','A2','D3','G3','B3','E4']},
+  dropD:   {pt:'Drop D',  en:'Drop D',   es:'Drop D',   notes:['D2','A2','D3','G3','B3','E4']},
+  openG:   {pt:'Open G',  en:'Open G',   es:'Open G',   notes:['D2','G2','D3','G3','B3','D4']},
+  openD:   {pt:'Open D',  en:'Open D',   es:'Open D',   notes:['D2','A2','D3','F#3','A3','D4']},
+  dadgad:  {pt:'DADGAD',  en:'DADGAD',   es:'DADGAD',   notes:['D2','A2','D3','G3','A3','D4']},
+  halfDown:{pt:'Meio Tom↓',en:'Half Step↓',es:'Semitono↓',notes:['Eb2','Ab2','Db3','Gb3','Bb3','Eb4']},
+};
+const _tuner={
+  ctx:null,source:null,analyser:null,stream:null,
+  running:false,animFrame:null,
+  buffer:null,bufSize:4096,
+  freq:null,noteName:null,octave:null,
+  smoothCents:0,needleVel:0,targetCents:0,
+  lastDetect:0,detectInterval:80,
+  selectedString:-1,
+  preset:'standard',
+  tuning:['E2','A2','D3','G3','B3','E4'],
+  customTuning:['E2','A2','D3','G3','B3','E4'],
+  editMode:false,
+  noSignal:true,
+  a4:440,
+};
+
+function _tunerNote2Midi(name){
+  const m=name.match(/^([A-G][b#]?)(\d)$/);
+  if(!m)return 48;
+  const map={C:0,'C#':1,Db:1,D:2,'D#':3,Eb:3,E:4,F:5,'F#':6,Gb:6,G:7,'G#':8,Ab:8,A:9,'A#':10,Bb:10,B:11};
+  return (parseInt(m[2])+1)*12+(map[m[1]]||0);
+}
+function _tunerMidi2Label(midi){
+  return {note:_TUNER_NOTES[((midi%12)+12)%12],octave:Math.floor(midi/12)-1};
+}
+function _tunerFreq2Midi(freq){return 69+12*Math.log2(freq/_tuner.a4);}
+
+// YIN pitch detection — algorithm used by professional tuners
+function _tunerYIN(buf,sr){
+  const N=buf.length,half=N>>1;
+  // Noise gate: skip if signal is too quiet
+  let energy=0;
+  for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
+  if(energy/N<0.0003)return null;
+  // Frequency range for guitar: 55Hz (A1) to 1400Hz
+  const tauMin=Math.max(2,Math.floor(sr/1400));
+  const tauMax=Math.min(half-1,Math.floor(sr/55));
+  // Step 1: Difference function d(tau)
+  const d=new Float32Array(tauMax+1);
+  for(let tau=1;tau<=tauMax;tau++){
+    let s=0;
+    for(let j=0;j<half;j++){const x=buf[j]-buf[j+tau];s+=x*x;}
+    d[tau]=s;
+  }
+  // Step 2: Cumulative mean normalized difference d'(tau)
+  const dn=new Float32Array(tauMax+1);
+  dn[0]=1;
+  let rs=0;
+  for(let tau=1;tau<=tauMax;tau++){rs+=d[tau];dn[tau]=rs>0?d[tau]*tau/rs:1;}
+  // Step 3: First local minimum below threshold
+  const thr=0.12;
+  let found=-1;
+  for(let tau=tauMin;tau<tauMax-1;tau++){
+    if(dn[tau]<thr&&dn[tau]<=dn[tau+1]){found=tau;break;}
+  }
+  if(found<0)return null;
+  // Step 4: Parabolic interpolation (sub-sample precision)
+  let bt=found;
+  if(found>tauMin&&found<tauMax){
+    const a=dn[found-1],b=dn[found],c=dn[found+1];
+    const den=2*(2*b-a-c);
+    if(Math.abs(den)>1e-10)bt=found+(c-a)/den;
+  }
+  return {freq:sr/bt,confidence:1-dn[found]};
+}
+
+function _tunerProcess(result){
+  if(!result||result.confidence<0.72){_tuner.noSignal=true;_tuner.targetCents=0;return;}
+  _tuner.noSignal=false;
+  const rawMidi=_tunerFreq2Midi(result.freq);
+  let targetMidi;
+  if(_tuner.selectedString>=0){
+    targetMidi=_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]);
+  }else{
+    targetMidi=Math.round(rawMidi);
+  }
+  _tuner.targetCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
+  const {note,octave}=_tunerMidi2Label(targetMidi);
+  _tuner.noteName=note;_tuner.octave=octave;
+}
+
+function _tunerUpdateDOM(){
+  const c=_tuner.smoothCents;
+  const a=(90-c*1.8)*Math.PI/180;
+  const nl=108,cx=150,cy=155;
+  const tx=(cx+nl*Math.cos(a)).toFixed(1),ty=(cy-nl*Math.sin(a)).toFixed(1);
+  const needle=document.getElementById('_tn-needle');
+  const ndot=document.getElementById('_tn-ndot');
+  if(needle){needle.setAttribute('x2',tx);needle.setAttribute('y2',ty);}
+  if(ndot){ndot.setAttribute('cx',tx);ndot.setAttribute('cy',ty);}
+  const inTune=!_tuner.noSignal&&Math.abs(c)<5;
+  const close=!_tuner.noSignal&&Math.abs(c)<15;
+  const col=_tuner.noSignal?'#3a3a3a':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
+  if(needle)needle.setAttribute('stroke',col);
+  if(ndot)ndot.setAttribute('fill',col);
+  const gz=document.getElementById('_tn-gzone');
+  if(gz){gz.style.filter=inTune?'drop-shadow(0 0 8px #5ad45a)':'none';gz.style.opacity=inTune?'1':'0.75';}
+  const notEl=document.getElementById('_tn-note');
+  if(notEl){
+    notEl.textContent=_tuner.noSignal?'─':(_tuner.noteName||'─');
+    notEl.style.color=_tuner.noSignal?'#333':inTune?'#7cdd7c':'#fff';
+  }
+  const octEl=document.getElementById('_tn-oct');
+  if(octEl)octEl.textContent=_tuner.noSignal?'':(_tuner.octave??'');
+  const cEl=document.getElementById('_tn-cents');
+  if(cEl){
+    if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#444';}
+    else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';}
+    else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';}
+  }
+}
+
+function _tunerAnimLoop(){
+  if(!_tuner.running)return;
+  const now=performance.now();
+  if(now-_tuner.lastDetect>_tuner.detectInterval){
+    _tuner.lastDetect=now;
+    if(_tuner.analyser&&_tuner.buffer){
+      _tuner.analyser.getFloatTimeDomainData(_tuner.buffer);
+      _tunerProcess(_tunerYIN(_tuner.buffer,_tuner.ctx.sampleRate));
+    }
+  }
+  // Spring physics for needle
+  const diff=(_tuner.noSignal?0:_tuner.targetCents)-_tuner.smoothCents;
+  _tuner.needleVel=_tuner.needleVel*0.72+diff*0.22;
+  _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
+  _tunerUpdateDOM();
+  _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);
+}
+
+async function _tunerStart(){
+  if(_tuner.running)return;
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({
+      audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false
+    });
+    _tuner.stream=stream;
+    _tuner.ctx=new(window.AudioContext||window.webkitAudioContext)();
+    _tuner.source=_tuner.ctx.createMediaStreamSource(stream);
+    _tuner.analyser=_tuner.ctx.createAnalyser();
+    _tuner.analyser.fftSize=_tuner.bufSize;
+    _tuner.analyser.smoothingTimeConstant=0;
+    _tuner.source.connect(_tuner.analyser);
+    _tuner.buffer=new Float32Array(_tuner.bufSize);
+    _tuner.running=true;
+    _tuner.lastDetect=0;
+    _tuner.smoothCents=0;_tuner.needleVel=0;
+    _tuner.noSignal=true;
+    _tunerUpdateMicBtn();
+    _tunerAnimLoop();
+  }catch(e){
+    const btn=document.getElementById('_tn-mic-btn');
+    if(btn){btn.textContent=t('tuner_mic_error');btn.style.background='linear-gradient(180deg,#4a1515,#2a0a0a)';btn.style.color='#ff8888';}
+  }
+}
+function _tunerStop(){
+  _tuner.running=false;
+  if(_tuner.animFrame){cancelAnimationFrame(_tuner.animFrame);_tuner.animFrame=null;}
+  if(_tuner.stream){_tuner.stream.getTracks().forEach(tr=>tr.stop());_tuner.stream=null;}
+  if(_tuner.ctx){_tuner.ctx.close().catch(()=>{});_tuner.ctx=null;}
+  _tuner.source=null;_tuner.analyser=null;_tuner.noSignal=true;
+  _tunerUpdateMicBtn();
+}
+function _tunerToggle(){playClickSfx('click');if(_tuner.running)_tunerStop();else _tunerStart();}
+function _tunerUpdateMicBtn(){
+  const btn=document.getElementById('_tn-mic-btn');
+  if(!btn)return;
+  if(_tuner.running){
+    btn.textContent=t('tuner_stop');
+    btn.style.background='linear-gradient(180deg,#333,#222)';btn.style.color='#ccc';
+  }else{
+    btn.textContent=t('tuner_start');
+    btn.style.background='linear-gradient(180deg,#5ad45a,#38aa38)';btn.style.color='#111';
+  }
+}
+function _tunerSelectString(idx){
+  playClickSfx('soft');
+  _tuner.selectedString=(_tuner.selectedString===idx)?-1:idx;
+  _tuner.noSignal=true;
+  _tunerRefreshControls();
+}
+function _tunerSelectPreset(name){
+  playClickSfx('soft');
+  _tuner.preset=name;
+  _tuner.tuning=[..._TUNER_PRESETS[name].notes];
+  _tuner.customTuning=[..._TUNER_PRESETS[name].notes];
+  _tuner.selectedString=-1;_tuner.editMode=false;
+  _tunerRefreshControls();
+}
+function _tunerToggleEdit(){
+  playClickSfx('soft');
+  _tuner.editMode=!_tuner.editMode;
+  _tunerRefreshControls();
+}
+function _tunerCustomNote(strIdx,delta){
+  const midi=_tunerNote2Midi(_tuner.customTuning[strIdx]);
+  const nm=Math.max(28,Math.min(76,midi+delta));
+  const {note,octave}=_tunerMidi2Label(nm);
+  _tuner.customTuning[strIdx]=note+octave;
+  _tuner.tuning=[..._tuner.customTuning];
+  _tuner.preset='custom';
+  _tunerRefreshControls();
+}
+function _tunerBuildStrBtns(){
+  return _tuner.tuning.map((noteStr,i)=>{
+    const {note}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
+    const strNum=6-i;
+    if(_tuner.editMode){
+      return `<div style="display:flex;flex-direction:column;align-items:center;gap:1px">
+        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer" onclick="_tunerCustomNote(${i},1)">▲</button>
+        <div style="width:44px;height:26px;border-radius:8px;border:2px solid #555;background:#1e1e1e;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <span style="font-size:.45rem;color:#555;line-height:1">${strNum}</span>
+          <span style="font-size:.95rem;font-weight:900;font-family:var(--font-title);color:#ddd;line-height:1">${note}</span>
+        </div>
+        <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer" onclick="_tunerCustomNote(${i},-1)">▼</button>
+      </div>`;
+    }
+    const isAct=_tuner.selectedString===i;
+    return `<button id="_tn-str-${i}" class="tuner-str-btn"
+      style="background:${isAct?'linear-gradient(180deg,#ffbe4f,#F5A623)':'linear-gradient(180deg,#2a2a2a,#1a1a1a)'};color:${isAct?'#111':'#ccc'};border-color:${isAct?'#F5A623':'#333'}"
+      onclick="_tunerSelectString(${i})">
+      <span class="str-num">${strNum}</span>
+      <span class="str-note-name">${note}</span>
+    </button>`;
+  }).join('');
+}
+function _tunerBuildPresetBtns(){
+  return Object.entries(_TUNER_PRESETS).map(([k,v])=>{
+    const isAct=_tuner.preset===k;
+    const label=v[state.lang]||v.pt;
+    return `<button class="tuner-preset-btn"
+      style="background:${isAct?'linear-gradient(180deg,#2a3f6a,#1e2e50)':'linear-gradient(180deg,#1e1e1e,#151515)'};border-color:${isAct?'#4a70bb':'#333'};color:${isAct?'#90b8ff':'#666'}"
+      onclick="_tunerSelectPreset('${k}')">${label}</button>`;
+  }).join('');
+}
+function _tunerRefreshControls(){
+  const sr=document.getElementById('_tn-str-row');
+  if(sr)sr.innerHTML=_tunerBuildStrBtns();
+  const pr=document.getElementById('_tn-preset-row');
+  if(pr)pr.innerHTML=_tunerBuildPresetBtns();
+  const eb=document.getElementById('_tn-edit-btn');
+  if(eb){
+    eb.textContent=_tuner.editMode?t('tuner_done'):t('tuner_custom');
+    eb.style.borderColor=_tuner.editMode?'#7cdd7c':'#444';
+    eb.style.color=_tuner.editMode?'#7cdd7c':'#888';
+  }
+}
+
+function renderAfinador(){
+  // SVG arc helpers
+  function apt(c,r){const a=(90-c*1.8)*Math.PI/180;return [(150+r*Math.cos(a)).toFixed(2),(155-r*Math.sin(a)).toFixed(2)];}
+  function aseg(c1,c2,ri,ro){
+    const [x1o,y1o]=apt(c1,ro),[x2o,y2o]=apt(c2,ro),[x2i,y2i]=apt(c2,ri),[x1i,y1i]=apt(c1,ri);
+    return `M${x1o},${y1o} A${ro},${ro},0,0,1,${x2o},${y2o} L${x2i},${y2i} A${ri},${ri},0,0,0,${x1i},${y1i} Z`;
+  }
+  function tick(c,r1,r2,sw,col){
+    const [x1,y1]=apt(c,r1),[x2,y2]=apt(c,r2);
+    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
+  }
+  // Initial needle pointing up (0 cents)
+  const [nx,ny]=apt(0,108);
+  return `
+    <div class="back-row">
+      <button class="back-btn" onclick="playClickSfx('back');_tunerStop();state.phase='start';render()">${t('back_btn')}</button>
+      <div style="flex:1;min-width:0;overflow:hidden">
+        <span style="font-size:1rem;font-weight:900;color:#7cdd7c;letter-spacing:.01em;white-space:nowrap">${t('tuner')}</span>
+      </div>
+    </div>
+    <div class="tuner-wrap">
+      <svg viewBox="0 0 300 160" class="tuner-svg" aria-hidden="true">
+        <!-- Shadow/glow backdrop -->
+        <defs>
+          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Background track -->
+        <path d="${aseg(-50,50,88,130)}" fill="#181818"/>
+        <path d="${aseg(-50,50,88,130)}" fill="none" stroke="#2a2a2a" stroke-width="1"/>
+        <!-- Red zones -->
+        <path d="${aseg(-50,-15,88,130)}" fill="#c03030" opacity=".8"/>
+        <path d="${aseg(15,50,88,130)}"   fill="#c03030" opacity=".8"/>
+        <!-- Orange/yellow zones -->
+        <path d="${aseg(-15,-5,88,130)}"  fill="#c07020" opacity=".85"/>
+        <path d="${aseg(5,15,88,130)}"    fill="#c07020" opacity=".85"/>
+        <!-- Green zone -->
+        <path id="_tn-gzone" d="${aseg(-5,5,88,130)}" fill="#38a838" opacity=".9"/>
+        <!-- Inner arc ring (depth) -->
+        <path d="${aseg(-50,50,88,93)}" fill="#111" opacity=".6"/>
+        <!-- Tick marks major -->
+        ${tick(-50,130,142,2,'#666')}${tick(-25,130,138,1.5,'#555')}
+        ${tick(0,130,145,2.5,'#999')}
+        ${tick(25,130,138,1.5,'#555')}${tick(50,130,142,2,'#666')}
+        <!-- Tick marks minor -->
+        ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,138,1,'#383838')).join('')}
+        <!-- Labels -->
+        <text x="8" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♭</text>
+        <text x="283" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♯</text>
+        <!-- Center guide line (dashed) -->
+        <line x1="150" y1="85" x2="150" y2="155" stroke="#ffffff18" stroke-width="1" stroke-dasharray="4,4"/>
+        <!-- Needle shadow -->
+        <line x1="152" y1="157" x2="${(parseFloat(nx)+2).toFixed(1)}" y2="${(parseFloat(ny)+2).toFixed(1)}" stroke="#00000066" stroke-width="4" stroke-linecap="round"/>
+        <!-- Needle -->
+        <line id="_tn-needle" x1="150" y1="155" x2="${nx}" y2="${ny}" stroke="#3a3a3a" stroke-width="3.5" stroke-linecap="round"/>
+        <!-- Needle tip -->
+        <circle id="_tn-ndot" cx="${nx}" cy="${ny}" r="5.5" fill="#3a3a3a"/>
+        <!-- Pivot -->
+        <circle cx="150" cy="155" r="9" fill="#252525" stroke="#3a3a3a" stroke-width="2"/>
+        <circle cx="150" cy="155" r="4" fill="#555"/>
+      </svg>
+
+      <!-- Note name display -->
+      <div class="tuner-note-display">
+        <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span><sup id="_tn-oct" class="tuner-octave"></sup>
+      </div>
+      <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
+
+      <!-- String selector -->
+      <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
+
+      <!-- Preset + edit controls -->
+      <div class="tuner-controls-row">
+        <div class="tuner-preset-scroll">
+          <div id="_tn-preset-row" class="tuner-preset-row">${_tunerBuildPresetBtns()}</div>
+        </div>
+        <button id="_tn-edit-btn" class="tuner-edit-btn" onclick="_tunerToggleEdit()">${t('tuner_custom')}</button>
+      </div>
+
+      <!-- Microphone button -->
+      <button id="_tn-mic-btn" class="tuner-mic-btn"
+        style="background:linear-gradient(180deg,#5ad45a,#38aa38);color:#111;text-shadow:none"
+        onclick="_tunerToggle()">${t('tuner_start')}</button>
     </div>`;
 }
 

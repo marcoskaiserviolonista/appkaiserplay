@@ -4633,10 +4633,11 @@ const _TUNER_PRESETS={
 const _tuner={
   ctx:null,source:null,analyser:null,stream:null,
   running:false,animFrame:null,
-  buffer:null,bufSize:4096,
+  buffer:null,bufSize:8192,
   freq:null,noteName:null,octave:null,
   smoothCents:0,needleVel:0,targetCents:0,
-  lastDetect:0,detectInterval:80,
+  lastDetect:0,detectInterval:60,
+  lastSignalTime:0,holdMs:800,
   selectedString:-1,
   preset:'standard',
   tuning:['E2','A2','D3','G3','B3','E4'],
@@ -4657,13 +4658,13 @@ function _tunerMidi2Label(midi){
 }
 function _tunerFreq2Midi(freq){return 69+12*Math.log2(freq/_tuner.a4);}
 
-// YIN pitch detection — algorithm used by professional tuners
+// YIN pitch detection
 function _tunerYIN(buf,sr){
   const N=buf.length,half=N>>1;
-  // Noise gate: skip if signal is too quiet
+  // Noise gate
   let energy=0;
   for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
-  if(energy/N<0.0003)return null;
+  if(energy/N<0.00005)return null;
   // Frequency range for guitar: 55Hz (A1) to 1400Hz
   const tauMin=Math.max(2,Math.floor(sr/1400));
   const tauMax=Math.min(half-1,Math.floor(sr/55));
@@ -4678,26 +4679,39 @@ function _tunerYIN(buf,sr){
   const dn=new Float32Array(tauMax+1);
   dn[0]=1;
   let rs=0;
-  for(let tau=1;tau<=tauMax;tau++){rs+=d[tau];dn[tau]=rs>0?d[tau]*tau/rs:1;}
-  // Step 3: First local minimum below threshold
-  const thr=0.12;
+  for(let tau=1;tau<=tauMax;tau++){
+    rs+=d[tau];
+    dn[tau]=rs>0?(d[tau]*tau/rs):1;
+  }
+  // Step 3: First local minimum below threshold (0.15 is practical for guitar)
+  const thr=0.15;
   let found=-1;
   for(let tau=tauMin;tau<tauMax-1;tau++){
-    if(dn[tau]<thr&&dn[tau]<=dn[tau+1]){found=tau;break;}
+    if(dn[tau]<thr&&dn[tau]<=dn[tau-1]&&dn[tau]<=dn[tau+1]){found=tau;break;}
   }
   if(found<0)return null;
   // Step 4: Parabolic interpolation (sub-sample precision)
   let bt=found;
-  if(found>tauMin&&found<tauMax){
+  if(found>tauMin&&found<tauMax-1){
     const a=dn[found-1],b=dn[found],c=dn[found+1];
     const den=2*(2*b-a-c);
     if(Math.abs(den)>1e-10)bt=found+(c-a)/den;
   }
-  return {freq:sr/bt,confidence:1-dn[found]};
+  const confidence=1-dn[found];
+  if(confidence<0.5)return null;
+  return {freq:sr/bt,confidence};
 }
 
 function _tunerProcess(result){
-  if(!result||result.confidence<0.72){_tuner.noSignal=true;_tuner.targetCents=0;return;}
+  const now=performance.now();
+  if(!result){
+    // Hold last reading for holdMs before going silent
+    if(now-_tuner.lastSignalTime>_tuner.holdMs){
+      _tuner.noSignal=true;_tuner.targetCents=0;
+    }
+    return;
+  }
+  _tuner.lastSignalTime=now;
   _tuner.noSignal=false;
   const rawMidi=_tunerFreq2Midi(result.freq);
   let targetMidi;
@@ -4752,9 +4766,10 @@ function _tunerAnimLoop(){
       _tunerProcess(_tunerYIN(_tuner.buffer,_tuner.ctx.sampleRate));
     }
   }
-  // Spring physics for needle
-  const diff=(_tuner.noSignal?0:_tuner.targetCents)-_tuner.smoothCents;
-  _tuner.needleVel=_tuner.needleVel*0.72+diff*0.22;
+  // Spring physics for needle (only pull to center when noSignal is confirmed, not during hold)
+  const target=_tuner.noSignal?0:_tuner.targetCents;
+  const diff=target-_tuner.smoothCents;
+  _tuner.needleVel=_tuner.needleVel*0.75+diff*0.18;
   _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
   _tunerUpdateDOM();
   _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);
@@ -4775,7 +4790,7 @@ async function _tunerStart(){
     _tuner.source.connect(_tuner.analyser);
     _tuner.buffer=new Float32Array(_tuner.bufSize);
     _tuner.running=true;
-    _tuner.lastDetect=0;
+    _tuner.lastDetect=0;_tuner.lastSignalTime=0;
     _tuner.smoothCents=0;_tuner.needleVel=0;
     _tuner.noSignal=true;
     _tunerUpdateMicBtn();

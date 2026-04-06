@@ -4755,9 +4755,11 @@ function _tunerProcess(result){
   if(_tuner.centsBuf.length>_tuner.centsBufSize)_tuner.centsBuf.shift();
   const sorted=[..._tuner.centsBuf].sort((a,b)=>a-b);
   const median=sorted[Math.floor(sorted.length/2)];
-  // Delta gate: flutuações pequenas (<3¢) são suavizadas; mudanças reais entram imediatamente
+  // Blend sempre suavizado — sem saltos diretos
+  // Mudanças maiores entram mais rápido mas nunca de forma abrupta
   const dlt=Math.abs(median-_tuner.targetCents);
-  _tuner.targetCents=dlt<3?_tuner.targetCents*0.7+median*0.3:median;
+  const blend=dlt>20?0.55:dlt>8?0.35:0.18;
+  _tuner.targetCents=_tuner.targetCents*(1-blend)+median*blend;
   _tuner.stableCents=_tuner.targetCents;
   const {note,octave}=_tunerMidi2Label(targetMidi);
   _tuner.noteName=note;_tuner.octave=octave;
@@ -4880,8 +4882,8 @@ function _tunerAnimLoop(){
   // Spring physics — suave e preciso
   const target=_tuner.noSignal?0:_tuner.targetCents;
   const diff=target-_tuner.smoothCents;
-  const spring=_tuner.noSignal?0.05:0.14;
-  const damp=0.82;
+  const spring=_tuner.noSignal?0.04:0.10;
+  const damp=0.85;
   _tuner.needleVel=_tuner.needleVel*damp+diff*spring;
   _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
 
@@ -4992,7 +4994,7 @@ function _tunerBuildStrBtns(){
       extra=`<span style="font-size:.7rem;line-height:1;margin-top:1px">✓</span>`;
     } else if(isAct){
       bg='linear-gradient(180deg,#ffbe4f,#F5A623)';border='#F5A623';color='#111';
-      extra=`<span style="font-size:.45rem;color:#11111166;line-height:1;margin-top:1px">●</span>`;
+      extra='';
     } else {
       bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
     }

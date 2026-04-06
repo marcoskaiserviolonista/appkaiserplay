@@ -632,6 +632,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tn-rz-al{left:20%;width:13%;background:linear-gradient(90deg,#4a2200,#8a4500)}
 .tn-rz-gl{left:33%;width:5%;background:#1a5a1a}
 .tn-rz-gc{left:38%;width:24%;background:#226a22}
+.tn-rz-perfect{left:46%;width:8%;background:#60dcff;box-shadow:0 0 6px #60dcff,0 0 14px #60dcff88;z-index:2}
 .tn-rz-gr{left:62%;width:5%;background:#1a5a1a}
 .tn-rz-ar{left:67%;width:13%;background:linear-gradient(90deg,#8a4500,#4a2200)}
 .tn-rz-rr{left:80%;width:20%;background:linear-gradient(90deg,#802020,#4a0e0e)}
@@ -4858,24 +4859,27 @@ function _tunerUpdateDOM(){
     r2.style.animationDuration=dur;
     r2.style.animationDelay=inTune?'0.7s':close?'0.5s':'0.35s';
   }
-  // ── LEDs ──
-  const _LED_THRESH=[50,42,30,18,8,3,8,18,30,42,50];
+  // ── LEDs (bilateral: acendem dos dois lados convergindo ao centro) ──
+  const _LED_THRESH=[50,40,28,18,10,4,10,18,28,40,50];
   const _LED_TYPE=['red','red','amb','amb','amb','grn','amb','amb','amb','red','red'];
-  const _LED_SIDE=[-1,-1,-1,-1,-1,0,1,1,1,1,1];
+  const _FADE_DELAY=['0ms','50ms','150ms','250ms','350ms','500ms','350ms','250ms','150ms','50ms','0ms'];
+  const absC=Math.abs(c);
   for(let i=0;i<=10;i++){
     const el=document.getElementById('_tn-led-'+i);
     if(!el)continue;
-    if(_tuner.noSignal){el.style.cssText=(i===5?'width:18px;height:18px':'');continue;}
-    const abs=Math.abs(c),side=_LED_SIDE[i];
-    const onSide=side===0||(side<0&&c<0)||(side>0&&c>0);
-    const active=onSide&&abs<=_LED_THRESH[i];
-    if(!active){el.style.cssText=(i===5?'width:18px;height:18px':'');continue;}
+    const active=!_tuner.noSignal&&absC<_LED_THRESH[i];
+    if(!active){
+      el.style.transitionDelay=_FADE_DELAY[i];
+      el.style.background='';el.style.borderColor='';el.style.boxShadow='';
+      continue;
+    }
+    el.style.transitionDelay='0ms';
     if(_LED_TYPE[i]==='grn'){
-      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:'+col+';border-color:'+col+'cc;box-shadow:0 0 12px '+col+'aa,0 0 22px '+col+'55';
+      el.style.background=col;el.style.borderColor=col+'cc';el.style.boxShadow='0 0 12px '+col+'aa,0 0 22px '+col+'55';
     }else if(_LED_TYPE[i]==='amb'){
-      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#c07020;border-color:#e09020;box-shadow:0 0 8px #c0702099,0 0 14px #c0702044';
+      el.style.background='#c07020';el.style.borderColor='#e09020';el.style.boxShadow='0 0 8px #c0702099,0 0 14px #c0702044';
     }else{
-      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#c03030;border-color:#e03030;box-shadow:0 0 8px #c0303099,0 0 14px #c0303044';
+      el.style.background='#c03030';el.style.borderColor='#e03030';el.style.boxShadow='0 0 8px #c0303099,0 0 14px #c0303044';
     }
   }
   // ── Régua: agulha ──
@@ -4892,7 +4896,8 @@ function _tunerUpdateDOM(){
     const nowBar=performance.now();
     if(!barInTune){
       _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
-      barEl.style.width='0%';barEl.style.transition='width .35s,background .2s';
+      barEl.style.transition='width .5s ease-out,background .3s';
+      barEl.style.width='0%';
       barEl.style.background='linear-gradient(90deg,#1a4a1a,#7cdd7c)';
     } else {
       if(!_tuner.inTuneBarStart)_tuner.inTuneBarStart=nowBar;
@@ -5158,6 +5163,7 @@ function renderAfinador(){
             <div class="tn-rz tn-rz-al"></div>
             <div class="tn-rz tn-rz-gl"></div>
             <div class="tn-rz tn-rz-gc"></div>
+            <div class="tn-rz tn-rz-perfect"></div>
             <div class="tn-rz tn-rz-gr"></div>
             <div class="tn-rz tn-rz-ar"></div>
             <div class="tn-rz tn-rz-rr"></div>

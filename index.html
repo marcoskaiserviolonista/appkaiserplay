@@ -4637,11 +4637,11 @@ const _TUNER_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const _tuner={
   ctx:null,source:null,analyser:null,stream:null,
   running:false,animFrame:null,
-  buffer:null,bufSize:8192,
+  buffer:null,bufSize:4096,
   freq:null,noteName:null,octave:null,
   smoothCents:0,needleVel:0,targetCents:0,
-  lastDetect:0,detectInterval:60,
-  lastSignalTime:0,holdMs:800,
+  lastDetect:0,detectInterval:30,
+  lastSignalTime:0,holdMs:250,
   selectedString:-1,
   tuning:['E2','A2','D3','G3','B3','E4'],
   editMode:false,
@@ -4668,7 +4668,7 @@ function _tunerYIN(buf,sr){
   let energy=0;
   for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
   _tuner.lastEnergy=energy/N;
-  if(_tuner.lastEnergy<0.00005)return null;
+  if(_tuner.lastEnergy<0.000008)return null;
   // Frequency range for guitar: 55Hz (A1) to 1400Hz
   const tauMin=Math.max(2,Math.floor(sr/1400));
   const tauMax=Math.min(half-1,Math.floor(sr/55));
@@ -4702,7 +4702,7 @@ function _tunerYIN(buf,sr){
     if(Math.abs(den)>1e-10)bt=found+(c-a)/den;
   }
   const confidence=1-dn[found];
-  if(confidence<0.5)return null;
+  if(confidence<0.4)return null;
   return {freq:sr/bt,confidence};
 }
 
@@ -4777,10 +4777,13 @@ function _tunerAnimLoop(){
       _tunerProcess(_tunerYIN(_tuner.buffer,_tuner.ctx.sampleRate));
     }
   }
-  // Spring physics for needle (only pull to center when noSignal is confirmed, not during hold)
+  // Spring physics — segue targetCents rapidamente, volta ao centro suavemente quando sem sinal
   const target=_tuner.noSignal?0:_tuner.targetCents;
   const diff=target-_tuner.smoothCents;
-  _tuner.needleVel=_tuner.needleVel*0.75+diff*0.18;
+  // Mola mais forte ao seguir sinal ativo, mais fraca ao voltar ao centro (parece mais natural)
+  const spring=_tuner.noSignal?0.08:0.28;
+  const damp=0.68;
+  _tuner.needleVel=_tuner.needleVel*damp+diff*spring;
   _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents+_tuner.needleVel));
   _tunerUpdateDOM();
   _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);

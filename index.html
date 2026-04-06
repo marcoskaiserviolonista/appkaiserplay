@@ -584,6 +584,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .metro-bpm-label{font-size:.7rem;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.15em;margin-top:-.5rem}
 .metro-beat{width:22px;height:22px;border-radius:50%;background:#2a2a2a;transition:background .05s,box-shadow .05s}
 .metro-beat.active{background:#F5A623;box-shadow:0 0 18px #F5A62399}
+@keyframes tunerComplete{0%{opacity:0;transform:scale(.85) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
 .metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:#2a2a2a;outline:none;cursor:pointer}
 .metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
 .metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
@@ -886,7 +887,7 @@ const STRINGS = {
     streak_congrats_pre:'Parabéns, você está há',
     streak_congrats_pos:'dias ativos!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
-    tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',
+    tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'🎸 Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',
     tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
     tuner_std:'Padrão',tuner_half_down:'Meio Tom ↓',
   },
@@ -1107,7 +1108,7 @@ const STRINGS = {
     streak_congrats_pre:'Congrats, you\'ve been active for',
     streak_congrats_pos:'days!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
-    tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',
+    tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'🎸 Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',
     tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
     tuner_std:'Standard',tuner_half_down:'Half Step ↓',
   },
@@ -1328,7 +1329,7 @@ const STRINGS = {
     streak_congrats_pre:'¡Felicidades, llevas',
     streak_congrats_pos:'días activos!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
-    tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',
+    tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'🎸 ¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',
     tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
     tuner_std:'Estándar',tuner_half_down:'Semitono ↓',
   }
@@ -4641,13 +4642,19 @@ const _tuner={
   freq:null,noteName:null,octave:null,
   smoothCents:0,needleVel:0,targetCents:0,
   lastDetect:0,detectInterval:30,
-  lastSignalTime:0,holdMs:250,
+  lastSignalTime:0,holdMs:2000,
   selectedString:-1,
   tuning:['E2','A2','D3','G3','B3','E4'],
   editMode:false,
   noSignal:true,
   lastEnergy:0,
   a4:440,
+  // Per-string tracking
+  stringTuned:[false,false,false,false,false,false],
+  stringInTuneStart:[0,0,0,0,0,0],
+  inTuneMs:1200,
+  allTunedShown:false,
+  lastInTuneSfxStr:-1,
 };
 
 function _tunerNote2Midi(name){
@@ -4709,24 +4716,94 @@ function _tunerYIN(buf,sr){
 function _tunerProcess(result){
   const now=performance.now();
   if(!result){
-    // Hold last reading for holdMs before going silent
+    // String still vibrating but YIN can't lock — hold the last reading
+    if(_tuner.lastEnergy>0.000008){_tuner.lastSignalTime=now;return;}
+    // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
       _tuner.noSignal=true;_tuner.targetCents=0;
+      _tuner.stringInTuneStart=_tuner.stringInTuneStart.map(()=>0);
     }
     return;
   }
   _tuner.lastSignalTime=now;
   _tuner.noSignal=false;
   const rawMidi=_tunerFreq2Midi(result.freq);
-  let targetMidi;
-  if(_tuner.selectedString>=0){
-    targetMidi=_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]);
-  }else{
-    targetMidi=Math.round(rawMidi);
+
+  // Auto-detect closest string (within 2 semitones)
+  let closest=-1,minDist=2.0;
+  _tuner.tuning.forEach((n,i)=>{
+    const d=Math.abs(rawMidi-_tunerNote2Midi(n));
+    if(d<minDist){minDist=d;closest=i;}
+  });
+  if(closest>=0&&_tuner.selectedString!==closest){
+    _tuner.selectedString=closest;
+    _tunerRefreshControls();
   }
+
+  const targetMidi=_tuner.selectedString>=0?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
   _tuner.targetCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
   const {note,octave}=_tunerMidi2Label(targetMidi);
   _tuner.noteName=note;_tuner.octave=octave;
+
+  // Track per-string in-tune state
+  const idx=_tuner.selectedString;
+  if(idx>=0){
+    if(Math.abs(_tuner.targetCents)<5){
+      if(!_tuner.stringInTuneStart[idx])_tuner.stringInTuneStart[idx]=now;
+      if(!_tuner.stringTuned[idx]&&now-_tuner.stringInTuneStart[idx]>_tuner.inTuneMs){
+        _tuner.stringTuned[idx]=true;
+        if(_tuner.lastInTuneSfxStr!==idx){_tuner.lastInTuneSfxStr=idx;_tunerPlayInTuneSfx();}
+        _tunerRefreshControls();
+        _tunerCheckAllTuned();
+      }
+    } else {
+      _tuner.stringInTuneStart[idx]=0;
+      if(Math.abs(_tuner.targetCents)>15&&_tuner.stringTuned[idx]){
+        _tuner.stringTuned[idx]=false;
+        _tuner.allTunedShown=false;
+        _tunerRefreshControls();
+      }
+    }
+  }
+}
+
+function _tunerPlayInTuneSfx(){
+  try{
+    const ctx=getAudioCtx();const t=ctx.currentTime;
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    o.type='sine';
+    o.frequency.setValueAtTime(1047,t);
+    o.frequency.exponentialRampToValueAtTime(1319,t+0.04);
+    g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
+    o.start(t);o.stop(t+0.55);
+    // Second note slightly later
+    const o2=ctx.createOscillator(),g2=ctx.createGain();
+    o2.connect(g2);g2.connect(ctx.destination);
+    o2.type='sine';o2.frequency.value=1760;
+    g2.gain.setValueAtTime(0,t);g2.gain.setValueAtTime(0.18,t+0.06);
+    g2.gain.exponentialRampToValueAtTime(0.001,t+0.5);
+    o2.start(t+0.06);o2.stop(t+0.5);
+  }catch(e){}
+}
+function _tunerCheckAllTuned(){
+  if(_tuner.allTunedShown)return;
+  if(_tuner.stringTuned.every(v=>v)){
+    _tuner.allTunedShown=true;
+    const el=document.getElementById('_tn-complete');
+    if(el){el.style.display='flex';el.style.animation='tunerComplete .5s ease';}
+    // Fanfare
+    try{
+      const ctx=getAudioCtx();const t=ctx.currentTime;
+      [[523,.05],[659,.15],[784,.25],[1047,.35]].forEach(([f,d])=>{
+        const o=ctx.createOscillator(),g=ctx.createGain();
+        o.connect(g);g.connect(ctx.destination);
+        o.type='sine';o.frequency.value=f;
+        g.gain.setValueAtTime(0.22,t+d);g.gain.exponentialRampToValueAtTime(0.001,t+d+0.4);
+        o.start(t+d);o.stop(t+d+0.4);
+      });
+    }catch(e){}
+  }
 }
 
 function _tunerUpdateDOM(){
@@ -4818,11 +4895,11 @@ async function _tunerStart(){
     _tuner.lastDetect=0;_tuner.lastSignalTime=0;
     _tuner.smoothCents=0;_tuner.needleVel=0;
     _tuner.noSignal=true;
-    _tunerUpdateMicBtn();
     _tunerAnimLoop();
   }catch(e){
-    const btn=document.getElementById('_tn-mic-btn');
-    if(btn){btn.textContent=t('tuner_mic_error');btn.style.background='linear-gradient(180deg,#4a1515,#2a0a0a)';btn.style.color='#ff8888';}
+    // Mic permission denied — show message in cents display
+    const cEl=document.getElementById('_tn-cents');
+    if(cEl){cEl.textContent=t('tuner_mic_error');cEl.style.color='#ff8888';}
   }
 }
 function _tunerStop(){
@@ -4831,24 +4908,14 @@ function _tunerStop(){
   if(_tuner.stream){_tuner.stream.getTracks().forEach(tr=>tr.stop());_tuner.stream=null;}
   if(_tuner.ctx){_tuner.ctx.close().catch(()=>{});_tuner.ctx=null;}
   _tuner.source=null;_tuner.analyser=null;_tuner.noSignal=true;
-  _tunerUpdateMicBtn();
-}
-function _tunerToggle(){playClickSfx('click');if(_tuner.running)_tunerStop();else _tunerStart();}
-function _tunerUpdateMicBtn(){
-  const btn=document.getElementById('_tn-mic-btn');
-  if(!btn)return;
-  if(_tuner.running){
-    btn.textContent=t('tuner_stop');
-    btn.style.background='linear-gradient(180deg,#333,#222)';btn.style.color='#ccc';
-  }else{
-    btn.textContent=t('tuner_start');
-    btn.style.background='linear-gradient(180deg,#5ad45a,#38aa38)';btn.style.color='#111';
-  }
+  _tuner.selectedString=-1;
+  _tuner.stringTuned=[false,false,false,false,false,false];
+  _tuner.stringInTuneStart=[0,0,0,0,0,0];
+  _tuner.allTunedShown=false;_tuner.lastInTuneSfxStr=-1;
 }
 function _tunerSelectString(idx){
   playClickSfx('soft');
   _tuner.selectedString=(_tuner.selectedString===idx)?-1:idx;
-  _tuner.noSignal=true;
   _tunerRefreshControls();
 }
 function _tunerToggleEdit(){
@@ -4877,12 +4944,24 @@ function _tunerBuildStrBtns(){
         <button style="width:44px;height:18px;border-radius:6px;border:1px solid #444;background:#252525;color:#aaa;font-size:.75rem;cursor:pointer" onclick="_tunerCustomNote(${i},-1)">▼</button>
       </div>`;
     }
-    const isAct=_tuner.selectedString===i;
+    const isTuned=_tuner.stringTuned[i];
+    const isAct=_tuner.selectedString===i&&!isTuned;
+    let bg,border,color,extra='';
+    if(isTuned){
+      bg='linear-gradient(180deg,#3dbd3d,#2a8a2a)';border='#7cdd7c';color='#fff';
+      extra=`<span style="font-size:.7rem;line-height:1;margin-top:1px">✓</span>`;
+    } else if(isAct){
+      bg='linear-gradient(180deg,#ffbe4f,#F5A623)';border='#F5A623';color='#111';
+      extra=`<span style="font-size:.45rem;color:#11111166;line-height:1;margin-top:1px">●</span>`;
+    } else {
+      bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
+    }
     return `<button id="_tn-str-${i}" class="tuner-str-btn"
-      style="background:${isAct?'linear-gradient(180deg,#ffbe4f,#F5A623)':'linear-gradient(180deg,#2a2a2a,#1a1a1a)'};color:${isAct?'#111':'#ccc'};border-color:${isAct?'#F5A623':'#333'}"
+      style="background:${bg};color:${color};border-color:${border};${isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':''}"
       onclick="_tunerSelectString(${i})">
       <span class="str-num">${strNum}</span>
       <span class="str-note-name">${note}</span>
+      ${extra}
     </button>`;
   }).join('');
 }
@@ -4898,6 +4977,9 @@ function _tunerRefreshControls(){
 }
 
 function renderAfinador(){
+  // Auto-start mic when page is rendered
+  if(!_tuner.running)setTimeout(_tunerStart,80);
+
   // SVG arc helpers
   function apt(c,r){const a=(90-c*1.8)*Math.PI/180;return [(150+r*Math.cos(a)).toFixed(2),(155-r*Math.sin(a)).toFixed(2)];}
   function aseg(c1,c2,ri,ro){
@@ -4908,79 +4990,62 @@ function renderAfinador(){
     const [x1,y1]=apt(c,r1),[x2,y2]=apt(c,r2);
     return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
   }
-  // Initial needle pointing up (0 cents)
   const [nx,ny]=apt(0,108);
+  const allTuned=_tuner.stringTuned.every(v=>v);
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');_tunerStop();state.phase='start';render()">${t('back_btn')}</button>
       <div style="flex:1;min-width:0;overflow:hidden">
         <span style="font-size:1rem;font-weight:900;color:#7cdd7c;letter-spacing:.01em;white-space:nowrap">${t('tuner')}</span>
       </div>
+      <button id="_tn-edit-btn" class="tuner-edit-btn" onclick="_tunerToggleEdit()">${t('tuner_custom')}</button>
     </div>
     <div class="tuner-wrap">
       <svg viewBox="0 0 300 160" class="tuner-svg" aria-hidden="true">
-        <!-- Shadow/glow backdrop -->
         <defs>
           <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         </defs>
-        <!-- Background track -->
         <path d="${aseg(-50,50,88,130)}" fill="#181818"/>
         <path d="${aseg(-50,50,88,130)}" fill="none" stroke="#2a2a2a" stroke-width="1"/>
-        <!-- Red zones -->
         <path d="${aseg(-50,-15,88,130)}" fill="#c03030" opacity=".8"/>
         <path d="${aseg(15,50,88,130)}"   fill="#c03030" opacity=".8"/>
-        <!-- Orange/yellow zones -->
         <path d="${aseg(-15,-5,88,130)}"  fill="#c07020" opacity=".85"/>
         <path d="${aseg(5,15,88,130)}"    fill="#c07020" opacity=".85"/>
-        <!-- Green zone -->
         <path id="_tn-gzone" d="${aseg(-5,5,88,130)}" fill="#38a838" opacity=".9"/>
-        <!-- Inner arc ring (depth) -->
         <path d="${aseg(-50,50,88,93)}" fill="#111" opacity=".6"/>
-        <!-- Tick marks major -->
         ${tick(-50,130,142,2,'#666')}${tick(-25,130,138,1.5,'#555')}
         ${tick(0,130,145,2.5,'#999')}
         ${tick(25,130,138,1.5,'#555')}${tick(50,130,142,2,'#666')}
-        <!-- Tick marks minor -->
         ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,138,1,'#383838')).join('')}
-        <!-- Labels -->
         <text x="8" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♭</text>
         <text x="283" y="158" fill="#555" font-size="14" font-weight="700" font-family="serif">♯</text>
-        <!-- Center guide line (dashed) -->
         <line x1="150" y1="85" x2="150" y2="155" stroke="#ffffff18" stroke-width="1" stroke-dasharray="4,4"/>
-        <!-- Needle shadow -->
         <line x1="152" y1="157" x2="${(parseFloat(nx)+2).toFixed(1)}" y2="${(parseFloat(ny)+2).toFixed(1)}" stroke="#00000066" stroke-width="4" stroke-linecap="round"/>
-        <!-- Needle -->
         <line id="_tn-needle" x1="150" y1="155" x2="${nx}" y2="${ny}" stroke="#3a3a3a" stroke-width="3.5" stroke-linecap="round"/>
-        <!-- Needle tip -->
         <circle id="_tn-ndot" cx="${nx}" cy="${ny}" r="5.5" fill="#3a3a3a"/>
-        <!-- Pivot -->
         <circle cx="150" cy="155" r="9" fill="#252525" stroke="#3a3a3a" stroke-width="2"/>
         <circle cx="150" cy="155" r="4" fill="#555"/>
       </svg>
 
-      <!-- Note name display -->
       <div class="tuner-note-display">
         <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span><sup id="_tn-oct" class="tuner-octave"></sup>
       </div>
       <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
 
-      <!-- String selector -->
+      <!-- String indicators -->
       <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
 
-      <!-- Edit controls -->
-      <div style="display:flex;justify-content:flex-end;width:100%;max-width:320px">
-        <button id="_tn-edit-btn" class="tuner-edit-btn" onclick="_tunerToggleEdit()">${t('tuner_custom')}</button>
-      </div>
-
       <!-- Input level meter -->
-      <div style="width:100%;max-width:320px;height:6px;background:#1a1a1a;border-radius:3px;overflow:hidden">
-        <div id="_tn-level-bar" style="height:100%;width:0%;border-radius:3px;transition:width .05s"></div>
+      <div style="width:100%;max-width:320px;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin-top:.1rem">
+        <div id="_tn-level-bar" style="height:100%;width:0%;border-radius:3px;transition:width .06s"></div>
       </div>
 
-      <!-- Microphone button -->
-      <button id="_tn-mic-btn" class="tuner-mic-btn"
-        style="background:linear-gradient(180deg,#5ad45a,#38aa38);color:#111;text-shadow:none"
-        onclick="_tunerToggle()">${t('tuner_start')}</button>
+      <!-- All-tuned completion banner -->
+      <div id="_tn-complete" style="display:${allTuned?'flex':'none'};flex-direction:column;align-items:center;gap:.5rem;width:100%;max-width:320px;background:linear-gradient(180deg,#1a3a1a,#112211);border:2px solid #7cdd7c44;border-radius:16px;padding:1rem;margin-top:.5rem;animation:tunerComplete .5s ease">
+        <div style="font-size:2rem">🎸</div>
+        <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')||'Violão Afinado!'}</div>
+        <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')||'Todas as cordas no ponto ✓'}</div>
+      </div>
     </div>`;
 }
 

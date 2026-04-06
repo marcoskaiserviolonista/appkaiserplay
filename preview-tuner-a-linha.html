@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Afinador — Layout A: Linha Digital</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Fredoka:wght@600;700&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0e0e0e;color:#f0f0f0;font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.app{width:100%;max-width:520px;padding:0 1rem 3rem;display:flex;flex-direction:column;align-items:center}
+
+/* Back row */
+.back-row{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem 0 .5rem}
+.back-btn{background:#1e1e1e;border:2px solid #2a2a2a;border-radius:10px;color:#aaa;font-size:.78rem;font-weight:700;font-family:'Poppins',sans-serif;padding:.3rem .75rem;cursor:pointer}
+
+/* Title */
+.tuner-title{width:100%;text-align:center;padding:.5rem 0 1.25rem}
+.tuner-title-main{font-size:1.65rem;font-weight:700;font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#ffffff 20%,#60dcff 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.01em;line-height:1.15}
+.tuner-title-bar{width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.4rem auto 0}
+
+/* ── Layout A: Linha Digital ── */
+.tuner-wrap{width:100%;display:flex;flex-direction:column;align-items:center;gap:1.1rem}
+
+/* Note card */
+.note-card{width:100%;max-width:320px;background:#141414;border:1px solid #1e1e1e;border-radius:20px;padding:1.4rem 1.5rem 1.2rem;display:flex;flex-direction:column;align-items:center;gap:.2rem;position:relative;overflow:hidden}
+.note-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent 10%,#60dcff 50%,transparent 90%)}
+.note-big{font-size:5.5rem;font-family:'Fredoka',sans-serif;font-weight:700;color:#ffffff;line-height:1;letter-spacing:-.03em}
+.note-big span.acc{font-size:2.5rem;color:#60dcff;vertical-align:super;font-weight:600}
+.note-octave{font-size:.8rem;font-weight:700;color:#444;letter-spacing:.15em;text-transform:uppercase;margin-top:-.2rem}
+.note-hz{font-size:.78rem;font-weight:600;color:#3a6a7a;font-family:'Poppins',sans-serif;letter-spacing:.04em;margin-top:.1rem}
+
+/* Cents badge */
+.cents-badge{display:flex;align-items:center;justify-content:center;gap:.4rem}
+.cents-val{font-size:1.5rem;font-weight:900;color:#60dcff;font-family:'Poppins',sans-serif;min-width:4ch;text-align:center;letter-spacing:-.02em}
+.cents-unit{font-size:.7rem;font-weight:700;color:#3a6a7a;text-transform:uppercase;letter-spacing:.12em}
+
+/* ── Ruler / line meter ── */
+.ruler-wrap{width:100%;max-width:360px;position:relative;height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+
+.ruler-track{width:100%;height:4px;background:#1a1a1a;border-radius:99px;position:relative;overflow:visible}
+
+/* Zones */
+.ruler-zone-red-l{position:absolute;top:0;left:0;width:33%;height:100%;background:linear-gradient(90deg,#401010,#802020);border-radius:99px 0 0 99px}
+.ruler-zone-amber-l{position:absolute;top:0;left:33%;width:17%;height:100%;background:linear-gradient(90deg,#502a00,#a05500)}
+.ruler-zone-green{position:absolute;top:0;left:45%;width:10%;height:100%;background:#1a5a1a}
+.ruler-zone-amber-r{position:absolute;top:0;left:55%;width:12%;height:100%;background:linear-gradient(90deg,#a05500,#502a00)}
+.ruler-zone-red-r{position:absolute;top:0;left:67%;width:33%;height:100%;background:linear-gradient(90deg,#802020,#401010);border-radius:0 99px 99px 0}
+
+/* Active glow zone */
+.ruler-glow{position:absolute;top:-1px;height:6px;border-radius:3px;pointer-events:none;transition:left .1s,width .1s}
+
+/* Tick marks */
+.ruler-ticks{position:absolute;top:12px;left:0;right:0;height:18px;display:flex;justify-content:space-between;padding:0 0}
+.tick-major{width:1.5px;height:14px;background:#3a3a3a;border-radius:1px;position:relative}
+.tick-major::after{content:attr(data-label);position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:.52rem;font-weight:700;color:#3a3a3a;white-space:nowrap;font-family:'Poppins',sans-serif}
+.tick-minor{width:1px;height:8px;background:#252525;border-radius:1px}
+
+/* Needle */
+.ruler-needle{position:absolute;top:-14px;left:50%;transform:translateX(-50%);width:3px;height:30px;background:#60dcff;border-radius:99px;box-shadow:0 0 8px #60dcff;transition:left .1s}
+.ruler-needle-dot{position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);width:9px;height:9px;background:#60dcff;border-radius:50%;box-shadow:0 0 12px #60dcff}
+
+/* ♭ ♯ labels */
+.ruler-flat{position:absolute;top:50%;left:4px;transform:translateY(-50%);font-size:1rem;color:#555;font-family:serif;font-weight:700}
+.ruler-sharp{position:absolute;top:50%;right:4px;transform:translateY(-50%);font-size:1rem;color:#555;font-family:serif;font-weight:700}
+
+/* In-tune indicator */
+.in-tune-label{font-size:.9rem;font-weight:800;color:#7cdd7c;font-family:'Fredoka',sans-serif;letter-spacing:.06em;text-shadow:0 0 10px #7cdd7c66;min-height:1.4rem;text-align:center}
+
+/* String row */
+.str-row{display:flex;gap:.4rem;justify-content:center;width:100%;max-width:320px}
+.str-btn{flex:1;max-width:46px;height:52px;border-radius:12px;border:1.5px solid #222;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#111;cursor:default}
+.str-btn.active{border-color:#60dcff44;background:linear-gradient(180deg,#0d1f27,#081518)}
+.str-btn.tuned{border-color:#7cdd7c66;background:linear-gradient(180deg,#0d1f0d,#081208)}
+.str-note{font-size:1.05rem;font-weight:900;font-family:'Fredoka',sans-serif;color:#888;line-height:1}
+.str-btn.active .str-note{color:#60dcff}
+.str-btn.tuned .str-note{color:#7cdd7c}
+.str-num{font-size:.52rem;font-weight:700;color:#333;font-family:'Poppins',sans-serif}
+.str-check{font-size:.65rem;color:#7cdd7c}
+
+/* Toggle */
+.toggle-row{display:flex;gap:3px;width:100%;max-width:320px;background:#0d0d0d;border:1.5px solid #1a1a1a;border-radius:12px;padding:3px}
+.toggle-btn{flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:'Poppins',sans-serif;cursor:pointer}
+.toggle-btn.on{background:#252525;color:#fff;box-shadow:0 2px 0 #000;transform:translateY(-1px)}
+.toggle-btn.off{background:#070707;color:#333;box-shadow:inset 0 2px 3px rgba(0,0,0,.7)}
+
+/* Level bar */
+.level-bar-wrap{width:100%;max-width:320px;height:3px;background:#111;border-radius:99px;overflow:hidden}
+.level-bar-fill{height:100%;width:30%;background:linear-gradient(90deg,#1a4a5a,#60dcff);border-radius:99px;transition:width .06s}
+
+/* Status text */
+.status-text{font-size:.78rem;font-weight:700;color:#3a6a7a;letter-spacing:.06em;text-transform:uppercase;min-height:1.2rem;text-align:center}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="back-row">
+    <button class="back-btn">← Voltar</button>
+    <div style="flex:1"></div>
+    <span style="font-size:.88rem;font-weight:900;color:#7cdd7c">Afinador</span>
+  </div>
+
+  <div class="tuner-title">
+    <div class="tuner-title-main">Afinador de Alta Precisão</div>
+    <div class="tuner-title-bar"></div>
+  </div>
+
+  <div class="tuner-wrap">
+
+    <!-- Note card -->
+    <div class="note-card">
+      <div class="note-big">E<span class="acc" style="visibility:hidden">♭</span></div>
+      <div class="note-octave">Oitava 2</div>
+      <div class="note-hz">82.4 Hz</div>
+    </div>
+
+    <!-- Cents badge -->
+    <div class="cents-badge">
+      <div class="cents-val" style="color:#7cdd7c">+0</div>
+      <div class="cents-unit">cents</div>
+    </div>
+
+    <!-- In-tune label -->
+    <div class="in-tune-label">✓ Afinado!</div>
+
+    <!-- Ruler meter -->
+    <div class="ruler-wrap">
+      <span class="ruler-flat">♭</span>
+      <span class="ruler-sharp">♯</span>
+
+      <div class="ruler-track">
+        <div class="ruler-zone-red-l"></div>
+        <div class="ruler-zone-amber-l"></div>
+        <div class="ruler-zone-green" style="box-shadow:0 0 8px #1a8a1a66"></div>
+        <div class="ruler-zone-amber-r"></div>
+        <div class="ruler-zone-red-r"></div>
+        <!-- Needle at center (0 cents = 50%) -->
+        <div class="ruler-needle" style="left:50%">
+          <div class="ruler-needle-dot"></div>
+        </div>
+      </div>
+
+      <!-- Ticks -->
+      <div class="ruler-ticks" style="position:absolute;top:10px;left:12px;right:12px;display:flex;justify-content:space-between">
+        <div class="tick-major" data-label="−50"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-major" data-label="−25"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-major" data-label="0" style="background:#3a5a3a"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-major" data-label="+25"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-minor"></div>
+        <div class="tick-major" data-label="+50"></div>
+      </div>
+    </div>
+
+    <!-- String row -->
+    <div class="str-row">
+      <div class="str-btn tuned"><div class="str-note">E</div><div class="str-num">6ª</div><div class="str-check">✓</div></div>
+      <div class="str-btn tuned"><div class="str-note">A</div><div class="str-num">5ª</div><div class="str-check">✓</div></div>
+      <div class="str-btn tuned"><div class="str-note">D</div><div class="str-num">4ª</div><div class="str-check">✓</div></div>
+      <div class="str-btn active"><div class="str-note">G</div><div class="str-num">3ª</div></div>
+      <div class="str-btn"><div class="str-note">B</div><div class="str-num">2ª</div></div>
+      <div class="str-btn"><div class="str-note">E</div><div class="str-num">1ª</div></div>
+    </div>
+
+    <!-- Toggle -->
+    <div class="toggle-row">
+      <button class="toggle-btn on">Afinação Padrão</button>
+      <button class="toggle-btn off">Alternativa</button>
+    </div>
+
+    <!-- Level bar -->
+    <div class="level-bar-wrap">
+      <div class="level-bar-fill"></div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-text">Toque uma corda</div>
+
+  </div><!-- /tuner-wrap -->
+
+  <!-- Label -->
+  <div style="margin-top:2rem;padding:.5rem 1rem;border:1px solid #1e1e1e;border-radius:8px;text-align:center">
+    <div style="font-size:.6rem;font-weight:800;color:#333;text-transform:uppercase;letter-spacing:.15em">Layout A</div>
+    <div style="font-size:.82rem;font-weight:700;color:#555">Linha Digital — Minimalista</div>
+  </div>
+</div>
+</body>
+</html>

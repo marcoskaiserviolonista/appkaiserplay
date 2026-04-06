@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Afinador — Layout B: Estúdio Pro</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Fredoka:wght@600;700&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#0a0a0a;color:#f0f0f0;font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.app{width:100%;max-width:520px;padding:0 1rem 3rem;display:flex;flex-direction:column;align-items:center}
+
+.back-row{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem 0 .5rem}
+.back-btn{background:#161616;border:2px solid #222;border-radius:10px;color:#aaa;font-size:.78rem;font-weight:700;font-family:'Poppins',sans-serif;padding:.3rem .75rem;cursor:pointer}
+
+.tuner-title{width:100%;text-align:center;padding:.5rem 0 1rem}
+.tuner-title-main{font-size:1.65rem;font-weight:700;font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#ffffff 20%,#60dcff 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tuner-title-bar{width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.4rem auto 0}
+
+/* ── Main panel ── */
+.panel{width:100%;max-width:340px;background:linear-gradient(180deg,#151515,#101010);border:1px solid #222;border-radius:24px;padding:1.4rem 1rem 1.2rem;display:flex;flex-direction:column;align-items:center;gap:.6rem;position:relative;box-shadow:0 8px 32px rgba(0,0,0,.6),inset 0 1px 0 #2a2a2a}
+
+/* Screws decorativos (canto) */
+.panel::before,.panel::after{content:'';position:absolute;width:8px;height:8px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#333,#111);border:1px solid #2a2a2a;top:14px}
+.panel::before{left:14px}
+.panel::after{right:14px}
+
+/* ── Dual-arc SVG ── */
+.arc-svg{width:100%;max-width:300px}
+
+/* ── Note + freq row ── */
+.note-row{display:flex;align-items:baseline;gap:.3rem;justify-content:center}
+.note-main{font-size:4.5rem;font-family:'Fredoka',sans-serif;font-weight:700;color:#fff;line-height:1;letter-spacing:-.02em}
+.note-acc{font-size:2rem;color:#60dcff;font-weight:600;font-family:'Fredoka',sans-serif}
+.note-oct{font-size:1rem;color:#3a3a3a;font-weight:700;align-self:flex-start;margin-top:.5rem}
+
+/* Freq display (like hardware) */
+.freq-display{font-size:.72rem;font-weight:700;color:#2a5a6a;font-family:'Poppins',sans-serif;letter-spacing:.1em;background:#070707;border:1px solid #151515;border-radius:6px;padding:.2rem .6rem}
+
+/* Cents bar (VU-style segmented) */
+.vu-wrap{width:100%;display:flex;align-items:center;gap:.3rem;justify-content:center;padding:0 .5rem}
+.vu-col{display:flex;flex-direction:column;gap:2px;align-items:center}
+.vu-label{font-size:.5rem;font-weight:800;color:#2a4a4a;letter-spacing:.1em;text-transform:uppercase}
+.vu-segs{display:flex;gap:2px}
+.vu-seg{width:12px;height:10px;border-radius:2px;background:#111;border:1px solid #1a1a1a}
+.vu-seg.r3{background:#7a1010;border-color:#9a1818}
+.vu-seg.r2{background:#5a0e0e;border-color:#7a1515}
+.vu-seg.r1{background:#3a0a0a;border-color:#550f0f}
+.vu-seg.a2{background:#5a3200;border-color:#7a4500}
+.vu-seg.a1{background:#3a2100;border-color:#552e00}
+.vu-seg.g1{background:#0a4a0a;border-color:#0f6a0f}
+.vu-seg.g2{background:#104a10;border-color:#186818}
+.vu-center-line{width:1.5px;height:32px;background:#2a2a2a;border-radius:1px}
+
+/* Status badge */
+.status-badge{font-size:.82rem;font-weight:800;font-family:'Fredoka',sans-serif;letter-spacing:.05em;min-height:1.4rem;text-align:center}
+.status-badge.intune{color:#7cdd7c;text-shadow:0 0 10px #7cdd7c55}
+.status-badge.idle{color:#2a3a3a}
+.status-badge.sharp{color:#F5A623}
+.status-badge.flat{color:#F5A623}
+
+/* String row */
+.str-row{display:flex;gap:.35rem;justify-content:center;width:100%}
+.str-btn{flex:1;max-width:44px;height:50px;border-radius:10px;border:1px solid #1e1e1e;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;background:#0d0d0d}
+.str-btn.active{border-color:#60dcff33;background:#0a1a1f}
+.str-btn.tuned{border-color:#7cdd7c44}
+.str-note{font-size:1rem;font-weight:900;font-family:'Fredoka',sans-serif;color:#555;line-height:1}
+.str-btn.active .str-note{color:#60dcff}
+.str-btn.tuned .str-note{color:#7cdd7c}
+.str-num{font-size:.48rem;font-weight:700;color:#2a2a2a;font-family:'Poppins',sans-serif}
+
+/* Screws on str row corners */
+.str-panel{width:100%;max-width:300px;background:#0d0d0d;border:1px solid #181818;border-radius:14px;padding:.6rem .5rem;position:relative}
+.str-panel::before,.str-panel::after{content:'';position:absolute;width:6px;height:6px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#252525,#0d0d0d);border:1px solid #1e1e1e;top:8px}
+.str-panel::before{left:8px}
+.str-panel::after{right:8px}
+
+/* Toggle */
+.toggle-row{display:flex;gap:3px;width:100%;max-width:300px;background:#080808;border:1px solid #151515;border-radius:10px;padding:3px}
+.toggle-btn{flex:1;padding:.28rem .4rem;border-radius:7px;border:none;font-size:.68rem;font-weight:800;font-family:'Poppins',sans-serif;cursor:pointer}
+.toggle-btn.on{background:#1e1e1e;color:#ccc;box-shadow:0 2px 0 #000;transform:translateY(-1px)}
+.toggle-btn.off{background:#050505;color:#2a2a2a;box-shadow:inset 0 2px 3px rgba(0,0,0,.8)}
+
+/* Level bar */
+.level-wrap{width:100%;max-width:300px;height:3px;background:#0d0d0d;border-radius:99px;overflow:hidden;border:1px solid #151515}
+.level-fill{height:100%;width:28%;background:linear-gradient(90deg,#0d2a35,#60dcff88);border-radius:99px;transition:width .06s}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="back-row">
+    <button class="back-btn">← Voltar</button>
+    <div style="flex:1"></div>
+    <span style="font-size:.88rem;font-weight:900;color:#7cdd7c">Afinador</span>
+  </div>
+
+  <div class="tuner-title">
+    <div class="tuner-title-main">Afinador de Alta Precisão</div>
+    <div class="tuner-title-bar"></div>
+  </div>
+
+  <!-- Main panel -->
+  <div class="panel">
+
+    <!-- Dual-arc SVG -->
+    <svg viewBox="0 0 300 165" class="arc-svg" aria-hidden="true">
+      <defs>
+        <filter id="glow2"><feGaussianBlur stdDeviation="2.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <!-- Screw texture -->
+        <radialGradient id="screwGrad" cx="35%" cy="35%">
+          <stop offset="0%" stop-color="#2a2a2a"/>
+          <stop offset="100%" stop-color="#0a0a0a"/>
+        </radialGradient>
+      </defs>
+
+      <!-- Outer arc background -->
+      <path d="M 22,155 A 128,128,0,0,1,278,155" fill="none" stroke="#181818" stroke-width="14"/>
+      <!-- Inner arc background -->
+      <path d="M 48,155 A 102,102,0,0,1,252,155" fill="none" stroke="#131313" stroke-width="10"/>
+
+      <!-- Outer arc: colored zones -->
+      <!-- far-flat (red) -->
+      <path d="M 22,155 A 128,128,0,0,1,68,53" fill="none" stroke="#5a1010" stroke-width="14" stroke-linecap="round"/>
+      <!-- near-flat (amber) -->
+      <path d="M 70,52 A 128,128,0,0,1,108,22" fill="none" stroke="#5a3800" stroke-width="14" stroke-linecap="round"/>
+      <!-- center (green) -->
+      <path d="M 110,21 A 128,128,0,0,1,190,21" fill="none" stroke="#1a5a1a" stroke-width="14" stroke-linecap="round"/>
+      <!-- near-sharp (amber) -->
+      <path d="M 192,22 A 128,128,0,0,1,230,52" fill="none" stroke="#5a3800" stroke-width="14" stroke-linecap="round"/>
+      <!-- far-sharp (red) -->
+      <path d="M 232,53 A 128,128,0,0,1,278,155" fill="none" stroke="#5a1010" stroke-width="14" stroke-linecap="round"/>
+
+      <!-- Inner arc: precision zone (±10 cents) -->
+      <path d="M 93,71 A 102,102,0,0,1,207,71" fill="none" stroke="#1a3a1a" stroke-width="9" stroke-linecap="round"/>
+      <!-- Inner arc: green center (±5 cents) -->
+      <path d="M 115,40 A 102,102,0,0,1,185,40" fill="none" stroke="#245a24" stroke-width="9" stroke-linecap="round"/>
+      <!-- Inner arc: perfect center (cyan) -->
+      <path d="M 130,28 A 102,102,0,0,1,170,28" fill="none" stroke="#1a4a5a" stroke-width="9" stroke-linecap="round"/>
+
+      <!-- Tick marks on outer arc -->
+      <!-- -50 (start) -->
+      <line x1="22" y1="155" x2="15" y2="155" stroke="#2a2a2a" stroke-width="2"/>
+      <!-- -25 -->
+      <line x1="46" y1="64" x2="40" y2="59" stroke="#2a2a2a" stroke-width="2"/>
+      <!-- 0 -->
+      <line x1="150" y1="27" x2="150" y2="18" stroke="#3a5a3a" stroke-width="2.5"/>
+      <!-- +25 -->
+      <line x1="254" y1="64" x2="260" y2="59" stroke="#2a2a2a" stroke-width="2"/>
+      <!-- +50 -->
+      <line x1="278" y1="155" x2="285" y2="155" stroke="#2a2a2a" stroke-width="2"/>
+
+      <!-- Scale labels -->
+      <text x="8" y="162" fill="#2a2a2a" font-size="9" font-weight="700" font-family="Poppins,sans-serif" text-anchor="middle">-50</text>
+      <text x="35" y="56" fill="#2a2a2a" font-size="9" font-weight="700" font-family="Poppins,sans-serif" text-anchor="middle">-25</text>
+      <text x="150" y="14" fill="#2a5a2a" font-size="9" font-weight="700" font-family="Poppins,sans-serif" text-anchor="middle">0</text>
+      <text x="265" y="56" fill="#2a2a2a" font-size="9" font-weight="700" font-family="Poppins,sans-serif" text-anchor="middle">+25</text>
+      <text x="292" y="162" fill="#2a2a2a" font-size="9" font-weight="700" font-family="Poppins,sans-serif" text-anchor="middle">+50</text>
+
+      <!-- ♭ ♯ -->
+      <text x="18" y="152" text-anchor="end" fill="#3a3a3a" font-size="16" font-weight="700" font-family="serif">♭</text>
+      <text x="282" y="152" fill="#3a3a3a" font-size="16" font-weight="700" font-family="serif">♯</text>
+
+      <!-- Center perfect zone glow -->
+      <line x1="150" y1="18" x2="150" y2="50" stroke="#60dcff" stroke-width="1.5" stroke-linecap="round" opacity=".6" filter="url(#glow2)"/>
+
+      <!-- Needle (at 0 — pointing straight up) -->
+      <line x1="150" y1="155" x2="150" y2="45" stroke="#e0e0e0" stroke-width="2.5" stroke-linecap="round" filter="url(#glow2)"/>
+      <!-- Arrowhead -->
+      <polygon points="150,32 144,47 156,47" fill="#7cdd7c" filter="url(#glow2)"/>
+      <!-- Pivot -->
+      <circle cx="150" cy="155" r="8" fill="#1a1a1a" stroke="#2a2a2a" stroke-width="2"/>
+      <circle cx="150" cy="155" r="4" fill="#333"/>
+    </svg>
+
+    <!-- Note + Hz -->
+    <div class="note-row">
+      <div class="note-main">G</div>
+      <div class="note-oct" style="color:#2a5a6a">3</div>
+    </div>
+    <div class="freq-display">196.0 Hz</div>
+
+    <!-- VU-style cents meter -->
+    <div class="vu-wrap">
+      <!-- Left (flat) side, 3 segments -->
+      <div class="vu-label">♭</div>
+      <div class="vu-segs">
+        <div class="vu-seg r3"></div>
+        <div class="vu-seg r2"></div>
+        <div class="vu-seg r1"></div>
+        <div class="vu-seg a2"></div>
+        <div class="vu-seg a1"></div>
+      </div>
+      <div class="vu-center-line"></div>
+      <div class="vu-segs">
+        <div class="vu-seg a1"></div>
+        <div class="vu-seg a2"></div>
+        <div class="vu-seg r1"></div>
+        <div class="vu-seg r2"></div>
+        <div class="vu-seg r3"></div>
+      </div>
+      <div class="vu-label">♯</div>
+    </div>
+
+    <!-- Status -->
+    <div class="status-badge intune">✓ Afinado!</div>
+
+  </div><!-- /panel -->
+
+  <!-- String panel -->
+  <div style="margin-top:.75rem;width:100%;max-width:340px">
+    <div class="str-panel">
+      <div class="str-row">
+        <div class="str-btn tuned"><div class="str-note">E</div><div class="str-num">6ª</div></div>
+        <div class="str-btn tuned"><div class="str-note">A</div><div class="str-num">5ª</div></div>
+        <div class="str-btn tuned"><div class="str-note">D</div><div class="str-num">4ª</div></div>
+        <div class="str-btn active"><div class="str-note">G</div><div class="str-num">3ª</div></div>
+        <div class="str-btn"><div class="str-note">B</div><div class="str-num">2ª</div></div>
+        <div class="str-btn"><div class="str-note">E</div><div class="str-num">1ª</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:.6rem;width:100%;max-width:340px;display:flex;flex-direction:column;gap:.5rem">
+    <div class="toggle-row">
+      <button class="toggle-btn on">Afinação Padrão</button>
+      <button class="toggle-btn off">Alternativa</button>
+    </div>
+    <div class="level-wrap">
+      <div class="level-fill"></div>
+    </div>
+  </div>
+
+  <!-- Label -->
+  <div style="margin-top:2rem;padding:.5rem 1rem;border:1px solid #1a1a1a;border-radius:8px;text-align:center">
+    <div style="font-size:.6rem;font-weight:800;color:#333;text-transform:uppercase;letter-spacing:.15em">Layout B</div>
+    <div style="font-size:.82rem;font-weight:700;color:#555">Estúdio Pro — Duplo Arco</div>
+  </div>
+</div>
+</body>
+</html>

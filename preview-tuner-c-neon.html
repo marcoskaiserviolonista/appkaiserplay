@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Afinador — Layout C: Neon Circular</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&family=Fredoka:wght@600;700&family=VT323&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#080808;color:#f0f0f0;font-family:'Poppins',sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.app{width:100%;max-width:520px;padding:0 1rem 3rem;display:flex;flex-direction:column;align-items:center}
+
+.back-row{width:100%;display:flex;align-items:center;gap:.6rem;padding:.75rem 0 .5rem}
+.back-btn{background:#111;border:2px solid #1e1e1e;border-radius:10px;color:#888;font-size:.78rem;font-weight:700;font-family:'Poppins',sans-serif;padding:.3rem .75rem;cursor:pointer}
+
+.tuner-title{width:100%;text-align:center;padding:.5rem 0 1rem}
+.tuner-title-main{font-size:1.65rem;font-weight:700;font-family:'Fredoka',sans-serif;background:linear-gradient(135deg,#ffffff 20%,#60dcff 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.tuner-title-bar{width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.4rem auto 0}
+
+/* ── Circular gauge ── */
+.gauge-wrap{position:relative;width:260px;height:260px;margin:0 auto}
+.gauge-wrap svg{position:absolute;top:0;left:0;width:100%;height:100%}
+
+/* Center text inside gauge */
+.gauge-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;gap:.05rem;pointer-events:none;text-align:center}
+.gauge-note{font-size:4.8rem;font-family:'Fredoka',sans-serif;font-weight:700;color:#fff;line-height:1;letter-spacing:-.03em}
+.gauge-acc{font-size:1.8rem;color:#60dcff;font-weight:600}
+.gauge-oct{font-size:.65rem;font-weight:800;color:#2a5a6a;letter-spacing:.18em;text-transform:uppercase;margin-top:-.1rem}
+.gauge-cents{font-size:1.2rem;font-weight:900;color:#60dcff;font-family:'Poppins',sans-serif;letter-spacing:-.02em}
+.gauge-cents-lbl{font-size:.5rem;font-weight:800;color:#2a4a4a;letter-spacing:.18em;text-transform:uppercase;margin-top:-.1rem}
+.gauge-status{font-size:.78rem;font-weight:800;font-family:'Fredoka',sans-serif;color:#7cdd7c;letter-spacing:.04em;min-height:1.2rem}
+
+/* ── Pulse rings (CSS animation) ── */
+@keyframes pulseRing{
+  0%{opacity:.5;transform:scale(1)}
+  100%{opacity:0;transform:scale(1.08)}
+}
+.pulse-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:1.5px solid #60dcff;transform:translate(-50%,-50%);pointer-events:none}
+.pulse-ring-1{width:170px;height:170px;animation:pulseRing 1.8s ease-out infinite}
+.pulse-ring-2{width:185px;height:185px;animation:pulseRing 1.8s ease-out .6s infinite}
+
+/* ── String row ── */
+.str-row{display:flex;gap:.4rem;justify-content:center;width:100%;max-width:320px}
+.str-btn{flex:1;max-width:46px;height:52px;border-radius:14px;border:1.5px solid #1a1a1a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:#0d0d0d;position:relative;overflow:hidden}
+.str-btn.active{border-color:#60dcff55}
+.str-btn.active::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#60dcff,transparent)}
+.str-btn.tuned{border-color:#7cdd7c44}
+.str-btn.tuned::before{content:'';position:absolute;top:0;left:0;right:0;height:1.5px;background:linear-gradient(90deg,transparent,#7cdd7c,transparent)}
+.str-note{font-size:1.1rem;font-weight:900;font-family:'Fredoka',sans-serif;color:#333;line-height:1}
+.str-btn.active .str-note{color:#60dcff;text-shadow:0 0 8px #60dcff99}
+.str-btn.tuned .str-note{color:#7cdd7c;text-shadow:0 0 6px #7cdd7c66}
+.str-num{font-size:.48rem;font-weight:700;color:#222;font-family:'Poppins',sans-serif}
+
+/* ── Cents bar ── */
+.cents-bar-wrap{width:100%;max-width:300px;position:relative;height:28px;display:flex;align-items:center}
+.cents-track{width:100%;height:6px;background:#0e0e0e;border-radius:99px;position:relative;border:1px solid #151515;overflow:hidden}
+.cents-fill{position:absolute;top:0;height:100%;border-radius:99px;background:linear-gradient(90deg,#60dcff,#7cdd7c,#60dcff);transition:all .08s}
+/* Needle dot on bar */
+.cents-dot{position:absolute;top:50%;width:12px;height:12px;background:#60dcff;border-radius:50%;transform:translate(-50%,-50%);box-shadow:0 0 10px #60dcff,0 0 20px #60dcff44;transition:left .08s}
+/* Center mark */
+.cents-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:2px;height:16px;background:#252525;border-radius:1px}
+/* Labels */
+.cents-flat-lbl{position:absolute;left:-14px;font-size:.85rem;font-family:serif;font-weight:700;color:#2a4a4a}
+.cents-sharp-lbl{position:absolute;right:-14px;font-size:.85rem;font-family:serif;font-weight:700;color:#2a4a4a}
+
+/* ── Toggle ── */
+.toggle-row{display:flex;gap:2px;width:100%;max-width:300px;background:#0a0a0a;border:1px solid #141414;border-radius:12px;padding:3px}
+.toggle-btn{flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.7rem;font-weight:800;font-family:'Poppins',sans-serif;cursor:pointer;transition:all .15s}
+.toggle-btn.on{background:#151f24;color:#60dcff;box-shadow:0 2px 0 #000,inset 0 0 8px #60dcff22;transform:translateY(-1px)}
+.toggle-btn.off{background:#050505;color:#1e2a2a;box-shadow:inset 0 2px 3px rgba(0,0,0,.8)}
+
+/* Level bar */
+.level-wrap{width:100%;max-width:300px;height:3px;background:#0a0a0a;border-radius:99px;overflow:hidden}
+.level-fill{height:100%;width:35%;background:linear-gradient(90deg,#0d2028,#60dcff66);border-radius:99px}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="back-row">
+    <button class="back-btn">← Voltar</button>
+    <div style="flex:1"></div>
+    <span style="font-size:.88rem;font-weight:900;color:#7cdd7c">Afinador</span>
+  </div>
+
+  <div class="tuner-title">
+    <div class="tuner-title-main">Afinador de Alta Precisão</div>
+    <div class="tuner-title-bar"></div>
+  </div>
+
+  <!-- Circular gauge -->
+  <div class="gauge-wrap">
+
+    <!-- Pulse rings (visible when in tune) -->
+    <div class="pulse-ring pulse-ring-1"></div>
+    <div class="pulse-ring pulse-ring-2"></div>
+
+    <svg viewBox="0 0 260 260" aria-hidden="true">
+      <defs>
+        <filter id="glowC"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <filter id="glowCsm"><feGaussianBlur stdDeviation="1.5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <!-- Gradient for outer ring -->
+        <linearGradient id="ringGradFlat" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#601010"/>
+          <stop offset="100%" stop-color="#502800"/>
+        </linearGradient>
+        <linearGradient id="ringGradSharp" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" stop-color="#502800"/>
+          <stop offset="100%" stop-color="#601010"/>
+        </linearGradient>
+      </defs>
+
+      <!-- Outer decorative ring -->
+      <circle cx="130" cy="130" r="125" fill="none" stroke="#111" stroke-width="1"/>
+      <circle cx="130" cy="130" r="120" fill="none" stroke="#0d0d0d" stroke-width="8"/>
+
+      <!-- Arc: flat side (red → amber), from ~180° to ~270° (left half top) -->
+      <!-- Using stroke-dasharray technique on a circle -->
+      <!-- r=110, circumference = 691.15, total arc = 180° = half = 345.6 -->
+      <!-- Each segment: roughly 34.5 units each -->
+
+      <!-- Full background arc (semi-circle, top half) -->
+      <path d="M 20,130 A 110,110,0,0,1,240,130" fill="none" stroke="#141414" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- Flat far (red) -->
+      <path d="M 20,130 A 110,110,0,0,1,55,47" fill="none" stroke="#5a0f0f" stroke-width="12" stroke-linecap="round"/>
+      <!-- Flat near (amber) -->
+      <path d="M 58,45 A 110,110,0,0,1,95,19" fill="none" stroke="#4a2800" stroke-width="12" stroke-linecap="round"/>
+      <!-- Center green -->
+      <path d="M 98,18 A 110,110,0,0,1,162,18" fill="none" stroke="#0f3a0f" stroke-width="12" stroke-linecap="round" filter="url(#glowCsm)"/>
+      <!-- Sharp near (amber) -->
+      <path d="M 165,19 A 110,110,0,0,1,202,45" fill="none" stroke="#4a2800" stroke-width="12" stroke-linecap="round"/>
+      <!-- Sharp far (red) -->
+      <path d="M 205,47 A 110,110,0,0,1,240,130" fill="none" stroke="#5a0f0f" stroke-width="12" stroke-linecap="round"/>
+
+      <!-- Center perfect band (cyan glow) -->
+      <path d="M 114,17 A 110,110,0,0,1,146,17" fill="none" stroke="#60dcff" stroke-width="12" stroke-linecap="round" opacity=".35" filter="url(#glowC)"/>
+
+      <!-- Inner arc (precision, ±20 cents) -->
+      <path d="M 45,130 A 85,85,0,0,1,215,130" fill="none" stroke="#0d0d0d" stroke-width="7"/>
+      <path d="M 78,57 A 85,85,0,0,1,182,57" fill="none" stroke="#1a3a1a" stroke-width="7" stroke-linecap="round"/>
+      <path d="M 108,30 A 85,85,0,0,1,152,30" fill="none" stroke="#1a5a2a" stroke-width="7" stroke-linecap="round" filter="url(#glowCsm)"/>
+
+      <!-- Tick marks -->
+      <!-- -50 left -->
+      <line x1="20" y1="130" x2="10" y2="130" stroke="#252525" stroke-width="2"/>
+      <text x="5" y="134" fill="#1e2e1e" font-size="8" font-weight="700" font-family="Poppins" text-anchor="middle">-50</text>
+      <!-- -25 -->
+      <line x1="40" y1="72" x2="34" y2="66" stroke="#252525" stroke-width="1.5"/>
+      <text x="28" y="62" fill="#1e2e1e" font-size="8" font-weight="700" font-family="Poppins" text-anchor="middle">-25</text>
+      <!-- 0 top -->
+      <line x1="130" y1="20" x2="130" y2="10" stroke="#2a5a2a" stroke-width="2"/>
+      <text x="130" y="8" fill="#2a5a2a" font-size="8" font-weight="700" font-family="Poppins" text-anchor="middle">0</text>
+      <!-- +25 -->
+      <line x1="220" y1="72" x2="226" y2="66" stroke="#252525" stroke-width="1.5"/>
+      <text x="232" y="62" fill="#1e2e1e" font-size="8" font-weight="700" font-family="Poppins" text-anchor="middle">+25</text>
+      <!-- +50 right -->
+      <line x1="240" y1="130" x2="250" y2="130" stroke="#252525" stroke-width="2"/>
+      <text x="255" y="134" fill="#1e2e1e" font-size="8" font-weight="700" font-family="Poppins" text-anchor="middle">+50</text>
+
+      <!-- ♭ ♯ labels (symmetric) -->
+      <text x="20" y="155" text-anchor="middle" fill="#2a4a4a" font-size="16" font-weight="700" font-family="serif">♭</text>
+      <text x="240" y="155" text-anchor="middle" fill="#2a4a4a" font-size="16" font-weight="700" font-family="serif">♯</text>
+
+      <!-- Needle (at 0 — pointing straight up from center) -->
+      <!-- Center = 130,130; at 0 cents needle goes straight up -->
+      <line x1="130" y1="130" x2="130" y2="40" stroke="#60dcff" stroke-width="2" stroke-linecap="round" filter="url(#glowC)" opacity=".9"/>
+      <polygon points="130,30 124,48 136,48" fill="#7cdd7c" filter="url(#glowC)"/>
+
+      <!-- Pivot with glow -->
+      <circle cx="130" cy="130" r="10" fill="#0d0d0d" stroke="#1e1e1e" stroke-width="2"/>
+      <circle cx="130" cy="130" r="5" fill="#60dcff" filter="url(#glowC)" opacity=".8"/>
+    </svg>
+
+    <!-- Center info -->
+    <div class="gauge-center">
+      <div class="gauge-note">G</div>
+      <div class="gauge-oct">Oitava 3</div>
+      <div class="gauge-cents" style="color:#7cdd7c">+0</div>
+      <div class="gauge-cents-lbl">cents</div>
+      <div class="gauge-status">✓ Afinado</div>
+    </div>
+
+  </div><!-- /gauge-wrap -->
+
+  <!-- Cents slider bar -->
+  <div style="width:100%;max-width:300px;margin:.75rem auto 0;position:relative;padding:0 18px">
+    <span class="cents-flat-lbl">♭</span>
+    <div class="cents-track">
+      <div class="cents-center"></div>
+      <div class="cents-dot" style="left:50%"></div>
+    </div>
+    <span class="cents-sharp-lbl">♯</span>
+  </div>
+
+  <!-- String row -->
+  <div class="str-row" style="margin-top:1rem">
+    <div class="str-btn tuned"><div class="str-note">E</div><div class="str-num">6ª</div></div>
+    <div class="str-btn tuned"><div class="str-note">A</div><div class="str-num">5ª</div></div>
+    <div class="str-btn tuned"><div class="str-note">D</div><div class="str-num">4ª</div></div>
+    <div class="str-btn active"><div class="str-note">G</div><div class="str-num">3ª</div></div>
+    <div class="str-btn"><div class="str-note">B</div><div class="str-num">2ª</div></div>
+    <div class="str-btn"><div class="str-note">E</div><div class="str-num">1ª</div></div>
+  </div>
+
+  <div style="margin-top:.65rem;width:100%;max-width:300px;display:flex;flex-direction:column;gap:.5rem">
+    <div class="toggle-row">
+      <button class="toggle-btn on">Afinação Padrão</button>
+      <button class="toggle-btn off">Alternativa</button>
+    </div>
+    <div class="level-wrap">
+      <div class="level-fill"></div>
+    </div>
+  </div>
+
+  <!-- Label -->
+  <div style="margin-top:2rem;padding:.5rem 1rem;border:1px solid #151515;border-radius:8px;text-align:center">
+    <div style="font-size:.6rem;font-weight:800;color:#333;text-transform:uppercase;letter-spacing:.15em">Layout C</div>
+    <div style="font-size:.82rem;font-weight:700;color:#555">Neon Circular — Moderno</div>
+  </div>
+</div>
+</body>
+</html>

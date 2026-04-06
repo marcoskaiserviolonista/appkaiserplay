@@ -585,7 +585,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .metro-beat{width:22px;height:22px;border-radius:50%;background:#2a2a2a;transition:background .05s,box-shadow .05s}
 .metro-beat.active{background:#F5A623;box-shadow:0 0 18px #F5A62399}
 @keyframes tunerComplete{0%{opacity:0;transform:scale(.85) translateY(8px)}100%{opacity:1;transform:scale(1) translateY(0)}}
-@keyframes tunerPerfect{0%{opacity:0;transform:translate(-50%,-50%) scale(.6)}12%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}28%{opacity:1;transform:translate(-50%,-50%) scale(1)}72%{opacity:1;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(.9)}}
+@keyframes tunerPerfect{0%{opacity:0;transform:scale(.6)}12%{opacity:1;transform:scale(1.15)}28%{opacity:1;transform:scale(1)}72%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.9)}}
 .metro-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:#2a2a2a;outline:none;cursor:pointer}
 .metro-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
 .metro-slider::-moz-range-thumb{width:22px;height:22px;border-radius:50%;background:#F5A623;border:3px solid #111;box-shadow:2px 2px 0 #111;cursor:pointer}
@@ -4691,6 +4691,8 @@ const _tuner={
   stableCents:0,
   // Perfect-tune text animation state
   perfectShownAt:0,
+  // Confirmation bar (1 second stable in-tune)
+  inTuneBarStart:0,inTuneBarFull:false,
 };
 
 function _tunerNote2Midi(name){
@@ -4882,16 +4884,34 @@ function _tunerUpdateDOM(){
     rn.style.background=_tuner.noSignal?'#2a2a2a':col;
     rn.style.boxShadow=_tuner.noSignal?'none':`0 0 8px ${col},0 0 16px ${col}66`;
   }
-  // ── "Afinação perfeita" text ──
-  const perfTxt=document.getElementById('_tn-perfect-txt');
-  if(perfTxt){
-    const now2=performance.now();
-    if(perfect&&now2-_tuner.perfectShownAt>2000){
-      _tuner.perfectShownAt=now2;
-      perfTxt.style.animation='none';
-      void perfTxt.offsetWidth;
-      perfTxt.style.animation='tunerPerfect 1.6s ease forwards';
-    } else if(!perfect){perfTxt.style.animation='none';}
+  // ── Barra de confirmação (enche em 1s enquanto afinado) ──
+  const barEl=document.getElementById('_tn-tune-bar');
+  if(barEl){
+    const nowBar=performance.now();
+    if(!inTune||_tuner.noSignal){
+      _tuner.inTuneBarStart=0;
+      _tuner.inTuneBarFull=false;
+      barEl.style.width='0%';
+      barEl.style.transition='width .1s,background .3s';
+    } else {
+      if(!_tuner.inTuneBarStart)_tuner.inTuneBarStart=nowBar;
+      const pct=Math.min(100,(nowBar-_tuner.inTuneBarStart)/1000*100);
+      barEl.style.width=pct+'%';
+      barEl.style.transition='background .3s'+(pct<100?',width .05s':'');
+      barEl.style.background=pct>=100
+        ?'linear-gradient(90deg,#60dcff,#ffffff88,#60dcff)'
+        :(perfect?'linear-gradient(90deg,#1a5a7a,#60dcff)':'linear-gradient(90deg,#1a4a1a,#7cdd7c)');
+      if(pct>=100&&!_tuner.inTuneBarFull){
+        _tuner.inTuneBarFull=true;
+        const perfTxt2=document.getElementById('_tn-perfect-txt');
+        if(perfTxt2&&nowBar-_tuner.perfectShownAt>1500){
+          _tuner.perfectShownAt=nowBar;
+          perfTxt2.style.animation='none';
+          void perfTxt2.offsetWidth;
+          perfTxt2.style.animation='tunerPerfect 2s ease forwards';
+        }
+      }
+    }
   }
   // ── Nome da nota ──
   const notEl=document.getElementById('_tn-note');
@@ -4951,7 +4971,10 @@ function _tunerAnimLoop(){
       }
     } else {
       _tuner.stringInTuneStart[_si]=0;
-      // Corda afinada permanece travada — só destravar via toque manual
+      // Destravar automaticamente se a mesma corda for tocada bem desafinada (>25¢)
+      if(_tuner.stringTuned[_si]&&Math.abs(_tuner.smoothCents)>25){
+        _tuner.stringTuned[_si]=false;_tuner.allTunedShown=false;_tunerRefreshControls();
+      }
     }
   } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
   _tunerUpdateDOM();
@@ -5004,6 +5027,7 @@ function _tunerStop(){
   _tuner.stringTuned=[false,false,false,false,false,false];
   _tuner.stringInTuneStart=[0,0,0,0,0,0];
   _tuner.allTunedShown=false;_tuner.lastInTuneSfxStr=-1;
+  _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;
 }
 function _tunerSelectString(idx){
   playClickSfx('soft');
@@ -5101,8 +5125,6 @@ function renderAfinador(){
           <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span>
           <span id="_tn-oct" class="tn-circle-oct"></span>
         </div>
-        <!-- Overlay "Afinação Perfeita" — aparece sobre o círculo -->
-        <div id="_tn-perfect-txt" style="position:absolute;top:50%;left:50%;width:100%;text-align:center;font-size:1.05rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.06em;text-shadow:0 0 14px #60dcff,0 0 28px #60dcff88;opacity:0;pointer-events:none;z-index:10">${t('tuner_perfect')}</div>
       </div>
 
       <!-- Cents / status -->
@@ -5121,6 +5143,14 @@ function renderAfinador(){
         <div class="tn-led" id="_tn-led-8"></div>
         <div class="tn-led" id="_tn-led-9"  style="width:10px;height:10px"></div>
         <div class="tn-led" id="_tn-led-10" style="width:10px;height:10px"></div>
+      </div>
+
+      <!-- Barra de confirmação + texto "Afinação Perfeita" -->
+      <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:.35rem;margin:.15rem 0">
+        <div style="width:100%;height:5px;background:#0d0d0d;border-radius:99px;overflow:hidden;border:1px solid #141414">
+          <div id="_tn-tune-bar" style="height:100%;width:0%;border-radius:99px"></div>
+        </div>
+        <div id="_tn-perfect-txt" style="font-size:1.05rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.06em;text-shadow:0 0 14px #60dcff,0 0 28px #60dcff88;opacity:0;pointer-events:none;min-height:1.4rem;text-align:center">${t('tuner_perfect')}</div>
       </div>
 
       <!-- Régua de precisão -->

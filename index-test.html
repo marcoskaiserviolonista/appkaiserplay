@@ -610,6 +610,35 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-preset-btn:active{filter:brightness(.85)}
 .tuner-mic-btn{width:100%;max-width:320px;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
+/* ── Afinador v2 — Círculo + LEDs + Régua ── */
+@keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.55)}}
+.tn-circle-outer{position:relative;width:190px;height:190px;margin:0 auto .1rem}
+.tn-pulse-ring{position:absolute;top:50%;left:50%;border-radius:50%;border:2px solid currentColor;pointer-events:none;width:174px;height:174px}
+.tn-pulse-ring-1{animation:tnPulse 1.8s ease-out infinite}
+.tn-pulse-ring-2{animation:tnPulse 1.8s ease-out .7s infinite}
+.tn-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:158px;height:158px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#1c1c1c,#0d0d0d);border:2px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;transition:border-color .25s,box-shadow .25s;z-index:2}
+.tn-circle .tuner-note-name{font-size:4.2rem;white-space:nowrap}
+.tn-circle-oct{font-size:.58rem;font-weight:800;color:#2a3a3a;letter-spacing:.18em;text-transform:uppercase;min-height:.8rem;transition:color .25s}
+.tn-led-bar{display:flex;align-items:center;gap:5px;justify-content:center;width:100%;max-width:310px;margin:.05rem 0}
+.tn-led{width:14px;height:14px;border-radius:50%;background:#0e0e0e;border:1.5px solid #161616;transition:background .18s,box-shadow .18s,border-color .18s;flex-shrink:0}
+.tn-ruler-wrap{width:100%;max-width:320px}
+.tn-ruler-labels{display:flex;justify-content:space-between;padding:0 2px}
+.tn-ruler-flat,.tn-ruler-sharp{font-size:.85rem;font-family:serif;font-weight:700;color:#2a3a3a}
+.tn-ruler-zone-outer{position:relative;height:22px}
+.tn-ruler-bg{position:absolute;top:50%;left:0;right:0;height:5px;transform:translateY(-50%);background:#151515;border-radius:99px;border:1px solid #1a1a1a;overflow:hidden}
+.tn-rz{position:absolute;top:0;height:100%}
+.tn-rz-rl{left:0;width:20%;background:linear-gradient(90deg,#4a0e0e,#802020)}
+.tn-rz-al{left:20%;width:13%;background:linear-gradient(90deg,#4a2200,#8a4500)}
+.tn-rz-gl{left:33%;width:5%;background:#1a5a1a}
+.tn-rz-gc{left:38%;width:24%;background:#226a22}
+.tn-rz-gr{left:62%;width:5%;background:#1a5a1a}
+.tn-rz-ar{left:67%;width:13%;background:linear-gradient(90deg,#8a4500,#4a2200)}
+.tn-rz-rr{left:80%;width:20%;background:linear-gradient(90deg,#802020,#4a0e0e)}
+.tn-ruler-needle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:18px;border-radius:2px;background:#2a2a2a;transition:left .12s cubic-bezier(.25,.8,.25,1),background .25s,box-shadow .25s;pointer-events:none}
+.tn-ruler-ticks{display:flex;justify-content:space-between;align-items:flex-start;margin-top:2px}
+.tn-rtick-maj{width:1.5px;height:10px;background:#252525;border-radius:1px;margin:0 auto}
+.tn-rtick-min{width:1px;height:6px;background:#1a1a1a;border-radius:1px}
+.tn-rtick-lbl{font-size:.5rem;font-weight:700;color:#222;font-family:var(--font-body);white-space:nowrap}
 </style>
 
 </head>
@@ -4806,35 +4835,53 @@ function _tunerCheckAllTuned(){
 
 function _tunerUpdateDOM(){
   const c=_tuner.smoothCents;
-  const a=(90-c*1.8)*Math.PI/180;
-  const nl=108,cx=150,cy=155;
-  const cos_a=Math.cos(a),sin_a=Math.sin(a);
-  // Needle line stops before arrowhead
-  const lineR=97,arrowLen=11,arrowW=5;
-  const lx=(cx+lineR*cos_a).toFixed(1),ly=(cy-lineR*sin_a).toFixed(1);
-  // Arrowhead tip and base
-  const tipx=cx+nl*cos_a,tipy=cy-nl*sin_a;
-  const bx=cx+(nl-arrowLen)*cos_a,by=cy-(nl-arrowLen)*sin_a;
-  const ex=-sin_a,ey=-cos_a;
-  const arrowPts=`${tipx.toFixed(1)},${tipy.toFixed(1)} ${(bx+ex*arrowW).toFixed(1)},${(by+ey*arrowW).toFixed(1)} ${(bx-ex*arrowW).toFixed(1)},${(by-ey*arrowW).toFixed(1)}`;
-  const needle=document.getElementById('_tn-needle');
-  const ndot=document.getElementById('_tn-ndot');
-  if(needle){needle.setAttribute('x2',lx);needle.setAttribute('y2',ly);}
-  if(ndot)ndot.setAttribute('points',arrowPts);
   const perfect=!_tuner.noSignal&&Math.abs(c)<2;
   const inTune=!_tuner.noSignal&&Math.abs(c)<5;
   const close=!_tuner.noSignal&&Math.abs(c)<15;
   const col=_tuner.noSignal?'#3a3a3a':inTune?'#7cdd7c':close?'#F5A623':'#e05050';
-  if(needle)needle.setAttribute('stroke',col);
-  if(ndot)ndot.setAttribute('fill',col);
-  // Center perfect-tune zone: glow + animation when needle exactly centered
-  const cline=document.getElementById('_tn-cline');
-  if(cline){
-    cline.style.filter=perfect?'drop-shadow(0 0 6px #60dcff)':'none';
+  // ── Círculo: borda + glow ──
+  const circ=document.getElementById('_tn-circle');
+  if(circ){
+    circ.style.borderColor=col;
+    circ.style.boxShadow=_tuner.noSignal?'none':`0 0 18px ${col}44,0 0 36px ${col}1a,inset 0 0 20px ${col}0a`;
   }
-  const gz=document.getElementById('_tn-gzone');
-  if(gz){gz.style.filter=inTune?'drop-shadow(0 0 8px #5ad45a)':'none';gz.style.opacity=inTune?'1':'0.75';}
-  // "Afinação perfeita" pop text — aparece uma vez ao entrar na zona perfeita
+  // ── Pulse rings: cor + velocidade ──
+  const r1=document.getElementById('_tn-ring1'),r2=document.getElementById('_tn-ring2');
+  if(r1&&r2){
+    r1.style.color=col;r2.style.color=col;
+    const dur=inTune?'1.8s':close?'1.2s':'0.8s';
+    r1.style.animationDuration=dur;
+    r2.style.animationDuration=dur;
+    r2.style.animationDelay=inTune?'0.7s':close?'0.5s':'0.35s';
+  }
+  // ── LEDs ──
+  const _LED_THRESH=[50,42,30,18,8,3,8,18,30,42,50];
+  const _LED_TYPE=['red','red','amb','amb','amb','grn','amb','amb','amb','red','red'];
+  const _LED_SIDE=[-1,-1,-1,-1,-1,0,1,1,1,1,1];
+  for(let i=0;i<=10;i++){
+    const el=document.getElementById('_tn-led-'+i);
+    if(!el)continue;
+    if(_tuner.noSignal){el.style.cssText=(i===5?'width:18px;height:18px':'');continue;}
+    const abs=Math.abs(c),side=_LED_SIDE[i];
+    const onSide=side===0||(side<0&&c<0)||(side>0&&c>0);
+    const active=onSide&&abs<=_LED_THRESH[i];
+    if(!active){el.style.cssText=(i===5?'width:18px;height:18px':'');continue;}
+    if(_LED_TYPE[i]==='grn'){
+      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#3fc060;border-color:#5ce07a;box-shadow:'+(perfect?'0 0 14px #3fc060cc,0 0 26px #3fc06088':'0 0 10px #3fc06099,0 0 18px #3fc06044');
+    }else if(_LED_TYPE[i]==='amb'){
+      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#c07020;border-color:#e09020;box-shadow:0 0 8px #c0702099,0 0 14px #c0702044';
+    }else{
+      el.style.cssText=(i===5?'width:18px;height:18px;':'')+'background:#c03030;border-color:#e03030;box-shadow:0 0 8px #c0303099,0 0 14px #c0303044';
+    }
+  }
+  // ── Régua: agulha ──
+  const rn=document.getElementById('_tn-ruler-needle');
+  if(rn){
+    rn.style.left=((c+50)).toFixed(1)+'%';
+    rn.style.background=_tuner.noSignal?'#2a2a2a':col;
+    rn.style.boxShadow=_tuner.noSignal?'none':`0 0 8px ${col},0 0 16px ${col}66`;
+  }
+  // ── "Afinação perfeita" text ──
   const perfTxt=document.getElementById('_tn-perfect-txt');
   if(perfTxt){
     const now2=performance.now();
@@ -4843,24 +4890,28 @@ function _tunerUpdateDOM(){
       perfTxt.style.animation='none';
       void perfTxt.offsetWidth;
       perfTxt.style.animation='tunerPerfect 1.6s ease forwards';
-    } else if(!perfect){
-      perfTxt.style.animation='none';
-    }
+    } else if(!perfect){perfTxt.style.animation='none';}
   }
+  // ── Nome da nota ──
   const notEl=document.getElementById('_tn-note');
   if(notEl){
     notEl.textContent=_tuner.noSignal?'─':(_tuner.noteName||'─');
-    notEl.style.color=_tuner.noSignal?'#333':inTune?'#7cdd7c':'#fff';
+    notEl.style.color=col;
   }
+  // ── Oitava ──
   const octEl=document.getElementById('_tn-oct');
-  if(octEl)octEl.textContent=_tuner.noSignal?'':(_tuner.octave??'');
+  if(octEl){
+    octEl.textContent=_tuner.noSignal?'':(_tuner.octave!=null?'OCT '+_tuner.octave:'');
+    octEl.style.color=_tuner.noSignal?'#2a2a2a':col+'aa';
+  }
+  // ── Cents / status ──
   const cEl=document.getElementById('_tn-cents');
   if(cEl){
     if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#444';}
     else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';}
     else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';}
   }
-  // Input level meter
+  // ── Barra de nível de entrada ──
   const lvl=document.getElementById('_tn-level-bar');
   if(lvl&&_tuner.running){
     const pct=Math.min(100,Math.sqrt((_tuner.lastEnergy||0))*800);
@@ -5025,27 +5076,7 @@ function _tunerRefreshControls(){
 }
 
 function renderAfinador(){
-  // Auto-start mic when page is rendered
   if(!_tuner.running)setTimeout(_tunerStart,80);
-
-  // SVG arc helpers
-  function apt(c,r){const a=(90-c*1.8)*Math.PI/180;return [(150+r*Math.cos(a)).toFixed(2),(155-r*Math.sin(a)).toFixed(2)];}
-  function aseg(c1,c2,ri,ro){
-    const [x1o,y1o]=apt(c1,ro),[x2o,y2o]=apt(c2,ro),[x2i,y2i]=apt(c2,ri),[x1i,y1i]=apt(c1,ri);
-    return `M${x1o},${y1o} A${ro},${ro},0,0,1,${x2o},${y2o} L${x2i},${y2i} A${ri},${ri},0,0,0,${x1i},${y1i} Z`;
-  }
-  function tick(c,r1,r2,sw,col){
-    const [x1,y1]=apt(c,r1),[x2,y2]=apt(c,r2);
-    return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${sw}" stroke-linecap="round"/>`;
-  }
-  // Initial arrowhead at 0 cents (pointing straight up)
-  const nl=108,lineR=97,arrowLen=11,arrowW=5;
-  const a0=Math.PI/2;
-  const lx0=(150+lineR*Math.cos(a0)).toFixed(1),ly0=(155-lineR*Math.sin(a0)).toFixed(1);
-  const tipx0=(150+nl*Math.cos(a0)).toFixed(1),tipy0=(155-nl*Math.sin(a0)).toFixed(1);
-  const bx0=150+(nl-arrowLen)*Math.cos(a0),by0=155-(nl-arrowLen)*Math.sin(a0);
-  const ex0=-Math.sin(a0),ey0=-Math.cos(a0);
-  const arrow0=`${tipx0},${tipy0} ${(bx0+ex0*arrowW).toFixed(1)},${(by0+ey0*arrowW).toFixed(1)} ${(bx0-ex0*arrowW).toFixed(1)},${(by0-ey0*arrowW).toFixed(1)}`;
   const allTuned=_tuner.stringTuned.every(v=>v);
   return `
     <div class="back-row">
@@ -5059,60 +5090,92 @@ function renderAfinador(){
       <div style="width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.4rem auto 0"></div>
     </div>
     <div class="tuner-wrap">
-      <svg viewBox="0 0 300 160" class="tuner-svg" aria-hidden="true">
-        <defs>
-          <filter id="glow"><feGaussianBlur stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        </defs>
-        <path d="${aseg(-50,50,88,130)}" fill="#181818"/>
-        <path d="${aseg(-50,-15,88,130)}" fill="#c03030" opacity=".8"/>
-        <path d="${aseg(15,50,88,130)}"   fill="#c03030" opacity=".8"/>
-        <path d="${aseg(-15,-5,88,130)}"  fill="#c07020" opacity=".85"/>
-        <path d="${aseg(5,15,88,130)}"    fill="#c07020" opacity=".85"/>
-        <path id="_tn-gzone" d="${aseg(-5,5,88,130)}" fill="#38a838" opacity=".9"/>
-        <path d="${aseg(-50,50,88,93)}" fill="#111" opacity=".6"/>
-        ${tick(-25,130,139,1.5,'#555')}
-        ${tick(0,130,145,2.5,'#999')}
-        ${tick(25,130,139,1.5,'#555')}
-        ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,137,1,'#383838')).join('')}
-        <text x="18" y="158" text-anchor="end" fill="#aaa" font-size="19" font-weight="700" font-family="serif">♭</text>
-        <text x="282" y="158" fill="#aaa" font-size="19" font-weight="700" font-family="serif">♯</text>
-        <!-- Wider perfect-tune zone (±2¢) in cyan on top of green -->
-        <path d="${aseg(-2,2,92,128)}" fill="#60dcff" opacity=".18"/>
-        <!-- Center line — glows via JS when needle exactly centered -->
-        <line id="_tn-cline" x1="150" y1="25" x2="150" y2="62" stroke="#60dcff" stroke-width="2" stroke-linecap="round" opacity=".5"/>
-        <line id="_tn-needle" x1="150" y1="155" x2="${lx0}" y2="${ly0}" stroke="#3a3a3a" stroke-width="3" stroke-linecap="round"/>
-        <polygon id="_tn-ndot" points="${arrow0}" fill="#3a3a3a"/>
-        <circle cx="150" cy="155" r="9" fill="#252525" stroke="#3a3a3a" stroke-width="2"/>
-        <circle cx="150" cy="155" r="4" fill="#555"/>
-      </svg>
 
-      <!-- "Afinação perfeita" pop text -->
-      <div id="_tn-perfect-txt" style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.04em;text-shadow:0 0 12px #60dcff88;opacity:0;pointer-events:none;min-height:1.4rem;text-align:center">${t('tuner_perfect')||'Afinação Perfeita'}</div>
-
-      <div class="tuner-note-display">
-        <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span><sup id="_tn-oct" class="tuner-octave"></sup>
+      <!-- Círculo com pulse rings -->
+      <div class="tn-circle-outer">
+        <div class="tn-pulse-ring tn-pulse-ring-1" id="_tn-ring1" style="color:#3a3a3a"></div>
+        <div class="tn-pulse-ring tn-pulse-ring-2" id="_tn-ring2" style="color:#3a3a3a"></div>
+        <div class="tn-circle" id="_tn-circle">
+          <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span>
+          <span id="_tn-oct" class="tn-circle-oct"></span>
+        </div>
       </div>
+
+      <!-- Texto "Afinação Perfeita" -->
+      <div id="_tn-perfect-txt" style="font-size:1rem;font-weight:900;color:#60dcff;font-family:var(--font-title);letter-spacing:.04em;text-shadow:0 0 12px #60dcff88;opacity:0;pointer-events:none;min-height:1.4rem;text-align:center">${t('tuner_perfect')}</div>
+
+      <!-- Cents / status -->
       <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
 
-      <!-- String indicators -->
+      <!-- LEDs de precisão -->
+      <div class="tn-led-bar">
+        <div class="tn-led" id="_tn-led-0"  style="width:10px;height:10px"></div>
+        <div class="tn-led" id="_tn-led-1"  style="width:10px;height:10px"></div>
+        <div class="tn-led" id="_tn-led-2"></div>
+        <div class="tn-led" id="_tn-led-3"></div>
+        <div class="tn-led" id="_tn-led-4"></div>
+        <div class="tn-led" id="_tn-led-5"  style="width:18px;height:18px"></div>
+        <div class="tn-led" id="_tn-led-6"></div>
+        <div class="tn-led" id="_tn-led-7"></div>
+        <div class="tn-led" id="_tn-led-8"></div>
+        <div class="tn-led" id="_tn-led-9"  style="width:10px;height:10px"></div>
+        <div class="tn-led" id="_tn-led-10" style="width:10px;height:10px"></div>
+      </div>
+
+      <!-- Régua de precisão -->
+      <div class="tn-ruler-wrap">
+        <div class="tn-ruler-labels">
+          <span class="tn-ruler-flat">♭</span>
+          <span class="tn-ruler-sharp">♯</span>
+        </div>
+        <div class="tn-ruler-zone-outer">
+          <div class="tn-ruler-bg">
+            <div class="tn-rz tn-rz-rl"></div>
+            <div class="tn-rz tn-rz-al"></div>
+            <div class="tn-rz tn-rz-gl"></div>
+            <div class="tn-rz tn-rz-gc"></div>
+            <div class="tn-rz tn-rz-gr"></div>
+            <div class="tn-rz tn-rz-ar"></div>
+            <div class="tn-rz tn-rz-rr"></div>
+          </div>
+          <div class="tn-ruler-needle" id="_tn-ruler-needle"></div>
+        </div>
+        <div class="tn-ruler-ticks">
+          <div style="text-align:center"><div class="tn-rtick-maj"></div><div class="tn-rtick-lbl">−50</div></div>
+          <div class="tn-rtick-min"></div>
+          <div class="tn-rtick-min"></div>
+          <div style="text-align:center"><div class="tn-rtick-maj"></div><div class="tn-rtick-lbl">−25</div></div>
+          <div class="tn-rtick-min"></div>
+          <div class="tn-rtick-min"></div>
+          <div style="text-align:center"><div class="tn-rtick-maj" style="background:#2a4a2a"></div><div class="tn-rtick-lbl" style="color:#2a4a2a">0</div></div>
+          <div class="tn-rtick-min"></div>
+          <div class="tn-rtick-min"></div>
+          <div style="text-align:center"><div class="tn-rtick-maj"></div><div class="tn-rtick-lbl">+25</div></div>
+          <div class="tn-rtick-min"></div>
+          <div class="tn-rtick-min"></div>
+          <div style="text-align:center"><div class="tn-rtick-maj"></div><div class="tn-rtick-lbl">+50</div></div>
+        </div>
+      </div>
+
+      <!-- Cordas -->
       <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
 
-      <!-- Tuning mode toggle -->
+      <!-- Toggle afinação -->
       <div id="_tn-tuning-toggle" style="display:flex;gap:3px;margin-top:.45rem;margin-bottom:.1rem;width:100%;max-width:320px;background:#111;border:2px solid #1e1e1e;border-radius:12px;padding:3px">
         <button onclick="_tunerSetAltTuning(false)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${!_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_std')}</button>
         <button onclick="_tunerSetAltTuning(true)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_alt')}</button>
       </div>
 
-      <!-- Input level meter -->
-      <div style="width:100%;max-width:320px;height:5px;background:#1a1a1a;border-radius:3px;overflow:hidden;margin-top:.1rem">
+      <!-- Barra de nível de entrada -->
+      <div style="width:100%;max-width:320px;height:3px;background:#0d0d0d;border-radius:99px;overflow:hidden;margin-top:.1rem">
         <div id="_tn-level-bar" style="height:100%;width:0%;border-radius:3px;transition:width .06s"></div>
       </div>
 
-      <!-- All-tuned completion banner -->
+      <!-- Banner: violão afinado! -->
       <div id="_tn-complete" style="display:${allTuned?'flex':'none'};flex-direction:column;align-items:center;gap:.5rem;width:100%;max-width:320px;background:linear-gradient(180deg,#1a3a1a,#112211);border:2px solid #7cdd7c44;border-radius:16px;padding:1rem;margin-top:.5rem;animation:tunerComplete .5s ease">
         <img src="tuner-headstock.png" alt="" aria-hidden="true" style="width:52px;height:52px;object-fit:contain">
-        <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')||'Violão Afinado!'}</div>
-        <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')||'Todas as cordas no ponto ✓'}</div>
+        <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')}</div>
+        <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')}</div>
       </div>
     </div>`;
 }

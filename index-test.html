@@ -601,7 +601,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-octave{font-size:1.5rem;font-family:var(--font-body);color:#555;font-weight:700;align-self:flex-start;margin-top:.5rem}
 .tuner-cents-display{font-size:1.05rem;font-weight:700;font-family:var(--font-body);min-height:1.6rem;letter-spacing:.04em;text-align:center}
 .tuner-str-row{display:flex;gap:.45rem;justify-content:center;width:100%;max-width:320px}
-.tuner-str-btn{flex:1;max-width:46px;height:48px;border-radius:12px;border:2px solid #333;box-shadow:2px 2px 0 #111;display:flex;flex-direction:column;align-items:center;justify-content:space-between;cursor:default;gap:0;padding:3px 0;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc}
+.tuner-str-btn{flex:1;max-width:46px;height:48px;border-radius:12px;border:2px solid #333;box-shadow:2px 2px 0 #111;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:default;gap:2px;padding:0;background:linear-gradient(180deg,#2a2a2a,#1a1a1a);color:#ccc}
 .tuner-str-btn .str-note-name{font-size:1.1rem;font-weight:900;font-family:var(--font-title);line-height:1}
 .tuner-controls-row{display:flex;align-items:center;gap:.5rem;width:100%;max-width:320px}
 .tuner-preset-scroll{flex:1;overflow-x:auto;-webkit-overflow-scrolling:touch}
@@ -4971,7 +4971,9 @@ function _tunerCustomNote(strIdx,delta){
 }
 function _tunerBuildStrBtns(){
   return _tuner.tuning.map((noteStr,i)=>{
-    const {note}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
+    const {note,octave}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
+    // High E (E4 or above) shows as lowercase 'e' — guitar convention
+    const dispNote=(note==='E'&&octave>=4)?'e':note;
     const isTuned=_tuner.stringTuned[i];
     const isAct=_tuner.selectedString===i&&!isTuned;
     let bg,border,color;
@@ -4983,16 +4985,20 @@ function _tunerBuildStrBtns(){
       bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
     }
     const glow=isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':'';
+    // Text shadow only on light text (never on dark text like #111)
+    const noteShadow=color==='#111'?'':'text-shadow:0 1px 3px rgba(0,0,0,.8)';
+    const arrowColor=color==='#111'?'#444':'#999';
     if(_tuner.altTuning){
-      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}">
-        <button style="width:100%;flex:0 0 14px;border:none;background:transparent;color:#999;font-size:.6rem;cursor:pointer;touch-action:manipulation;line-height:1" onclick="_tunerCustomNote(${i},1)">▲</button>
-        <span class="str-note-name" style="text-shadow:0 1px 3px #000">${note}</span>
-        <button style="width:100%;flex:0 0 14px;border:none;background:transparent;color:#999;font-size:.6rem;cursor:pointer;touch-action:manipulation;line-height:1" onclick="_tunerCustomNote(${i},-1)">▼</button>
+      // gap:0 so children (flex:0 0 14px, flex:1, flex:0 0 14px) fill exactly 48px
+      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};border-color:${border};${glow}gap:0">
+        <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},1)">▲</button>
+        <span style="flex:1;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;font-family:var(--font-title);line-height:1;color:${color};${noteShadow}">${dispNote}</span>
+        <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},-1)">▼</button>
       </div>`;
     }
     const extra=isTuned?`<span style="font-size:.65rem;line-height:1">✓</span>`:'';
-    return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}justify-content:center;gap:1px">
-      <span class="str-note-name" style="text-shadow:0 1px 3px #000">${note}</span>
+    return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}">
+      <span class="str-note-name" style="${noteShadow}">${dispNote}</span>
       ${extra}
     </div>`;
   }).join('');
@@ -5061,8 +5067,8 @@ function renderAfinador(){
         ${tick(0,130,145,2.5,'#999')}
         ${tick(25,130,139,1.5,'#555')}
         ${[-40,-30,-20,-10,10,20,30,40].map(c=>tick(c,132,137,1,'#383838')).join('')}
-        <text x="4" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♭</text>
-        <text x="273" y="158" fill="#666" font-size="19" font-weight="700" font-family="serif">♯</text>
+        <text x="4" y="158" fill="#aaa" font-size="19" font-weight="700" font-family="serif" style="text-shadow:0 1px 3px #000">♭</text>
+        <text x="271" y="158" fill="#aaa" font-size="19" font-weight="700" font-family="serif" style="text-shadow:0 1px 3px #000">♯</text>
         <!-- Wider perfect-tune zone (±2¢) in cyan on top of green -->
         <path d="${aseg(-2,2,92,128)}" fill="#60dcff" opacity=".18"/>
         <!-- Center line — glows via JS when needle exactly centered -->

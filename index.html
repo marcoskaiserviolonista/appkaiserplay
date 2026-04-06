@@ -612,6 +612,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 /* ── Afinador v2 — Círculo + LEDs + Régua ── */
 @keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.38)}}
+@keyframes tnStrFlash{0%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 14px #7cdd7c88,2px 2px 0 #111;border-color:#7cdd7c}65%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 22px #7cdd7c,2px 2px 0 #111;border-color:#7cdd7c}100%{background:linear-gradient(180deg,#2a2a2a,#1a1a1a);box-shadow:2px 2px 0 #111;border-color:#333}}
 .tn-circle-outer{position:relative;width:190px;height:190px;margin:1.4rem auto .1rem}
 .tn-pulse-ring{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);border-radius:50%;border:2px solid currentColor;pointer-events:none;width:174px;height:174px}
 .tn-pulse-ring-1{animation:tnPulse 1.8s ease-out infinite}
@@ -4692,7 +4693,7 @@ const _tuner={
   // Perfect-tune text animation state
   perfectShownAt:0,
   // Confirmation bar (1 second stable in-tune)
-  inTuneBarStart:0,inTuneBarFull:false,
+  inTuneBarStart:0,inTuneBarFull:false,inTuneBarGapStart:0,
 };
 
 function _tunerNote2Midi(name){
@@ -4884,16 +4885,28 @@ function _tunerUpdateDOM(){
     rn.style.background=_tuner.noSignal?'#2a2a2a':col;
     rn.style.boxShadow=_tuner.noSignal?'none':`0 0 8px ${col},0 0 16px ${col}66`;
   }
-  // ── Barra de confirmação (enche em 1s enquanto afinado) ──
+  // ── Barra de confirmação (enche em 1s; threshold 7¢ + grace 250ms para cordas graves) ──
+  const barInTune=!_tuner.noSignal&&Math.abs(c)<7;
   const barEl=document.getElementById('_tn-tune-bar');
   if(barEl){
     const nowBar=performance.now();
-    if(!inTune||_tuner.noSignal){
-      _tuner.inTuneBarStart=0;
-      _tuner.inTuneBarFull=false;
-      barEl.style.width='0%';
-      barEl.style.transition='width .1s,background .3s';
+    if(_tuner.noSignal){
+      _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
+      barEl.style.width='0%';barEl.style.transition='width .1s,background .3s';
+    } else if(!barInTune){
+      if(_tuner.inTuneBarStart>0){
+        // Brief gap — aguarda 250ms antes de resetar (estabilidade em cordas graves)
+        if(!_tuner.inTuneBarGapStart)_tuner.inTuneBarGapStart=nowBar;
+        if(nowBar-_tuner.inTuneBarGapStart>250){
+          _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
+          barEl.style.width='0%';barEl.style.transition='width .1s,background .3s';
+        }
+        // else: dentro do grace — barra pausa no lugar atual
+      } else {
+        _tuner.inTuneBarGapStart=0;
+      }
     } else {
+      _tuner.inTuneBarGapStart=0;
       if(!_tuner.inTuneBarStart)_tuner.inTuneBarStart=nowBar;
       const pct=Math.min(100,(nowBar-_tuner.inTuneBarStart)/1000*100);
       barEl.style.width=pct+'%';
@@ -4968,6 +4981,9 @@ function _tunerAnimLoop(){
         _tuner.stringTuned[_si]=true;
         if(_tuner.lastInTuneSfxStr!==_si){_tuner.lastInTuneSfxStr=_si;_tunerPlayInTuneSfx();}
         _tunerRefreshControls();_tunerCheckAllTuned();
+        // Flash verde no botão da corda afinada
+        const _fe=document.getElementById('_tn-str-'+_si);
+        if(_fe){_fe.style.animation='none';void _fe.offsetWidth;_fe.style.animation='tnStrFlash 1.5s ease forwards';}
       }
     } else {
       _tuner.stringInTuneStart[_si]=0;
@@ -5027,7 +5043,7 @@ function _tunerStop(){
   _tuner.stringTuned=[false,false,false,false,false,false];
   _tuner.stringInTuneStart=[0,0,0,0,0,0];
   _tuner.allTunedShown=false;_tuner.lastInTuneSfxStr=-1;
-  _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;
+  _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
 }
 function _tunerSelectString(idx){
   playClickSfx('soft');
@@ -5056,32 +5072,21 @@ function _tunerBuildStrBtns(){
     const {note,octave}=_tunerMidi2Label(_tunerNote2Midi(noteStr));
     // High E (E4 or above) shows as lowercase 'e' — guitar convention
     const dispNote=(note==='E'&&octave>=4)?'e':note;
-    const isTuned=_tuner.stringTuned[i];
-    const isAct=_tuner.selectedString===i&&!isTuned;
-    let bg,border,color;
-    if(isTuned){
-      bg='linear-gradient(180deg,#3dbd3d,#2a8a2a)';border='#7cdd7c';color='#fff';
-    } else if(isAct){
-      bg='linear-gradient(180deg,#ffbe4f,#F5A623)';border='#F5A623';color='#111';
-    } else {
-      bg='linear-gradient(180deg,#2a2a2a,#1a1a1a)';border='#333';color='#ccc';
-    }
-    const glow=isTuned?'box-shadow:0 0 8px #7cdd7c55,2px 2px 0 #111;':'';
-    // Text shadow only on light text (never on dark text like #111)
-    const noteShadow=color==='#111'?'':'text-shadow:0 1px 3px rgba(0,0,0,.8)';
-    const arrowColor=color==='#111'?'#444':'#999';
+    const isAct=_tuner.selectedString===i;
+    const bg=isAct?'linear-gradient(180deg,#ffbe4f,#F5A623)':'linear-gradient(180deg,#2a2a2a,#1a1a1a)';
+    const border=isAct?'#F5A623':'#333';
+    const color=isAct?'#111':'#ccc';
+    const noteShadow=isAct?'':'text-shadow:0 1px 3px rgba(0,0,0,.8)';
+    const arrowColor=isAct?'#444':'#999';
     if(_tuner.altTuning){
-      // gap:0 so children (flex:0 0 14px, flex:1, flex:0 0 14px) fill exactly 48px
-      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};border-color:${border};${glow}gap:0">
+      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};border-color:${border};gap:0">
         <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},1)">▲</button>
         <span style="flex:1;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;font-family:var(--font-title);line-height:1;color:${color};${noteShadow}">${dispNote}</span>
         <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},-1)">▼</button>
       </div>`;
     }
-    const extra=isTuned?`<span style="font-size:.65rem;line-height:1">✓</span>`:'';
-    return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};${glow}">
+    return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};box-shadow:2px 2px 0 #111">
       <span class="str-note-name" style="${noteShadow}">${dispNote}</span>
-      ${extra}
     </div>`;
   }).join('');
 }

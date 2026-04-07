@@ -611,6 +611,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-mic-btn{width:100%;max-width:320px;padding:1rem;border-radius:18px;border:3px solid #111;box-shadow:5px 5px 0 #111;font-size:1.1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.02em;touch-action:manipulation;transition:filter .1s}
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 /* ── Afinador v2 — Círculo + LEDs + Régua ── */
+@keyframes tnPlayGlow{0%,100%{text-shadow:0 0 6px #60dcff44,0 0 14px #60dcff22;opacity:.6}50%{text-shadow:0 0 16px #60dcff,0 0 32px #60dcff88;opacity:1}}
 @keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.38)}}
 @keyframes tnStrFlash{0%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 14px #7cdd7c88,2px 2px 0 #111;border-color:#7cdd7c}65%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 22px #7cdd7c,2px 2px 0 #111;border-color:#7cdd7c}100%{background:linear-gradient(180deg,#2a2a2a,#1a1a1a);box-shadow:2px 2px 0 #111;border-color:#333}}
 .tn-circle-outer{position:relative;width:190px;height:190px;margin:1.4rem auto .1rem}
@@ -4808,16 +4809,18 @@ function _tunerProcess(result){
 
 function _tunerPlayInTuneSfx(){
   try{
-    const ctx=getAudioCtx();const t=ctx.currentTime;
-    // Beep tecnológico curto — não simula corda, não interfere no microfone
+    const ctx=getAudioCtx();
+    if(ctx.state==='suspended')ctx.resume();
+    const t=ctx.currentTime;
+    // Dois tons ascendentes — sine limpo, mais audível
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);
-    o.type='square';
-    o.frequency.setValueAtTime(2200,t);
-    o.frequency.setValueAtTime(2800,t+0.03);
-    g.gain.setValueAtTime(0.08,t);
-    g.gain.exponentialRampToValueAtTime(0.001,t+0.10);
-    o.start(t);o.stop(t+0.10);
+    o.type='sine';
+    o.frequency.setValueAtTime(1760,t);
+    o.frequency.setValueAtTime(2093,t+0.09);
+    g.gain.setValueAtTime(0.20,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
+    o.start(t);o.stop(t+0.25);
   }catch(e){}
 }
 function _tunerCheckAllTuned(){
@@ -4946,9 +4949,9 @@ function _tunerUpdateDOM(){
   // ── Cents / status ──
   const cEl=document.getElementById('_tn-cents');
   if(cEl){
-    if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#60dcff';}
-    else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';}
-    else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';}
+    if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#60dcff';cEl.style.animation='tnPlayGlow 2s ease-in-out infinite';}
+    else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';cEl.style.animation='';}
+    else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';cEl.style.animation='';}
   }
   // ── Barra de nível de entrada ──
   const lvl=document.getElementById('_tn-level-bar');

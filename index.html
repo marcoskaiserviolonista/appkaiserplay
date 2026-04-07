@@ -4678,7 +4678,7 @@ const _tuner={
   freq:null,noteName:null,octave:null,
   smoothCents:0,needleVel:0,targetCents:0,
   lastDetect:0,detectInterval:30,
-  lastSignalTime:0,holdMs:2000,
+  lastSignalTime:0,holdMs:600,
   selectedString:-1,
   tuning:['E2','A2','D3','G3','B3','E4'],
   guitarMode:false,
@@ -4760,7 +4760,7 @@ function _tunerProcess(result){
   const now=performance.now();
   if(!result){
     // String still vibrating but YIN can't lock — hold the last reading
-    if(_tuner.lastEnergy>0.0000015){_tuner.lastSignalTime=now;return;}
+    if(_tuner.lastEnergy>0.0000008){_tuner.lastSignalTime=now;return;}
     // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
       _tuner.noSignal=true;_tuner.targetCents=0;_tuner.stableCents=0;
@@ -4852,16 +4852,19 @@ function _tunerUpdateDOM(){
     circ.style.borderColor=col;
     circ.style.boxShadow=_tuner.noSignal?'none':`0 0 18px ${col}44,0 0 36px ${col}1a,inset 0 0 20px ${col}0a`;
   }
-  // ── Pulse rings: só vibram quando há sinal ──
+  // ── Pulse rings: lentos no silêncio, reativos ao som ──
   const r1=document.getElementById('_tn-ring1'),r2=document.getElementById('_tn-ring2');
   if(r1&&r2){
-    r1.style.display=_tuner.noSignal?'none':'';
-    r2.style.display=_tuner.noSignal?'none':'';
-    r1.style.color=col;r2.style.color=col;
-    const dur=inTune?'1.8s':close?'1.2s':'0.8s';
-    r1.style.animationDuration=dur;
-    r2.style.animationDuration=dur;
-    r2.style.animationDelay=inTune?'0.7s':close?'0.5s':'0.35s';
+    if(_tuner.noSignal){
+      r1.style.color='#1a1a1a';r2.style.color='#1a1a1a';
+      r1.style.animationDuration='5s';r2.style.animationDuration='5s';
+      r2.style.animationDelay='2.2s';
+    } else {
+      r1.style.color=col;r2.style.color=col;
+      const dur=inTune?'1.8s':close?'1.2s':'0.8s';
+      r1.style.animationDuration=dur;r2.style.animationDuration=dur;
+      r2.style.animationDelay=inTune?'0.7s':close?'0.5s':'0.35s';
+    }
   }
   // ── LEDs (bilateral: acendem dos dois lados convergindo ao centro) ──
   const _LED_THRESH=[50,40,28,18,10,4,10,18,28,40,50];

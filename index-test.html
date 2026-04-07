@@ -4946,7 +4946,7 @@ function _tunerUpdateDOM(){
   // ── Cents / status ──
   const cEl=document.getElementById('_tn-cents');
   if(cEl){
-    if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#444';}
+    if(_tuner.noSignal){cEl.textContent=t('tuner_play');cEl.style.color='#60dcff';}
     else if(inTune){cEl.textContent=t('tuner_in_tune');cEl.style.color='#7cdd7c';}
     else{const cv=Math.round(Math.abs(c));cEl.textContent=(c<0?'♭ ':'♯ ')+cv+'¢';cEl.style.color=close?'#F5A623':'#e08080';}
   }

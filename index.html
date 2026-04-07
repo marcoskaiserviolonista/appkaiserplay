@@ -4852,9 +4852,11 @@ function _tunerUpdateDOM(){
     circ.style.borderColor=col;
     circ.style.boxShadow=_tuner.noSignal?'none':`0 0 18px ${col}44,0 0 36px ${col}1a,inset 0 0 20px ${col}0a`;
   }
-  // ── Pulse rings: cor + velocidade ──
+  // ── Pulse rings: só vibram quando há sinal ──
   const r1=document.getElementById('_tn-ring1'),r2=document.getElementById('_tn-ring2');
   if(r1&&r2){
+    r1.style.display=_tuner.noSignal?'none':'';
+    r2.style.display=_tuner.noSignal?'none':'';
     r1.style.color=col;r2.style.color=col;
     const dur=inTune?'1.8s':close?'1.2s':'0.8s';
     r1.style.animationDuration=dur;

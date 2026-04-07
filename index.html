@@ -632,11 +632,11 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tn-rz-al{left:20%;width:13%;background:linear-gradient(90deg,#4a2200,#8a4500)}
 .tn-rz-gl{left:33%;width:5%;background:#1a5a1a}
 .tn-rz-gc{left:38%;width:24%;background:#226a22}
-.tn-rz-perfect{left:46%;width:8%;background:#60dcff;box-shadow:0 0 6px #60dcff,0 0 14px #60dcff88;z-index:2}
+.tn-rz-perfect{left:44%;width:12%;background:#60dcff;box-shadow:0 0 8px #60dcff,0 0 18px #60dcff99;z-index:2}
 .tn-rz-gr{left:62%;width:5%;background:#1a5a1a}
 .tn-rz-ar{left:67%;width:13%;background:linear-gradient(90deg,#8a4500,#4a2200)}
 .tn-rz-rr{left:80%;width:20%;background:linear-gradient(90deg,#802020,#4a0e0e)}
-.tn-ruler-needle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:18px;border-radius:2px;background:#2a2a2a;transition:left .12s cubic-bezier(.25,.8,.25,1),background .25s,box-shadow .25s;pointer-events:none}
+.tn-ruler-needle{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:4px;height:18px;border-radius:2px;background:#2a2a2a;transition:left .04s linear,background .2s,box-shadow .2s;pointer-events:none}
 .tn-ruler-center-mark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:3px;height:14px;border-radius:2px;background:#60dcff;box-shadow:0 0 5px #60dcff,0 0 12px #60dcff66;pointer-events:none;z-index:3}
 .tn-ruler-ticks{display:flex;justify-content:space-between;align-items:flex-start;margin-top:2px}
 .tn-rtick-maj{width:1.5px;height:10px;background:#252525;border-radius:1px;margin:0 auto}
@@ -917,7 +917,8 @@ const STRINGS = {
     streak_congrats_pre:'Parabéns, você está há',
     streak_congrats_pos:'dias ativos!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
-    tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'Tecnologia Máxima',
+    tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'o melhor afinador do mundo',
+    tuner_free:'Afinação livre',tuner_guitar:'Afinação do violão',
     tuner_in_tune:'✓ Afinado!',tuner_mic_error:'Sem acesso ao microfone',tuner_all_tuned:'Violão Afinado!',tuner_all_tuned_sub:'Todas as cordas no ponto ✓',tuner_perfect:'✦ Afinação Perfeita ✦',
     tuner_play:'Toque uma corda',tuner_custom:'Personalizar',tuner_done:'Concluir',
     tuner_std:'Afinação padrão',tuner_alt:'Afinação alternativa',tuner_half_down:'Meio Tom ↓',
@@ -1139,7 +1140,8 @@ const STRINGS = {
     streak_congrats_pre:'Congrats, you\'ve been active for',
     streak_congrats_pos:'days!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
-    tuner_title:'High Precision Tuner',tuner_subtitle:'Maximum Technology',
+    tuner_title:'High Precision Tuner',tuner_subtitle:'the best tuner in the world',
+    tuner_free:'Free tuning',tuner_guitar:'Guitar tuning',
     tuner_in_tune:'✓ In Tune!',tuner_mic_error:'No microphone access',tuner_all_tuned:'Guitar In Tune!',tuner_all_tuned_sub:'All strings in tune ✓',tuner_perfect:'✦ Perfect Tune ✦',
     tuner_play:'Play a string',tuner_custom:'Customize',tuner_done:'Done',
     tuner_std:'Standard tuning',tuner_alt:'Alternative tuning',tuner_half_down:'Half Step ↓',
@@ -1361,7 +1363,8 @@ const STRINGS = {
     streak_congrats_pre:'¡Felicidades, llevas',
     streak_congrats_pos:'días activos!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
-    tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'Tecnología Máxima',
+    tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'el mejor afinador del mundo',
+    tuner_free:'Afinación libre',tuner_guitar:'Afinación de guitarra',
     tuner_in_tune:'✓ ¡Afinado!',tuner_mic_error:'Sin acceso al micrófono',tuner_all_tuned:'¡Guitarra Afinada!',tuner_all_tuned_sub:'Todas las cuerdas a punto ✓',tuner_perfect:'✦ Afinación Perfecta ✦',
     tuner_play:'Toca una cuerda',tuner_custom:'Personalizar',tuner_done:'Listo',
     tuner_std:'Afinación estándar',tuner_alt:'Afinación alternativa',tuner_half_down:'Semitono ↓',
@@ -4429,7 +4432,7 @@ function render(){
   if(!state.user&&!state.isGuest){state.phase='login';c.innerHTML=renderLogin();return;}
   if(state.phase==='perfil'){c.innerHTML=renderPerfil();return;}
   if(state.tab==='ranking'){c.innerHTML=renderRanking();return;}
-  if(state.phase==='start'){c.innerHTML=renderStart();_checkPurchasePrompt();return;}
+  if(state.phase==='start'){c.innerHTML=renderStart();return;}
   if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
@@ -4671,14 +4674,14 @@ const _TUNER_NOTES=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const _tuner={
   ctx:null,source:null,analyser:null,stream:null,
   running:false,animFrame:null,
-  buffer:null,bufSize:4096,
+  buffer:null,bufSize:8192,
   freq:null,noteName:null,octave:null,
   smoothCents:0,needleVel:0,targetCents:0,
   lastDetect:0,detectInterval:30,
   lastSignalTime:0,holdMs:2000,
   selectedString:-1,
   tuning:['E2','A2','D3','G3','B3','E4'],
-  altTuning:false,
+  guitarMode:false,
   noSignal:true,
   lastEnergy:0,
   a4:440,
@@ -4693,8 +4696,8 @@ const _tuner={
   stableCents:0,
   // Perfect-tune text animation state
   perfectShownAt:0,
-  // Confirmation bar (1 second stable in-tune)
-  inTuneBarStart:0,inTuneBarFull:false,inTuneBarGapStart:0,
+  // Confirmation bar (enche/esvazia progressivamente)
+  inTuneBarPct:0,inTuneBarFull:false,lastBarUpdateTime:0,
 };
 
 function _tunerNote2Midi(name){
@@ -4715,10 +4718,10 @@ function _tunerYIN(buf,sr){
   let energy=0;
   for(let i=0;i<N;i++)energy+=buf[i]*buf[i];
   _tuner.lastEnergy=energy/N;
-  if(_tuner.lastEnergy<0.0000015)return null;
-  // Frequency range for guitar: 55Hz (A1) to 1400Hz
+  if(_tuner.lastEnergy<0.0000005)return null;
+  // Frequency range: 27Hz (sub-bass) to 1400Hz — cobre qualquer instrumento incluindo 7ª corda
   const tauMin=Math.max(2,Math.floor(sr/1400));
-  const tauMax=Math.min(half-1,Math.floor(sr/55));
+  const tauMax=Math.min(half-1,Math.floor(sr/27));
   // Step 1: Difference function d(tau)
   const d=new Float32Array(tauMax+1);
   for(let tau=1;tau<=tauMax;tau++){
@@ -4770,19 +4773,23 @@ function _tunerProcess(result){
   _tuner.noSignal=false;
   const rawMidi=_tunerFreq2Midi(result.freq);
 
-  // Auto-detect closest string (within 2 semitones)
-  let closest=-1,minDist=2.0;
-  _tuner.tuning.forEach((n,i)=>{
-    const d=Math.abs(rawMidi-_tunerNote2Midi(n));
-    if(d<minDist){minDist=d;closest=i;}
-  });
-  if(closest>=0&&_tuner.selectedString!==closest){
-    _tuner.selectedString=closest;
-    _tuner.centsBuf=[];_tuner.targetCents=0;_tuner.stableCents=0;
-    _tunerRefreshControls();
+  if(_tuner.guitarMode){
+    // Auto-detect closest string (dentro de 2 semitons)
+    let closest=-1,minDist=2.0;
+    _tuner.tuning.forEach((n,i)=>{
+      const d=Math.abs(rawMidi-_tunerNote2Midi(n));
+      if(d<minDist){minDist=d;closest=i;}
+    });
+    if(closest>=0&&_tuner.selectedString!==closest){
+      _tuner.selectedString=closest;
+      _tuner.centsBuf=[];_tuner.targetCents=0;_tuner.stableCents=0;
+      _tunerRefreshControls();
+    }
+  } else {
+    _tuner.selectedString=-1;
   }
 
-  const targetMidi=_tuner.selectedString>=0?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
+  const targetMidi=(_tuner.guitarMode&&_tuner.selectedString>=0)?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
   const rawCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
   // Median filter: acumula últimas N leituras, usa mediana para eliminar outliers/spikes
   _tuner.centsBuf.push(rawCents);
@@ -4802,20 +4809,15 @@ function _tunerProcess(result){
 function _tunerPlayInTuneSfx(){
   try{
     const ctx=getAudioCtx();const t=ctx.currentTime;
+    // Beep tecnológico curto — não simula corda, não interfere no microfone
     const o=ctx.createOscillator(),g=ctx.createGain();
     o.connect(g);g.connect(ctx.destination);
-    o.type='sine';
-    o.frequency.setValueAtTime(1047,t);
-    o.frequency.exponentialRampToValueAtTime(1319,t+0.04);
-    g.gain.setValueAtTime(0.25,t);g.gain.exponentialRampToValueAtTime(0.001,t+0.55);
-    o.start(t);o.stop(t+0.55);
-    // Second note slightly later
-    const o2=ctx.createOscillator(),g2=ctx.createGain();
-    o2.connect(g2);g2.connect(ctx.destination);
-    o2.type='sine';o2.frequency.value=1760;
-    g2.gain.setValueAtTime(0,t);g2.gain.setValueAtTime(0.18,t+0.06);
-    g2.gain.exponentialRampToValueAtTime(0.001,t+0.5);
-    o2.start(t+0.06);o2.stop(t+0.5);
+    o.type='square';
+    o.frequency.setValueAtTime(2200,t);
+    o.frequency.setValueAtTime(2800,t+0.03);
+    g.gain.setValueAtTime(0.08,t);
+    g.gain.exponentialRampToValueAtTime(0.001,t+0.10);
+    o.start(t);o.stop(t+0.10);
   }catch(e){}
 }
 function _tunerCheckAllTuned(){
@@ -4861,8 +4863,10 @@ function _tunerUpdateDOM(){
   }
   // ── LEDs (bilateral: acendem dos dois lados convergindo ao centro) ──
   const _LED_THRESH=[50,40,28,18,10,4,10,18,28,40,50];
-  const _LED_TYPE=['red','red','amb','amb','amb','grn','amb','amb','amb','red','red'];
-  const _FADE_DELAY=['0ms','50ms','150ms','250ms','350ms','500ms','350ms','250ms','150ms','50ms','0ms'];
+  // Cores: vermelho → laranja → verde → azul (centro)
+  const _LED_TYPE=['red','red','amb','amb','grn','cyn','grn','amb','amb','red','red'];
+  // Apagam com delay: primeiro vermelhos (0ms), depois laranjas, depois verdes, centro por último
+  const _FADE_DELAY=['0ms','50ms','150ms','250ms','400ms','600ms','400ms','250ms','150ms','50ms','0ms'];
   const absC=Math.abs(c);
   for(let i=0;i<=10;i++){
     const el=document.getElementById('_tn-led-'+i);
@@ -4874,8 +4878,10 @@ function _tunerUpdateDOM(){
       continue;
     }
     el.style.transitionDelay='0ms';
-    if(_LED_TYPE[i]==='grn'){
-      el.style.background=col;el.style.borderColor=col+'cc';el.style.boxShadow='0 0 12px '+col+'aa,0 0 22px '+col+'55';
+    if(_LED_TYPE[i]==='cyn'){
+      el.style.background=col;el.style.borderColor=col+'cc';el.style.boxShadow='0 0 14px '+col+',0 0 28px '+col+'77';
+    }else if(_LED_TYPE[i]==='grn'){
+      el.style.background='#3dd13d';el.style.borderColor='#5ae05a';el.style.boxShadow='0 0 10px #3dd13d99,0 0 20px #3dd13d55';
     }else if(_LED_TYPE[i]==='amb'){
       el.style.background='#c07020';el.style.borderColor='#e09020';el.style.boxShadow='0 0 8px #c0702099,0 0 14px #c0702044';
     }else{
@@ -4889,35 +4895,35 @@ function _tunerUpdateDOM(){
     rn.style.background=_tuner.noSignal?'#2a2a2a':col;
     rn.style.boxShadow=_tuner.noSignal?'none':`0 0 8px ${col},0 0 16px ${col}66`;
   }
-  // ── Barra de confirmação (enche em 1s; esvazia ao sair da zona) ──
-  const barInTune=!_tuner.noSignal&&Math.abs(c)<7;
+  // ── Barra de confirmação (enche e esvazia progressivamente) ──
+  const barInTune=!_tuner.noSignal&&Math.abs(c)<5;
   const barEl=document.getElementById('_tn-tune-bar');
   if(barEl){
     const nowBar=performance.now();
-    if(!barInTune){
-      _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
-      barEl.style.transition='width .5s ease-out,background .3s';
-      barEl.style.width='0%';
-      barEl.style.background='linear-gradient(90deg,#1a4a1a,#7cdd7c)';
+    const dt=_tuner.lastBarUpdateTime?Math.min(0.08,(nowBar-_tuner.lastBarUpdateTime)/1000):0;
+    _tuner.lastBarUpdateTime=nowBar;
+    if(barInTune){
+      _tuner.inTuneBarPct=Math.min(100,_tuner.inTuneBarPct+dt*100);
     } else {
-      if(!_tuner.inTuneBarStart)_tuner.inTuneBarStart=nowBar;
-      const pct=Math.min(100,(nowBar-_tuner.inTuneBarStart)/1000*100);
-      barEl.style.width=pct+'%';
-      barEl.style.transition='background .3s'+(pct<100?',width .05s':'');
-      barEl.style.background=pct>=100
-        ?'linear-gradient(90deg,#60dcff,#ffffff88,#60dcff)'
-        :(perfect?'linear-gradient(90deg,#1a5a7a,#60dcff)':'linear-gradient(90deg,#1a4a1a,#7cdd7c)');
-      if(pct>=100&&!_tuner.inTuneBarFull){
-        _tuner.inTuneBarFull=true;
-        const perfTxt2=document.getElementById('_tn-perfect-txt');
-        if(perfTxt2&&nowBar-_tuner.perfectShownAt>1500){
-          _tuner.perfectShownAt=nowBar;
-          perfTxt2.style.animation='none';
-          void perfTxt2.offsetWidth;
-          perfTxt2.style.animation='tunerPerfect 2s ease forwards';
-        }
+      _tuner.inTuneBarPct=Math.max(0,_tuner.inTuneBarPct-dt*200);
+      if(_tuner.inTuneBarPct<95)_tuner.inTuneBarFull=false;
+    }
+    const pct=_tuner.inTuneBarPct;
+    if(pct>=100&&!_tuner.inTuneBarFull){
+      _tuner.inTuneBarFull=true;
+      const perfTxt2=document.getElementById('_tn-perfect-txt');
+      if(perfTxt2&&nowBar-_tuner.perfectShownAt>1500){
+        _tuner.perfectShownAt=nowBar;
+        perfTxt2.style.animation='none';
+        void perfTxt2.offsetWidth;
+        perfTxt2.style.animation='tunerPerfect 2s ease forwards';
       }
     }
+    barEl.style.transition='background .3s';
+    barEl.style.width=pct+'%';
+    barEl.style.background=pct>=100
+      ?'linear-gradient(90deg,#60dcff,#ffffff88,#60dcff)'
+      :'linear-gradient(90deg,#1a5a7a,#60dcff)';
   }
   // ── Nome da nota ──
   const notEl=document.getElementById('_tn-note');
@@ -4965,27 +4971,29 @@ function _tunerAnimLoop(){
   _tuner.smoothCents=Math.max(-52,Math.min(52,_tuner.smoothCents*(1-blend)+target*blend));
   _tuner.needleVel=0;
 
-  // Per-string in-tune tracking — verifica DEPOIS do smoothing (agulha realmente parada no centro)
-  const _si=_tuner.selectedString;
-  if(_si>=0&&!_tuner.noSignal){
-    if(Math.abs(_tuner.smoothCents)<5){
-      if(!_tuner.stringInTuneStart[_si])_tuner.stringInTuneStart[_si]=now;
-      if(!_tuner.stringTuned[_si]&&now-_tuner.stringInTuneStart[_si]>_tuner.inTuneMs){
-        _tuner.stringTuned[_si]=true;
-        if(_tuner.lastInTuneSfxStr!==_si){_tuner.lastInTuneSfxStr=_si;_tunerPlayInTuneSfx();}
-        _tunerRefreshControls();_tunerCheckAllTuned();
-        // Flash verde no botão da corda afinada
-        const _fe=document.getElementById('_tn-str-'+_si);
-        if(_fe){_fe.style.animation='none';void _fe.offsetWidth;_fe.style.animation='tnStrFlash 1.5s ease forwards';}
+  // Per-string in-tune tracking — só no modo violão
+  if(_tuner.guitarMode){
+    const _si=_tuner.selectedString;
+    if(_si>=0&&!_tuner.noSignal){
+      if(Math.abs(_tuner.smoothCents)<5){
+        if(!_tuner.stringInTuneStart[_si])_tuner.stringInTuneStart[_si]=now;
+        if(!_tuner.stringTuned[_si]&&now-_tuner.stringInTuneStart[_si]>_tuner.inTuneMs){
+          _tuner.stringTuned[_si]=true;
+          if(_tuner.lastInTuneSfxStr!==_si){_tuner.lastInTuneSfxStr=_si;_tunerPlayInTuneSfx();}
+          _tunerRefreshControls();_tunerCheckAllTuned();
+          // Flash verde no botão da corda afinada (pisca e volta ao normal)
+          const _fe=document.getElementById('_tn-str-'+_si);
+          if(_fe){_fe.style.animation='none';void _fe.offsetWidth;_fe.style.animation='tnStrFlash 1.5s ease forwards';}
+        }
+      } else {
+        _tuner.stringInTuneStart[_si]=0;
+        // Destravar automaticamente se a mesma corda for tocada bem desafinada (>25¢)
+        if(_tuner.stringTuned[_si]&&Math.abs(_tuner.smoothCents)>25){
+          _tuner.stringTuned[_si]=false;_tuner.allTunedShown=false;_tunerRefreshControls();
+        }
       }
-    } else {
-      _tuner.stringInTuneStart[_si]=0;
-      // Destravar automaticamente se a mesma corda for tocada bem desafinada (>25¢)
-      if(_tuner.stringTuned[_si]&&Math.abs(_tuner.smoothCents)>25){
-        _tuner.stringTuned[_si]=false;_tuner.allTunedShown=false;_tunerRefreshControls();
-      }
-    }
-  } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
+    } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
+  }
   _tunerUpdateDOM();
   _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);
 }
@@ -5036,7 +5044,8 @@ function _tunerStop(){
   _tuner.stringTuned=[false,false,false,false,false,false];
   _tuner.stringInTuneStart=[0,0,0,0,0,0];
   _tuner.allTunedShown=false;_tuner.lastInTuneSfxStr=-1;
-  _tuner.inTuneBarStart=0;_tuner.inTuneBarFull=false;_tuner.inTuneBarGapStart=0;
+  _tuner.inTuneBarPct=0;_tuner.inTuneBarFull=false;_tuner.lastBarUpdateTime=0;
+  _tuner.guitarMode=false;
 }
 function _tunerSelectString(idx){
   playClickSfx('soft');
@@ -5070,14 +5079,6 @@ function _tunerBuildStrBtns(){
     const border=isAct?'#F5A623':'#333';
     const color=isAct?'#111':'#ccc';
     const noteShadow=isAct?'':'text-shadow:0 1px 3px rgba(0,0,0,.8)';
-    const arrowColor=isAct?'#444':'#999';
-    if(_tuner.altTuning){
-      return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};border-color:${border};gap:0">
-        <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},1)">▲</button>
-        <span style="flex:1;display:flex;align-items:center;justify-content:center;font-size:1rem;font-weight:900;font-family:var(--font-title);line-height:1;color:${color};${noteShadow}">${dispNote}</span>
-        <button style="flex:0 0 14px;width:100%;display:flex;align-items:center;justify-content:center;border:none;background:transparent;color:${arrowColor};font-size:.9rem;line-height:1;cursor:pointer;touch-action:manipulation;padding:0;margin:0" onclick="_tunerCustomNote(${i},-1)">▼</button>
-      </div>`;
-    }
     return `<div id="_tn-str-${i}" class="tuner-str-btn" style="background:${bg};color:${color};border-color:${border};box-shadow:2px 2px 0 #111">
       <span class="str-note-name" style="${noteShadow}">${dispNote}</span>
     </div>`;
@@ -5085,37 +5086,54 @@ function _tunerBuildStrBtns(){
 }
 function _tunerRefreshControls(){
   const sr=document.getElementById('_tn-str-row');
-  if(sr)sr.innerHTML=_tunerBuildStrBtns();
-  const tp=document.getElementById('_tn-tuning-toggle');
+  if(sr){
+    sr.style.display=_tuner.guitarMode?'flex':'none';
+    if(_tuner.guitarMode)sr.innerHTML=_tunerBuildStrBtns();
+  }
+  const ct=document.getElementById('_tn-complete');
+  if(ct)ct.style.display=(_tuner.guitarMode&&_tuner.stringTuned.every(v=>v))?'flex':'none';
+  const tp=document.getElementById('_tn-mode-toggle');
   if(tp){
     const btns=tp.querySelectorAll('button');
-    function _applyToggleStyle(btn,active){
-      btn.style.background=active?'#383838':'#0d0d0d';
-      btn.style.color=active?'#fff':'#444';
-      btn.style.textShadow=active?'0 1px 3px #000':'none';
-      btn.style.boxShadow=active?'0 2px 0 #000':'inset 0 2px 3px rgba(0,0,0,.7)';
-      btn.style.transform=active?'translateY(-1px)':'none';
+    if(btns.length>=2){
+      function _ats(btn,active){
+        btn.style.background=active?'#383838':'#0d0d0d';
+        btn.style.color=active?'#fff':'#444';
+        btn.style.textShadow=active?'0 1px 3px #000':'none';
+        btn.style.boxShadow=active?'0 2px 0 #000':'inset 0 2px 3px rgba(0,0,0,.7)';
+        btn.style.transform=active?'translateY(-1px)':'none';
+      }
+      _ats(btns[0],!_tuner.guitarMode);
+      _ats(btns[1],_tuner.guitarMode);
     }
-    _applyToggleStyle(btns[0],!_tuner.altTuning);
-    _applyToggleStyle(btns[1],_tuner.altTuning);
   }
+}
+function _tunerSetGuitarMode(val){
+  playClickSfx('soft');
+  _tuner.guitarMode=val;
+  if(!val)_tuner.selectedString=-1;
+  _tuner.centsBuf=[];_tuner.targetCents=0;_tuner.stableCents=0;
+  _tuner.stringTuned=[false,false,false,false,false,false];
+  _tuner.stringInTuneStart=[0,0,0,0,0,0];
+  _tuner.allTunedShown=false;_tuner.lastInTuneSfxStr=-1;
+  _tuner.inTuneBarPct=0;_tuner.inTuneBarFull=false;
+  _tunerRefreshControls();
 }
 
 function renderAfinador(){
   if(!_tuner.running)setTimeout(_tunerStart,80);
-  const allTuned=_tuner.stringTuned.every(v=>v);
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');_tunerStop();state.phase='start';render()">${t('back_btn')}</button>
     </div>
     <div style="width:100%;max-width:520px;text-align:center;padding:.4rem 1rem 0">
       <div style="font-size:1.65rem;font-weight:700;font-family:var(--font-title);background:linear-gradient(135deg,#ffffff 20%,#60dcff 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-.01em;line-height:1.15">${t('tuner_title')}</div>
-      <div style="font-size:.62rem;font-weight:700;color:#2a4a5a;letter-spacing:.12em;text-transform:uppercase;margin-top:.25rem">${t('tuner_subtitle')}</div>
+      <div style="font-size:.78rem;font-weight:600;color:#4a7a8a;font-family:var(--font-body);margin-top:.2rem;font-style:italic">${t('tuner_subtitle')}</div>
       <div style="width:3rem;height:2px;background:linear-gradient(90deg,transparent,#60dcff,transparent);margin:.3rem auto 0"></div>
     </div>
     <div class="tuner-wrap">
 
-      <!-- Círculo com pulse rings e overlay "Afinação Perfeita" -->
+      <!-- Círculo com pulse rings -->
       <div class="tn-circle-outer">
         <div class="tn-pulse-ring tn-pulse-ring-1" id="_tn-ring1" style="color:#3a3a3a"></div>
         <div class="tn-pulse-ring tn-pulse-ring-2" id="_tn-ring2" style="color:#3a3a3a"></div>
@@ -5128,7 +5146,7 @@ function renderAfinador(){
       <!-- Cents / status -->
       <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
 
-      <!-- LEDs de precisão -->
+      <!-- LEDs de precisão: vermelho → laranja → verde → azul (centro) -->
       <div class="tn-led-bar">
         <div class="tn-led" id="_tn-led-0"  style="width:10px;height:10px"></div>
         <div class="tn-led" id="_tn-led-1"  style="width:10px;height:10px"></div>
@@ -5188,22 +5206,22 @@ function renderAfinador(){
         </div>
       </div>
 
-      <!-- Cordas -->
-      <div id="_tn-str-row" class="tuner-str-row">${_tunerBuildStrBtns()}</div>
-
-      <!-- Toggle afinação -->
-      <div id="_tn-tuning-toggle" style="display:flex;gap:3px;margin-top:.45rem;margin-bottom:.1rem;width:100%;max-width:320px;background:#111;border:2px solid #1e1e1e;border-radius:12px;padding:3px">
-        <button onclick="_tunerSetAltTuning(false)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${!_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_std')}</button>
-        <button onclick="_tunerSetAltTuning(true)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${_tuner.altTuning?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_alt')}</button>
+      <!-- Toggle: Afinação livre / Afinação do violão -->
+      <div id="_tn-mode-toggle" style="display:flex;gap:3px;margin-top:.45rem;margin-bottom:.1rem;width:100%;max-width:320px;background:#111;border:2px solid #1e1e1e;border-radius:12px;padding:3px">
+        <button onclick="_tunerSetGuitarMode(false)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${!_tuner.guitarMode?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_free')}</button>
+        <button onclick="_tunerSetGuitarMode(true)" style="flex:1;padding:.3rem .4rem;border-radius:9px;border:none;font-size:.72rem;font-weight:800;font-family:var(--font-body);cursor:pointer;touch-action:manipulation;transition:box-shadow .1s,transform .1s;${_tuner.guitarMode?'background:#383838;color:#fff;text-shadow:0 1px 3px #000;box-shadow:0 2px 0 #000;transform:translateY(-1px)':'background:#0d0d0d;color:#444;box-shadow:inset 0 2px 3px rgba(0,0,0,.7);transform:none'}">${t('tuner_guitar')}</button>
       </div>
+
+      <!-- Cordas (visível apenas no modo violão) -->
+      <div id="_tn-str-row" class="tuner-str-row" style="display:none"></div>
 
       <!-- Barra de nível de entrada -->
       <div style="width:100%;max-width:320px;height:3px;background:#0d0d0d;border-radius:99px;overflow:hidden;margin-top:.1rem">
         <div id="_tn-level-bar" style="height:100%;width:0%;border-radius:3px;transition:width .06s"></div>
       </div>
 
-      <!-- Banner: violão afinado! -->
-      <div id="_tn-complete" style="display:${allTuned?'flex':'none'};flex-direction:column;align-items:center;gap:.5rem;width:100%;max-width:320px;background:linear-gradient(180deg,#1a3a1a,#112211);border:2px solid #7cdd7c44;border-radius:16px;padding:1rem;margin-top:.5rem;animation:tunerComplete .5s ease">
+      <!-- Banner: violão afinado! (visível apenas no modo violão) -->
+      <div id="_tn-complete" style="display:none;flex-direction:column;align-items:center;gap:.5rem;width:100%;max-width:320px;background:linear-gradient(180deg,#1a3a1a,#112211);border:2px solid #7cdd7c44;border-radius:16px;padding:1rem;margin-top:.5rem">
         <img src="tuner-headstock.png" alt="" aria-hidden="true" style="width:52px;height:52px;object-fit:contain">
         <div style="font-size:1.1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-title)">${t('tuner_all_tuned')}</div>
         <div style="font-size:.8rem;color:#5ab85a;font-weight:700">${t('tuner_all_tuned_sub')}</div>
@@ -5272,11 +5290,11 @@ function renderStart(){
     </div>
     <div class="section-title"></div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.65rem">
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()">
-        <img src="metronomo.png"><span class="nav-btn-label">${t('metronome')}</span>
+      <button class="nav-btn" style="background:linear-gradient(180deg,#1a1100,#0e0900);border:2px solid #F5A62344;box-shadow:3px 3px 0 #0a0700" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='metronomo';render()">
+        <img src="metronomo.png"><span class="nav-btn-label" style="color:#F5A623">${t('metronome')}</span>
       </button>
-      <button class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()">
-        <img src="afinador.png"><span class="nav-btn-label">${t('tuner')}</span>
+      <button class="nav-btn" style="background:linear-gradient(180deg,#001618,#000d10);border:2px solid #60dcff44;box-shadow:3px 3px 0 #000a0d" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='afinador';render()">
+        <img src="afinador.png"><span class="nav-btn-label" style="color:#60dcff">${t('tuner')}</span>
       </button>
     </div>
     <div style="width:100%;max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem">
@@ -7142,59 +7160,6 @@ function _maybeInitOb(){
   }
 }
 
-// ── POPUP PERIÓDICO DE COMPRA (a cada 3 dias de uso) ─────────────
-let _purchasePromptChecked=false;
-function _checkPurchasePrompt(){
-  if(_purchasePromptChecked||state.fullAccess)return;
-  _purchasePromptChecked=true;
-  try{
-    const today=new Date().toISOString().slice(0,10);
-    let days=JSON.parse(localStorage.getItem('kp_days_used')||'[]');
-    if(!days.includes(today)){days.push(today);localStorage.setItem('kp_days_used',JSON.stringify(days));}
-    const lastPrompt=localStorage.getItem('kp_last_prompt')||'';
-    const daysSinceLast=days.filter(d=>d>lastPrompt).length;
-    if(daysSinceLast>=3){
-      localStorage.setItem('kp_last_prompt',today);
-      setTimeout(_showPurchasePrompt,800);
-    }
-  }catch(e){}
-}
-function _showPurchasePrompt(){
-  if(document.getElementById('purchase-prompt-overlay'))return;
-  const overlay=document.createElement('div');
-  overlay.id='purchase-prompt-overlay';
-  overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
-  overlay.innerHTML=`
-    <div style="background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
-      <div style="margin-bottom:1.2rem;line-height:1.25">
-        <div style="font-size:1.05rem;font-weight:900;color:#4ade80;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em">${t('unlock_popup_headline')}</div>
-        <div style="font-size:.9rem;font-weight:700;color:#aaa;font-family:var(--font-body);margin-top:.25rem">${t('unlock_popup_sub')}</div>
-      </div>
-      <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
-        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
-          <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
-          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
-          <img src="alvo.png" style="width:1rem;height:1rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
-          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b2')}</span>
-        </div>
-        <div style="display:flex;align-items:flex-start;gap:.65rem">
-          <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">♾️</span>
-          <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b3')}</span>
-        </div>
-      </div>
-      <button onclick="document.getElementById('purchase-prompt-overlay').remove();playClickSfx('click');state.phase='comprar';render()"
-        style="width:100%;padding:.9rem;background:linear-gradient(180deg,#16a34a,#15803d);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);margin-bottom:.6rem;letter-spacing:.01em;display:flex;align-items:center;justify-content:center;gap:.5rem">
-        🔓 ${t('unlock_popup_cta')}
-      </button>
-      <button onclick="document.getElementById('purchase-prompt-overlay').remove()"
-        style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.82rem;font-weight:600;font-family:var(--font-body);cursor:pointer">
-        ${t('unlock_popup_dismiss')}
-      </button>
-    </div>`;
-  document.body.appendChild(overlay);
-}
 
 // ── Fretboard: delegação de clique (registrado uma vez, nunca dentro do render) ──
 document.getElementById('content').addEventListener('click',function(e){

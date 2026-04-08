@@ -4941,10 +4941,14 @@ function _tunerUpdateDOM(){
       ?'linear-gradient(90deg,#60dcff,#ffffff88,#60dcff)'
       :'linear-gradient(90deg,#1a5a7a,#60dcff)';
   }
+  // ── Senoide idle (visível só sem sinal) ──
+  const waveEl=document.getElementById('_tn-idle-wave');
+  if(waveEl){waveEl.style.display=_tuner.noSignal?'block':'none';}
   // ── Nome da nota ──
   const notEl=document.getElementById('_tn-note');
   if(notEl){
-    notEl.textContent=_tuner.noSignal?'─':(_tuner.noteName||'─');
+    notEl.style.display=_tuner.noSignal?'none':'inline';
+    notEl.textContent=_tuner.noSignal?'':(_tuner.noteName||'─');
     notEl.style.color=col;
   }
   // ── Oitava ──
@@ -5011,6 +5015,21 @@ function _tunerAnimLoop(){
     } else if(_si>=0){_tuner.stringInTuneStart[_si]=0;}
   }
   _tunerUpdateDOM();
+  // ── Senoide idle ──────────────────────────────────────────────
+  if(_tuner.noSignal){
+    const wc=document.getElementById('_tn-idle-wave');
+    if(wc){
+      const wx=wc.getContext('2d'),W=wc.width,H=wc.height,t2=performance.now()/1000;
+      wx.clearRect(0,0,W,H);
+      wx.beginPath();
+      wx.strokeStyle='#60dcff';wx.lineWidth=1.6;wx.lineCap='round';
+      for(let x=0;x<=W;x++){
+        const y=H/2+7*Math.sin((x/W)*Math.PI*3+t2*1.26);
+        x===0?wx.moveTo(x,y):wx.lineTo(x,y);
+      }
+      wx.stroke();
+    }
+  }
   _tuner.animFrame=requestAnimationFrame(_tunerAnimLoop);
 }
 
@@ -5154,7 +5173,8 @@ function renderAfinador(){
         <div class="tn-pulse-ring tn-pulse-ring-1" id="_tn-ring1" style="color:#3a3a3a"></div>
         <div class="tn-pulse-ring tn-pulse-ring-2" id="_tn-ring2" style="color:#3a3a3a"></div>
         <div class="tn-circle" id="_tn-circle">
-          <span id="_tn-note" class="tuner-note-name" style="color:#333">─</span>
+          <canvas id="_tn-idle-wave" width="120" height="30" style="display:block;opacity:.55;transition:opacity .5s"></canvas>
+          <span id="_tn-note" class="tuner-note-name" style="color:#333;display:none"></span>
           <span id="_tn-oct" class="tn-circle-oct"></span>
         </div>
       </div>

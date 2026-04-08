@@ -4879,7 +4879,7 @@ function _tunerPlayInTuneSfx(){
     o.type='sine';
     o.frequency.setValueAtTime(1760,t);
     o.frequency.setValueAtTime(2093,t+0.09);
-    g.gain.setValueAtTime(0.20,t);
+    g.gain.setValueAtTime(0.05,t);
     g.gain.exponentialRampToValueAtTime(0.001,t+0.25);
     o.start(t);o.stop(t+0.25);
   }catch(e){}

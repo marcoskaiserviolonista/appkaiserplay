@@ -621,8 +621,6 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tn-circle{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:158px;height:158px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#1c1c1c,#0d0d0d);border:2px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.1rem;transition:border-color .25s,box-shadow .25s;z-index:2}
 .tn-circle .tuner-note-name{font-size:4.2rem;white-space:nowrap}
 .tn-circle-oct{font-size:.58rem;font-weight:800;color:#2a3a3a;letter-spacing:.18em;text-transform:uppercase;min-height:.8rem;transition:color .25s}
-.tn-led-bar{display:flex;align-items:center;gap:5px;justify-content:center;width:100%;max-width:310px;margin:.05rem 0}
-.tn-led{width:14px;height:14px;border-radius:50%;background:#0e0e0e;border:1.5px solid #161616;transition:background .18s,box-shadow .18s,border-color .18s;flex-shrink:0}
 .tn-ruler-wrap{width:100%;max-width:320px}
 .tn-ruler-labels{display:flex;justify-content:space-between;padding:0 2px}
 .tn-ruler-flat,.tn-ruler-sharp{font-size:.85rem;font-family:serif;font-weight:700;color:#2a3a3a}
@@ -4914,33 +4912,6 @@ function _tunerUpdateDOM(){
       r2.style.animationDelay=inTune?'0.7s':close?'0.5s':'0.35s';
     }
   }
-  // ── LEDs (bilateral: acendem dos dois lados convergindo ao centro) ──
-  const _LED_THRESH=[50,40,28,18,10,4,10,18,28,40,50];
-  // Cores: vermelho → laranja → verde → azul (centro)
-  const _LED_TYPE=['red','red','amb','amb','grn','cyn','grn','amb','amb','red','red'];
-  // Apagam com delay: primeiro vermelhos (0ms), depois laranjas, depois verdes, centro por último
-  const _FADE_DELAY=['0ms','50ms','150ms','250ms','400ms','600ms','400ms','250ms','150ms','50ms','0ms'];
-  const absC=Math.abs(c);
-  for(let i=0;i<=10;i++){
-    const el=document.getElementById('_tn-led-'+i);
-    if(!el)continue;
-    const active=!_tuner.noSignal&&absC<_LED_THRESH[i];
-    if(!active){
-      el.style.transitionDelay=_FADE_DELAY[i];
-      el.style.background='';el.style.borderColor='';el.style.boxShadow='';
-      continue;
-    }
-    el.style.transitionDelay='0ms';
-    if(_LED_TYPE[i]==='cyn'){
-      el.style.background=col;el.style.borderColor=col+'cc';el.style.boxShadow='0 0 14px '+col+',0 0 28px '+col+'77';
-    }else if(_LED_TYPE[i]==='grn'){
-      el.style.background='#3dd13d';el.style.borderColor='#5ae05a';el.style.boxShadow='0 0 10px #3dd13d99,0 0 20px #3dd13d55';
-    }else if(_LED_TYPE[i]==='amb'){
-      el.style.background='#c07020';el.style.borderColor='#e09020';el.style.boxShadow='0 0 8px #c0702099,0 0 14px #c0702044';
-    }else{
-      el.style.background='#c03030';el.style.borderColor='#e03030';el.style.boxShadow='0 0 8px #c0303099,0 0 14px #c0303044';
-    }
-  }
   // ── Régua: agulha ──
   const rn=document.getElementById('_tn-ruler-needle');
   if(rn){
@@ -5220,20 +5191,6 @@ function renderAfinador(){
       <!-- Cents / status -->
       <div id="_tn-cents" class="tuner-cents-display" style="color:#444">${t('tuner_play')}</div>
 
-      <!-- LEDs de precisão: vermelho → laranja → verde → azul (centro) -->
-      <div class="tn-led-bar">
-        <div class="tn-led" id="_tn-led-0"  style="width:10px;height:10px"></div>
-        <div class="tn-led" id="_tn-led-1"  style="width:10px;height:10px"></div>
-        <div class="tn-led" id="_tn-led-2"></div>
-        <div class="tn-led" id="_tn-led-3"></div>
-        <div class="tn-led" id="_tn-led-4"></div>
-        <div class="tn-led" id="_tn-led-5"  style="width:18px;height:18px"></div>
-        <div class="tn-led" id="_tn-led-6"></div>
-        <div class="tn-led" id="_tn-led-7"></div>
-        <div class="tn-led" id="_tn-led-8"></div>
-        <div class="tn-led" id="_tn-led-9"  style="width:10px;height:10px"></div>
-        <div class="tn-led" id="_tn-led-10" style="width:10px;height:10px"></div>
-      </div>
 
       <!-- Barra de confirmação + texto "Afinação Perfeita" -->
       <div style="width:100%;max-width:320px;display:flex;flex-direction:column;gap:.35rem;margin:.15rem 0">

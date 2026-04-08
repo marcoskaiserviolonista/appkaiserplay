@@ -1824,8 +1824,14 @@ function initCompressor() {
   comp.ratio.value = 14;       // compressão 14:1 — limiter mais firme para frequências graves
   comp.attack.value = 0.001;   // reage em 1ms — pega transientes graves
   comp.release.value = 0.20;   // solta gradual
+  // Filtro high-shelf: corta chiado de gravação acima de 8kHz
+  const hpf = ctx.createBiquadFilter();
+  hpf.type = 'highshelf';
+  hpf.frequency.value = 8000;
+  hpf.gain.value = -14;
   Howler.masterGain.disconnect();
-  Howler.masterGain.connect(comp);
+  Howler.masterGain.connect(hpf);
+  hpf.connect(comp);
   comp.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}

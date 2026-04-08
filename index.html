@@ -5367,16 +5367,15 @@ function renderStart(){
       <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
     <button id="ob-niveis" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"
-      style="width:100%;max-width:520px;background:linear-gradient(135deg,#1a1200 0%,#2a1e00 50%,#1a1200 100%);border:2.5px solid #F5A62366;border-radius:18px;box-shadow:4px 4px 0 #0a0700,0 0 20px #F5A62322;cursor:pointer;padding:0;display:flex;align-items:stretch;overflow:hidden;margin-bottom:.75rem;transition:all .12s;text-align:left">
-      <div style="width:28%;flex-shrink:0;background:#0a0800;display:flex;align-items:center;justify-content:center;padding:.75rem .5rem">
-        <img src="mago_do_som.png" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:2px solid #F5A62355;box-shadow:2px 2px 8px rgba(0,0,0,.8)">
+      style="width:100%;max-width:520px;background:linear-gradient(180deg,#2e2e2e,#1e1e1e);border:none;border-radius:14px;box-shadow:3px 3px 0 #0a0a0a;cursor:pointer;padding:0;display:flex;align-items:center;overflow:visible;margin-bottom:.75rem;text-align:left;min-height:80px">
+      <div style="flex-shrink:0;width:72px;margin:.65rem 0 .65rem .75rem;display:flex;align-items:center;justify-content:center">
+        <img src="mago_do_som.png" style="width:72px;height:96px;object-fit:contain;border-radius:6px;display:block">
       </div>
-      <div style="flex:1;padding:.9rem 1rem;display:flex;flex-direction:column;justify-content:center;gap:.4rem">
-        <div style="font-size:.58rem;font-weight:800;color:#F5A623;text-transform:uppercase;letter-spacing:.14em;opacity:.8">${t('levels')}</div>
-        <div style="font-size:1.05rem;font-weight:900;color:#e8e8e8;font-family:var(--font-body);line-height:1.2">Grimório de Cartas</div>
-        <div style="font-size:.72rem;font-weight:500;color:#bbb;line-height:1.45">${t('levels_card_desc')}</div>
+      <div style="flex:1;padding:.75rem .5rem .75rem .85rem;display:flex;flex-direction:column;justify-content:center;gap:.35rem">
+        <span style="font-size:.9rem;font-weight:700;color:#e8e8e8;font-family:var(--font-body)">${t('levels')}</span>
+        <div style="font-size:.75rem;font-weight:500;color:#aaa;line-height:1.5">${t('levels_card_desc')}</div>
       </div>
-      <div style="display:flex;align-items:center;padding-right:.85rem;color:#F5A62388;font-size:1.1rem">›</div>
+      <div style="padding-right:.9rem;color:#666;font-size:1.1rem;flex-shrink:0">›</div>
     </button>
     <div class="section-title">${t('your_stats')}</div>
     <div class="user-stats">
@@ -6370,6 +6369,33 @@ function renderRanking(){
 
 // ── Actions ───────────────────────────────────────────────────
 function startGame(){
+  if(!_obFlag('journey_ob_done')){_showJourneyOb();return;}
+  _startJourneyReal();
+}
+function _showJourneyOb(){
+  const root=document.getElementById('ob-root');if(!root)return;
+  const lang=state.lang||'pt';
+  const titles={pt:'Jornada Harmônica',en:'Harmonic Journey',es:'Jornada Armónica'};
+  const bodies={
+    pt:'Suba de nível a cada resposta certa.<br><br>Quanto mais alto o nível, maior será a dificuldade. Novos acordes irão surgir, cada vez mais complexos.<br><br>Pratique todos os dias e seu ouvido ficará cada vez mais treinado.',
+    en:'Level up with every correct answer.<br><br>The higher the level, the harder it gets. New, increasingly complex chords will keep appearing.<br><br>Practice every day and your ear will keep growing stronger.',
+    es:'Sube de nivel con cada respuesta correcta.<br><br>Cuanto más alto el nivel, mayor será la dificultad. Nuevos acordes irán surgiendo, cada vez más complejos.<br><br>Practica todos los días y tu oído estará cada vez más entrenado.'
+  };
+  const okLabels={pt:'Vamos lá!',en:"Let's go!",es:'¡Vamos!'};
+  const title=titles[lang]||titles.pt;
+  const body=bodies[lang]||bodies.pt;
+  const okLabel=okLabels[lang]||okLabels.pt;
+  root.innerHTML=`
+    <div style="position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:obFadeIn .28s ease">
+      <div style="background:#181818;border:2.5px solid #F5A623;border-radius:22px;padding:2rem 1.6rem 1.5rem;max-width:290px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.9);text-align:center">
+        <div style="font-family:var(--font-title);font-size:1.6rem;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:.6rem">${title}</div>
+        <div style="width:40px;height:3px;background:#F5A623;border-radius:2px;margin:0 auto .9rem"></div>
+        <p style="font-size:.92rem;color:#ddd;font-weight:500;line-height:1.65;margin:0 0 1.5rem;text-align:left">${body}</p>
+        <button onclick="_obSetFlag('journey_ob_done');document.getElementById('ob-root').innerHTML='';_startJourneyReal()" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:12px;padding:.6rem 2.4rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#111;cursor:pointer;text-shadow:none;display:inline-block">${okLabel}</button>
+      </div>
+    </div>`;
+}
+function _startJourneyReal(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.journeyMode='harmonic';
   if(state.xp===0){

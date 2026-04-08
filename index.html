@@ -4521,7 +4521,24 @@ function render(){
 // ── Metrônomo: Engine ─────────────────────────────────────────
 // scheduleAhead: 5s — garante beats no buffer mesmo com setTimeout throttled pela tela bloqueada
 // lookahead: 500ms — raro o suficiente para não gastar CPU, mas suficiente para reabastecer
-const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:5.0,lookahead:500,pendingSrc:[]};
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,audioTag:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:5.0,lookahead:500,pendingSrc:[]};
+
+// Elemento <audio> HTML que segura a sessão de áudio do iOS em background.
+// Web Audio API pura é suspensa ao bloquear a tela; <audio> não é.
+function _metroEnsureAudioTag(){
+  if(_metro.audioTag)return;
+  const buf=new ArrayBuffer(45);const v=new DataView(buf);
+  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
+  ws(0,'RIFF');v.setUint32(4,37,true);ws(8,'WAVEfmt ');
+  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,8000,true);v.setUint32(28,8000,true);
+  v.setUint16(32,1,true);v.setUint16(34,8,true);
+  ws(36,'data');v.setUint32(40,1,true);v.setUint8(44,128);
+  const tag=document.createElement('audio');
+  tag.src=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
+  tag.loop=true;tag.volume=0.001;
+  _metro.audioTag=tag;
+}
 
 function _metroBuildNoise(ctx){
   const len=Math.ceil(ctx.sampleRate*0.05);
@@ -4576,6 +4593,7 @@ function _metroStartSilentLoop(ctx){
 
 function _metroStart(){
   if(_metro.running)return;
+  _metroEnsureAudioTag();
   if(!_metro.ctx){
     _metro.ctx=new(window.AudioContext||window.webkitAudioContext)();
     const comp=_metro.ctx.createDynamicsCompressor();
@@ -4587,6 +4605,10 @@ function _metroStart(){
     _metroStartSilentLoop(_metro.ctx);
   }
   if(_metro.ctx.state==='suspended')_metro.ctx.resume();
+  // <audio> HTML mantém sessão de áudio ativa no iOS com tela bloqueada
+  _metro.audioTag.play().catch(()=>{});
+  // Elimina qualquer timerID órfão para evitar dupla batida
+  if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
   _metro.running=true;
   _metro.nextTime=_metro.ctx.currentTime+0.05;
   _metroSchedule();
@@ -4601,6 +4623,7 @@ function _metroStop(){
   _metro.pendingSrc.forEach(s=>{try{s.stop(now);}catch(e){}});
   _metro.pendingSrc=[];
   if(_metro.ctx&&_metro.ctx.state==='running')_metro.ctx.suspend();
+  if(_metro.audioTag)_metro.audioTag.pause();
   _metroUpdateUI();
 }
 

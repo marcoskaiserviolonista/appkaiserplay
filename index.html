@@ -4604,10 +4604,17 @@ function _metroStop(){
   _metroUpdateUI();
 }
 
-// Retoma AudioContext se o browser suspendeu ao bloquear a tela
+// Retoma metrônomo ao desbloquear a tela (resume contexto + reinicia loop de agendamento)
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden&&_metro.running&&_metro.ctx&&_metro.ctx.state==='suspended'){
-    _metro.ctx.resume();
+  if(!document.hidden&&_metro.running&&_metro.ctx){
+    const doResync=()=>{
+      // Mata qualquer timerID antigo throttled pelo OS e reinicia o scheduler
+      if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+      _metro.nextTime=_metro.ctx.currentTime+0.05;
+      _metroSchedule();
+    };
+    if(_metro.ctx.state==='suspended')_metro.ctx.resume().then(doResync);
+    else doResync();
   }
 });
 

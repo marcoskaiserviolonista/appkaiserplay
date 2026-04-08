@@ -4604,10 +4604,17 @@ function _metroStop(){
   _metroUpdateUI();
 }
 
-// Retoma AudioContext se o browser suspendeu ao bloquear a tela
+// Retoma metrônomo ao desbloquear a tela (resume contexto + reinicia loop de agendamento)
 document.addEventListener('visibilitychange',()=>{
-  if(!document.hidden&&_metro.running&&_metro.ctx&&_metro.ctx.state==='suspended'){
-    _metro.ctx.resume();
+  if(!document.hidden&&_metro.running&&_metro.ctx){
+    const doResync=()=>{
+      // Mata qualquer timerID antigo throttled pelo OS e reinicia o scheduler
+      if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+      _metro.nextTime=_metro.ctx.currentTime+0.05;
+      _metroSchedule();
+    };
+    if(_metro.ctx.state==='suspended')_metro.ctx.resume().then(doResync);
+    else doResync();
   }
 });
 
@@ -4761,7 +4768,7 @@ function _tunerProcess(result){
   const now=performance.now();
   if(!result){
     // String still vibrating but YIN can't lock — hold the last reading
-    if(_tuner.lastEnergy>0.0000005){_tuner.lastSignalTime=now;return;}
+    if(_tuner.lastEnergy>0.0000008){_tuner.lastSignalTime=now;return;}
     // Truly silent — countdown to go silent
     if(now-_tuner.lastSignalTime>_tuner.holdMs){
       _tuner.noSignal=true;_tuner.targetCents=0;_tuner.stableCents=0;
@@ -6301,7 +6308,7 @@ function startGame(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.journeyMode='harmonic';
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }
@@ -6321,7 +6328,7 @@ function startCordas(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
   state.journeyMode='cordas';
   if(state.xp===0){
-    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:500,moedas:500,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
+    Object.assign(state,{streak:0,bestStreak:0,score:0,stats:{t:0,c:0},chordStats:{},result:null,lvlUpPending:false,lvlUpFromFocused:false,notas:0,moedas:0,inventario:[],violoesComprados:['violao_basico'],violaoEquipado:'violao_basico',xpDisplay:0});
   } else {
     Object.assign(state,{score:0,result:null,lvlUpPending:false,lvlUpFromFocused:false});
   }

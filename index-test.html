@@ -6946,8 +6946,8 @@ function saveProgress(){
     stats:state.stats,
     chordStats:state.chordStats,
     violaoEquipado:state.violaoEquipado,
-    violoesComprados:state.violoesComprados,
-    inventario:state.inventario,
+    violoesComprados:['violao_basico'],
+    inventario:[],
     firstCardSeen:state.firstCardSeen,
     ratingDone:state.ratingDone,
     ratingSkippedAt:state.ratingSkippedAt,
@@ -6971,6 +6971,7 @@ async function loadProgress(uid){
       if(d.firstCardSeen!=null)state.firstCardSeen=d.firstCardSeen;
       if(d.ratingDone!=null)state.ratingDone=d.ratingDone;
       if(d.ratingSkippedAt!=null)state.ratingSkippedAt=d.ratingSkippedAt;
+      if(uid&&db)db.collection('players').doc(uid).update({inventario:[],violoesComprados:['violao_basico']}).catch(()=>{});
       state.inventario=[0,1,2,3,5];state.violoesComprados=['violao_basico','violao_bom','violao_luthier','violao_ouro','violao_diamante'];state.notas=500;state.moedas=500;state.diamantes=10;state.fullAccess=true;
       state.xpDisplay=state.xp;
     }

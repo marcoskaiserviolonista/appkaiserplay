@@ -5330,11 +5330,6 @@ function renderStart(){
         <div class="profile-lvl-lbl">${t('level_label')}</div>
       </div>
     </div>
-    ${state.dailyStreak>1?`
-    <div style="width:100%;max-width:520px;display:flex;align-items:center;justify-content:center;gap:.5rem;background:#1a1200;border:2px solid #F5A62344;border-radius:12px;padding:.5rem 1rem;margin-bottom:.5rem">
-      <span style="font-size:1.15rem">🔥</span>
-      <span style="font-size:.88rem;font-weight:800;color:#F5A623">${t('streak_congrats_pre')} ${state.dailyStreak} ${t('streak_congrats_pos')}</span>
-    </div>`:''}
     <div class="start-hero-d3">
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>
       <div class="start-desc">${t('start_desc')}</div>

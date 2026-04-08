@@ -6369,23 +6369,23 @@ function _showJourneyOb(){
   const lang=state.lang||'pt';
   const titles={pt:'Jornada Harmônica',en:'Harmonic Journey',es:'Jornada Armónica'};
   const bodies={
-    pt:'Suba de nível a cada resposta certa.<br><br>Quanto mais alto o nível, maior será a dificuldade. Novos acordes irão surgir, cada vez mais complexos.<br><br>Pratique todos os dias e seu ouvido ficará cada vez mais treinado.',
-    en:'Level up with every correct answer.<br><br>The higher the level, the harder it gets. New, increasingly complex chords will keep appearing.<br><br>Practice every day and your ear will keep growing stronger.',
-    es:'Sube de nivel con cada respuesta correcta.<br><br>Cuanto más alto el nivel, mayor será la dificultad. Nuevos acordes irán surgiendo, cada vez más complejos.<br><br>Practica todos los días y tu oído estará cada vez más entrenado.'
+    pt:'Suba de nível a cada resposta certa.<br>Quanto mais alto o nível, maior será a dificuldade.<br>Novos acordes irão surgir, cada vez mais complexos.<br>Pratique todos os dias e seu ouvido ficará cada vez mais treinado.',
+    en:'Level up with every correct answer.<br>The higher the level, the harder it gets.<br>New, increasingly complex chords will keep appearing.<br>Practice every day and your ear will keep growing stronger.',
+    es:'Sube de nivel con cada respuesta correcta.<br>Cuanto más alto el nivel, mayor será la dificultad.<br>Nuevos acordes irán surgiendo, cada vez más complejos.<br>Practica todos los días y tu oído estará cada vez más entrenado.'
   };
   const okLabels={pt:'Vamos lá!',en:"Let's go!",es:'¡Vamos!'};
   const title=titles[lang]||titles.pt;
   const body=bodies[lang]||bodies.pt;
   const okLabel=okLabels[lang]||okLabels.pt;
   root.innerHTML=`
-    <div style="position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:obFadeIn .28s ease">
-      <div style="background:#181818;border:2.5px solid #F5A623;border-radius:22px;padding:1.5rem 1.6rem;max-width:290px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.9);text-align:center">
-        <img src="mago_jornada.png" style="width:110px;height:110px;object-fit:contain;margin-bottom:.6rem">
-        <div style="font-family:var(--font-title);font-size:1.6rem;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:.5rem">${title}</div>
-        <div style="width:40px;height:3px;background:#F5A623;border-radius:2px;margin:0 auto .85rem"></div>
-        <p style="font-size:.88rem;color:#ddd;font-weight:500;line-height:1.7;margin:0 0 1.4rem;text-align:center">${body}</p>
-        <button onclick="_obSetFlag('journey_ob_done');document.getElementById('ob-root').innerHTML='';_startJourneyReal()" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:12px;padding:.6rem 2.4rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#111;cursor:pointer;text-shadow:none;display:inline-block">${okLabel}</button>
+    <div style="position:fixed;inset:0;z-index:8999;background:#111;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:2.5rem 1.75rem 2rem;animation:obFadeIn .32s ease">
+      <div style="text-align:center;width:100%">
+        <div style="font-family:var(--font-title);font-size:1.9rem;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:.5rem">${title}</div>
+        <div style="width:40px;height:3px;background:#F5A623;border-radius:2px;margin:0 auto .9rem"></div>
+        <p style="font-size:.92rem;color:#ddd;font-weight:500;line-height:1.55;margin:0;text-align:center">${body}</p>
       </div>
+      <img src="mago_jornada.png" style="width:100%;max-width:340px;flex:1;min-height:0;object-fit:contain;object-position:bottom;margin:.5rem 0">
+      <button onclick="_obSetFlag('journey_ob_done');document.getElementById('ob-root').innerHTML='';_startJourneyReal()" style="width:100%;max-width:340px;background:linear-gradient(180deg,#f5aa2a,#d4720a);border:3px solid #1a1a1a;border-radius:16px;box-shadow:5px 5px 0 #1a1a1a;padding:1rem;font-family:var(--font-body);font-size:1.1rem;font-weight:900;color:#fff;cursor:pointer;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);letter-spacing:.03em;flex-shrink:0">${okLabel}</button>
     </div>`;
 }
 function _startJourneyReal(){

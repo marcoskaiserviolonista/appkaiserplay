@@ -2453,7 +2453,7 @@ function playFbNoteClick(midi){
   const sn=nearestSample(midi);
   const ratio=midiToFreq(midi)/midiToFreq(sn);
   const id=howls[sn].play();
-  const _fbVol=0.3*_noteBoost(midi);
+  const _fbVol=0.20*_noteBoost(midi);
   howls[sn].volume(_fbVol,id);
   if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
   setTimeout(()=>{try{howls[sn].fade(_fbVol,0,FB_CLICK_FADE,id);}catch(e){}},FB_CLICK_SUSTAIN);

@@ -2159,6 +2159,16 @@ function showToast(msg,sub){
   _toastTimer=setTimeout(()=>{el.classList.remove('show');_toastTimer=null;},2800);
 }
 
+function spawnSalaFeedback(ok){
+  const floats=document.getElementById('floats');
+  if(!floats)return;
+  const el=document.createElement('div');
+  el.style.cssText=`position:absolute;top:38%;left:50%;transform:translateX(-50%);font-size:2.2rem;font-weight:900;font-family:var(--font-body);color:${ok?'#4ade80':'#f87171'};text-shadow:0 0 24px ${ok?'#22c55eaa':'#ef4444aa'};animation:floatUp 1.2s ease forwards;white-space:nowrap;pointer-events:none;letter-spacing:-.01em`;
+  el.textContent=ok?t('correct'):t('wrong');
+  floats.appendChild(el);
+  setTimeout(()=>el.remove(),1300);
+}
+
 function spawnFloat(x,y,text,big){
   const el=document.createElement('div');
   el.className='xp-float';
@@ -2763,6 +2773,7 @@ function doSalaVerify(){
   state.salaVerified=true;
   state.salaVerifyOk=ok;
   render();
+  spawnSalaFeedback(ok);
 }
 function playSalaAssembly(){
   const keys=Object.keys(state.salaFbSel);

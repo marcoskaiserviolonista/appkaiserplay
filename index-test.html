@@ -4510,19 +4510,22 @@ function render(){
 // ── Metrônomo: Engine ─────────────────────────────────────────
 // scheduleAhead: 5s — garante beats no buffer mesmo com setTimeout throttled pela tela bloqueada
 // lookahead: 500ms — raro o suficiente para não gastar CPU, mas suficiente para reabastecer
-const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,audioTag:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:5.0,lookahead:500,pendingSrc:[]};
+const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,audioTag:null,bpm:80,running:false,nextTime:0,timerID:null,scheduleAhead:5.0,lookahead:500,pendingSrc:[],gen:0};
 
 // Elemento <audio> HTML que segura a sessão de áudio do iOS em background.
 // Web Audio API pura é suspensa ao bloquear a tela; <audio> não é.
 function _metroEnsureAudioTag(){
   if(_metro.audioTag)return;
-  const buf=new ArrayBuffer(45);const v=new DataView(buf);
+  // WAV silencioso de 1 segundo — necessário para iOS registrar sessão de áudio em background
+  const sr=8000,ns=sr;
+  const buf=new ArrayBuffer(44+ns);const v=new DataView(buf);
   const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
-  ws(0,'RIFF');v.setUint32(4,37,true);ws(8,'WAVEfmt ');
+  ws(0,'RIFF');v.setUint32(4,36+ns,true);ws(8,'WAVEfmt ');
   v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
-  v.setUint32(24,8000,true);v.setUint32(28,8000,true);
+  v.setUint32(24,sr,true);v.setUint32(28,sr,true);
   v.setUint16(32,1,true);v.setUint16(34,8,true);
-  ws(36,'data');v.setUint32(40,1,true);v.setUint8(44,128);
+  ws(36,'data');v.setUint32(40,ns,true);
+  for(let i=0;i<ns;i++)v.setUint8(44+i,128); // silêncio em PCM 8-bit unsigned
   const tag=document.createElement('audio');
   tag.src=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
   tag.loop=true;tag.volume=0.001;
@@ -4550,9 +4553,11 @@ function _metroClick(time){
   noise.start(time);noise.stop(time+0.02);
   _metro.pendingSrc.push(noise);
   noise.onended=()=>{const i=_metro.pendingSrc.indexOf(noise);if(i>=0)_metro.pendingSrc.splice(i,1);};
-  // visual flash (best-effort; tela pode estar bloqueada)
+  // visual flash — gen evita que callbacks do BPM antigo poluam a animação
   const delay=Math.max(0,(time-ctx.currentTime)*1000);
+  const gen=_metro.gen;
   if(delay<2000)setTimeout(()=>{
+    if(_metro.gen!==gen)return; // callback obsoleto, ignora
     const dot=document.getElementById('_metro-dot');
     if(dot){dot.classList.add('active');setTimeout(()=>dot.classList.remove('active'),80);}
   },delay);
@@ -4608,6 +4613,7 @@ function _metroStart(){
   if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';
   // Elimina qualquer timerID órfão para evitar dupla batida
   if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+  _metro.gen++; // invalida callbacks visuais anteriores
   _metro.running=true;
   _metro.nextTime=_metro.ctx.currentTime+0.05;
   _metroSchedule();
@@ -4652,6 +4658,16 @@ function _metroSetBpm(v){
   const slider=document.getElementById('_metro-bpm-slider');
   if(val)val.textContent=_metro.bpm;
   if(slider)slider.value=_metro.bpm;
+  if(_metro.running&&_metro.ctx){
+    // Cancela todas as batidas pré-agendadas e reinicia com novo BPM imediatamente
+    const now=_metro.ctx.currentTime;
+    _metro.pendingSrc.forEach(s=>{try{s.stop(now);}catch(e){}});
+    _metro.pendingSrc=[];
+    _metro.gen++; // invalida callbacks visuais do BPM antigo
+    if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
+    _metro.nextTime=now+0.05;
+    _metroSchedule();
+  }
 }
 
 function _metroAdj(delta){_metroSetBpm(_metro.bpm+delta);}

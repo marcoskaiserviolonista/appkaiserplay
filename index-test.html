@@ -2880,9 +2880,8 @@ function renderSalaDeAula(){
   const _qLabel=state.chord.quality?_translateQualityLabel(state.chord.quality,state.chord.quality):'';
   const s4ReviewBtns=`
   <div style="border-top:1px solid #2a3a2a;padding-top:.5rem;margin-top:.5rem">
-    <div style="font-size:.68rem;color:#556;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">${state.lang==='en'?'Review notes':state.lang==='es'?'Repasar notas':'Rever notas'}</div>
+    <div style="font-size:.82rem;color:#fff;font-weight:700;margin-bottom:.35rem">${state.lang==='en'?'Tips:':state.lang==='es'?'Pistas:':'Dicas:'}</div>
     <div style="display:flex;gap:.4rem;flex-wrap:wrap">${_p4btn(t('sala_focus_high'),1)}${_p4btn(t('sala_focus_low'),2)}${_p4btn(t('sala_focus_mid'),3)}</div>
-    ${state.salaP4Review?`<button class="sala-focus-btn" style="margin-top:.35rem;color:#888;border-color:#333" onclick="playClickSfx('soft');state.salaP4Review=null;render()">← ${state.lang==='en'?'Build chord':state.lang==='es'?'Montar':'Montar'}</button>`:''}
   </div>`;
   const s4body=`
   <div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>

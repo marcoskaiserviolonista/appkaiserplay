@@ -862,7 +862,7 @@ const STRINGS = {
     coupon_toast_title:'Código copiado!', coupon_toast_body:'Cole esse código ao finalizar a compra.',
     coupon_modal_subtitle:'Use este código ao finalizar sua compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'Copiado!', coupon_modal_visit:'Aprenda violão no', coupon_modal_click:'Clique para saber mais',
     bought_modal_title:'Item adicionado ao inventário', bought_modal_equipped:'Seu item foi automaticamente equipado', bought_modal_go_shop:'Continuar na loja', bought_modal_later:'Ir ao inventário',
-    discount_modal_title:'Desconto exclusivo para você', discount_modal_benefit:'20% off no Plano Vitalício', discount_modal_buy:'Comprar com desconto', discount_modal_learn:'Saiba mais',
+    discount_modal_title:'Desconto exclusivo para você', discount_modal_benefit:'20% off no Plano Vitalício', discount_modal_buy:'Comprar com 20% de desconto', discount_modal_learn:'Visitar site',
     download_error_title:'Erro no download', download_error_body:'Não foi possível baixar. Tente novamente.',
     // Profile stats
     most_missed_chord:'Acorde que mais errou', hits_and_misses:'Acertos e Erros por Acorde',
@@ -1082,7 +1082,7 @@ const STRINGS = {
     coupon_toast_title:'Code copied!', coupon_toast_body:'Paste this code when checking out.',
     coupon_modal_subtitle:'Use this code when checking out:', coupon_modal_copy:'Copy', coupon_modal_copied:'Copied!', coupon_modal_visit:'Learn guitar at', coupon_modal_click:'Click to learn more',
     bought_modal_title:'Item added to inventory', bought_modal_equipped:'Your item was automatically equipped', bought_modal_go_shop:'Continue shopping', bought_modal_later:'Go to inventory',
-    discount_modal_title:'Exclusive discount for you', discount_modal_benefit:'20% off Lifetime Plan', discount_modal_buy:'Buy with discount', discount_modal_learn:'Learn more',
+    discount_modal_title:'Exclusive discount for you', discount_modal_benefit:'20% off Lifetime Plan', discount_modal_buy:'Buy with 20% discount', discount_modal_learn:'Visit website',
     download_error_title:'Download error', download_error_body:'Could not download the file. Please try again.',
     // Profile stats
     most_missed_chord:'Most missed chord', hits_and_misses:'Hits and Misses by Chord',
@@ -1302,7 +1302,7 @@ const STRINGS = {
     coupon_toast_title:'¡Código copiado!', coupon_toast_body:'Pega este código al finalizar la compra.',
     coupon_modal_subtitle:'Usa este código al finalizar tu compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'¡Copiado!', coupon_modal_visit:'Aprende guitarra en', coupon_modal_click:'Haz clic para saber más',
     bought_modal_title:'Artículo añadido al inventario', bought_modal_equipped:'Tu artículo fue equipado automáticamente', bought_modal_go_shop:'Continuar en la tienda', bought_modal_later:'Ir al inventario',
-    discount_modal_title:'Descuento exclusivo para ti', discount_modal_benefit:'20% off en el Plan Vitalicio', discount_modal_buy:'Comprar con descuento', discount_modal_learn:'Más información',
+    discount_modal_title:'Descuento exclusivo para ti', discount_modal_benefit:'20% off en el Plan Vitalicio', discount_modal_buy:'Comprar con 20% de descuento', discount_modal_learn:'Visitar sitio',
     download_error_title:'Error de descarga', download_error_body:'No se pudo descargar. Inténtalo de nuevo.',
     // Profile stats
     most_missed_chord:'Acorde que más fallaste', hits_and_misses:'Aciertos y Errores por Acorde',
@@ -6548,10 +6548,48 @@ function closeBoughtModal(){
   if(boughtModal){boughtModal.remove();boughtModal=null;}
 }
 
+let _cupomModal=null;
+function showCupomModal(){
+  if(_cupomModal)return;
+  const overlay=document.createElement('div');
+  overlay.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:1.5rem;';
+  overlay.onclick=e=>{if(e.target===overlay)closeCupomModal();};
+  overlay.innerHTML=`
+    <div style="background:#1a1a1a;border:3px solid #F5A623;border-radius:22px;padding:1.75rem 1.4rem 1.4rem;width:100%;max-width:380px;box-shadow:0 0 40px rgba(245,166,35,.2),6px 6px 0 #111;text-align:center;position:relative">
+      <button onclick="closeCupomModal()" style="position:absolute;top:.75rem;right:.75rem;background:#252525;border:1.5px solid #3a3a3a;border-radius:50%;width:34px;height:34px;color:#aaa;font-size:1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+
+      <div style="display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#ffbe4f,#e8931a);border:3px solid #1a1a1a;border-radius:14px;padding:.35rem 1.1rem;box-shadow:0 4px 0 #1a1a1a,0 0 20px rgba(245,166,35,.3);margin-bottom:1rem">
+        <span style="font-family:'Exo 2',sans-serif;font-size:1.9rem;color:#111;line-height:1;font-weight:900;letter-spacing:-.02em">20% OFF</span>
+      </div>
+
+      <div style="font-size:.95rem;font-weight:900;color:#f0f0f0;margin-bottom:.2rem">${t('discount_modal_title')}</div>
+      <div style="font-size:.78rem;color:#888;font-weight:600;margin-bottom:1.25rem">${t('discount_modal_benefit')}</div>
+
+      <a href="https://chk.eduzz.com/uumbh35c" target="_blank" rel="noopener" onclick="playClickSfx('nav');closeCupomModal()"
+        style="display:block;width:100%;padding:.9rem;border-radius:14px;border:3px solid #1a1a1a;background:linear-gradient(180deg,#4ade80,#16a34a);color:#fff;font-family:var(--font-body);font-size:.95rem;font-weight:900;cursor:pointer;box-shadow:0 5px 0 #1a1a1a;text-shadow:0 1px 0 rgba(0,0,0,.8);text-decoration:none;box-sizing:border-box;margin-bottom:1rem">
+        🛒 ${t('discount_modal_buy')}
+      </a>
+
+      <div style="border-top:1.5px solid #2a2a2a;margin-bottom:1rem"></div>
+
+      <a href="https://kaiserplay.com.br/" target="_blank" rel="noopener" onclick="playClickSfx('nav');closeCupomModal()"
+        style="display:flex;flex-direction:column;align-items:center;gap:.5rem;text-decoration:none;padding:.25rem 0">
+        <div style="font-size:.75rem;color:#666;font-weight:600">${t('discount_modal_learn')}</div>
+        <img src="logo-kaiserplay-transp.png" style="width:62%;object-fit:contain;display:block">
+      </a>
+    </div>`;
+  document.body.appendChild(overlay);
+  _cupomModal=overlay;
+  playClickSfx('soft');
+}
+function closeCupomModal(){
+  if(_cupomModal){_cupomModal.remove();_cupomModal=null;}
+}
+
 function downloadMaterial(itemId){
   const item=LOJA_ITEMS.find(x=>x.id===itemId);
   if(!item) return;
-  if(item.cupom){window.open('https://chk.eduzz.com/uumbh35c','_blank');return;}
+  if(item.cupom){showCupomModal();return;}
   if(!item.file){showToast(t('coming_soon'),t('coming_soon_body'));return;}
   window.open(item.file,'_blank');
 }

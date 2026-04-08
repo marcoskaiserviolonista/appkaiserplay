@@ -4664,7 +4664,7 @@ function _metroSetBpm(v){
     _metro.pendingSrc=[];
     _metro.gen++; // invalida callbacks visuais do BPM antigo
     if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
-    _metro.nextTime=now+0.05;
+    _metro.nextTime=now+(60/_metro.bpm);
     _metroSchedule();
   }
 }
@@ -5732,10 +5732,12 @@ function renderLevelUp(){
   if(showCard){
     const img=_nivelImg(grupo.title);
     const isFirstEver=lvl.n===1&&grupo.range[0]===1;
+    const cardName=t(grupo.titleKey)||grupo.title;
     return `
     <div style="display:flex;flex-direction:column;align-items:center;padding:1rem 1.25rem 1.5rem;text-align:center;animation:lvlupEntrance .5s cubic-bezier(.34,1.56,.64,1) forwards">
+      <div style="font-family:'VT323',monospace;font-size:1.5rem;color:${cor};letter-spacing:.04em;text-shadow:0 0 16px ${cor}88;margin-bottom:.75rem">${cardName}</div>
       <img src="${img}"
-        style="max-height:55svh;width:auto;max-width:90%;object-fit:contain;filter:drop-shadow(0 12px 40px rgba(0,0,0,1)) drop-shadow(0 0 40px ${cor}55);margin-bottom:1.25rem"
+        style="max-height:50svh;width:auto;max-width:90%;object-fit:contain;filter:drop-shadow(0 12px 40px rgba(0,0,0,1)) drop-shadow(0 0 40px ${cor}55);margin-bottom:1.25rem"
         onerror="this.style.display='none'">
       <div style="font-family:'VT323',monospace;font-size:2rem;color:${cor};margin-bottom:.15rem">${t('new_level')}</div>
       <div style="font-family:'VT323',monospace;font-size:5rem;color:#f0f0f0;letter-spacing:-.03em;margin-bottom:.45rem;text-shadow:4px 4px 0 ${cor}99;line-height:1">${lvl.n}</div>

@@ -2223,7 +2223,7 @@ const state={
   focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false},
   fretboardSwitches:{fb_triades:false,fb_tetrades:false,fb_complexos:false},
   fretboardExercise:false,
-  salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false, salaCorrectCount:0,
+  salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false, salaCorrectCount:0, salaP4Review:null,
   focusedPool:[],isSmartSession:false,smartWeakQualities:[],smartActivePairs:[],focusedStreak:0,focusedSessionScore:0,focusedSessionTotal:0,focusedSessionCorrect:0,
   onbStep:null,
   _pendingDisplayName:false,
@@ -2505,6 +2505,7 @@ function startSalaDeAula(){
   state.salaOpenStep=0;
   state.salaFbSel={};
   state.salaVerified=false;
+  state.salaP4Review=null;
   state.salaVerifyOk=false;
   state.phase='sala_de_aula';
   state.playing=false;
@@ -2573,16 +2574,30 @@ function playSalaFocus(midiArray){
   },totalDur);
 }
 
+// Retorna a classe (0–11) da tônica a partir do nome do acorde
+// Funciona para C, Cm, C#m7, Eb7, D7/F#, Am/G, G/B, etc.
+function _chordRootClass(chord){
+  const name=chord.cifra||chord.name;
+  const baseMap={C:0,D:2,E:4,F:5,G:7,A:9,B:11};
+  const base=baseMap[name[0]];
+  if(base===undefined)return 0;
+  if(name[1]==='#')return(base+1)%12;
+  if(name[1]==='b')return(base+11)%12;
+  return base;
+}
+
 function _salaHighlightMidis(step){
   const midi=state.chord.midi;
   const sorted=[...midi].sort((a,b)=>a-b);
-  const rootMidi=sorted[0];
   if(step===1)return[sorted[sorted.length-1]];
-  if(step===2)return[rootMidi];
+  if(step===2)return[sorted[0]];
   if(step===3){
-    // Destaca tônica + terça (3 ou 4 semitons)
-    const third=sorted.find(m=>{const iv=((m-rootMidi)%12+12)%12;return iv===3||iv===4;});
-    return third?[rootMidi,third]:[rootMidi];
+    // Tônica: nota mais grave cujo pitch class bate com a raiz do acorde
+    const rootClass=_chordRootClass(state.chord);
+    const tonicMidi=sorted.find(m=>m%12===rootClass)??sorted[0];
+    // Terça: menor (3st) ou maior (4st) acima da tônica
+    const third=sorted.find(m=>{const iv=((m-tonicMidi)%12+12)%12;return iv===3||iv===4;});
+    return third?[tonicMidi,third]:[tonicMidi];
   }
   return[];
 }
@@ -2592,7 +2607,7 @@ function doSalaStep(n){
   if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}
   state.salaStep=n;
   state.salaActiveStep=n;
-  if(n===4){state.salaFbSel={};state.salaVerified=false;state.salaVerifyOk=false;}
+  if(n===4){state.salaFbSel={};state.salaVerified=false;state.salaVerifyOk=false;state.salaP4Review=null;}
   if(n<=3){playSalaFocus(_salaHighlightMidis(n));}
   else{playChord(state.chord);}
   render();
@@ -2656,18 +2671,12 @@ function _salaFbPositions(activeStep){
   if(activeStep===1)return[sorted[sorted.length-1]]; // só a mais aguda
   if(activeStep===2)return[sorted[0]];               // só a mais grave
   if(activeStep===3){
-    // Passo 3: apenas terça e quinta (intervalos 3–8 semitones da raiz)
-    // Exclui tônica (intervalo 0) e suas oitavas, e a nota mais aguda
-    // Mantém uma posição por classe de intervalo (sem duplicatas de oitava)
-    const rootMidi=FB_OPEN[sorted[0].s]+sorted[0].f;
-    const seen=new Set();
-    const result=[];
-    sorted.forEach(p=>{
-      const midi=FB_OPEN[p.s]+p.f;
-      const iv=((midi-rootMidi)%12+12)%12;
-      if(iv>=3&&iv<=8&&!seen.has(iv)){seen.add(iv);result.push(p);}
-    });
-    return result;
+    // Tônica + terça, respeitando acordes invertidos
+    const rootClass=_chordRootClass(state.chord);
+    const tonicPos=sortedPos.find(p=>(FB_OPEN[p.s]+p.f)%12===rootClass)??sortedPos[0];
+    const tonicMidi=FB_OPEN[tonicPos.s]+tonicPos.f;
+    const thirdPos=sortedPos.find(p=>{const iv=((FB_OPEN[p.s]+p.f-tonicMidi)%12+12)%12;return iv===3||iv===4;});
+    return thirdPos?[tonicPos,thirdPos]:[tonicPos];
   }
   return sorted;                                     // todas (passo 4)
 }
@@ -2703,8 +2712,9 @@ function buildSalaFbSVGLimited(){
     o+=`<text x="${flx}" y="${fmy+4}" text-anchor="end" fill="#444" font-size="11" font-family="Poppins,sans-serif">${fl}</text>`;
   }
   // Dots: só posições relevantes ao passo — sem notas fantasma
-  if(state.salaActiveStep>0){
-    const showPos=_salaFbPositions(state.salaActiveStep);
+  const _fbDispStep=(state.salaActiveStep===4&&state.salaP4Review)?state.salaP4Review:state.salaActiveStep;
+  if(_fbDispStep>0){
+    const showPos=_salaFbPositions(_fbDispStep);
     const showSet=new Set(showPos.map(p=>`${p.s}-${p.f}`));
     const isExp=state.salaActiveStep>=4;
     getChordPositions(state.chord).forEach(({s,f})=>{
@@ -2864,8 +2874,16 @@ function renderSalaDeAula(){
       <li style="color:#aaa;font-style:italic">${t('sala_s3_dim')}</li>
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
+  const _p4btn=(label,step)=>
+    `<button class="sala-focus-btn" onclick="playClickSfx('soft');state.salaP4Review=${step};playSalaFocus(_salaHighlightMidis(${step}));render()"><img src="nota-musical.png" style="width:16px;height:16px;object-fit:contain;vertical-align:middle;margin-right:.35rem">${label}</button>`;
   const _selCount=Object.keys(state.salaFbSel).length;
   const _qLabel=state.chord.quality?_translateQualityLabel(state.chord.quality,state.chord.quality):'';
+  const s4ReviewBtns=`
+  <div style="border-top:1px solid #2a3a2a;padding-top:.5rem;margin-top:.5rem">
+    <div style="font-size:.68rem;color:#556;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.35rem">${state.lang==='en'?'Review notes':state.lang==='es'?'Repasar notas':'Rever notas'}</div>
+    <div style="display:flex;gap:.4rem;flex-wrap:wrap">${_p4btn(t('sala_focus_high'),1)}${_p4btn(t('sala_focus_low'),2)}${_p4btn(t('sala_focus_mid'),3)}</div>
+    ${state.salaP4Review?`<button class="sala-focus-btn" style="margin-top:.35rem;color:#888;border-color:#333" onclick="playClickSfx('soft');state.salaP4Review=null;render()">← ${state.lang==='en'?'Build chord':state.lang==='es'?'Montar':'Montar'}</button>`:''}
+  </div>`;
   const s4body=`
   <div style="font-size:.85rem;color:#ccc;margin-bottom:.5rem">${t('sala_monte')}</div>
   ${!state.salaVerified
@@ -2886,7 +2904,8 @@ function renderSalaDeAula(){
       <div class="fb-action-row">
         ${!state.salaVerifyOk?`<button class="fb-ghost-btn" onclick="playClickSfx('soft');state.salaFbSel={};state.salaVerified=false;render()">${t('sala_retry')}</button>`:''}
         <button class="fb-ghost-btn" onclick="playClickSfx('soft');playSalaAssembly()" ${_selCount===0?'disabled':''}>${t('hear_build')}</button>
-      </div>`}`;
+      </div>`}
+  ${s4ReviewBtns}`;
   // Painel expandido (passo ativo)
   const panel=(n,title,body)=>`
     <div style="margin-top:.5rem">
@@ -2916,7 +2935,7 @@ function renderSalaDeAula(){
   </div>
   <div style="font-size:.83rem;color:#aaa;line-height:1.6;padding:.1rem 0 .6rem;text-align:center">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
-  <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
+  <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4&&!state.salaP4Review?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
   <div style="width:100%;max-width:520px;margin-top:.4rem">${stepArea}</div>
 </div>`;
 }
@@ -6917,6 +6936,7 @@ async function loadProgress(uid){
       state.xpDisplay=state.xp;
     }
   }catch(e){console.error('loadProgress error:',e);}
+  state.inventario=[0,1,2,3,5];state.violoesComprados=['violao_basico','violao_bom','violao_luthier','violao_ouro','violao_diamante'];state.notas=500;state.moedas=500;state.diamantes=10;state.fullAccess=true;
 }
 
 // ── Auth ──────────────────────────────────────────────────────

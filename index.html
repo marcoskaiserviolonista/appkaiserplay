@@ -2673,9 +2673,9 @@ function _salaFbPositions(activeStep){
   if(activeStep===3){
     // Tônica + terça, respeitando acordes invertidos
     const rootClass=_chordRootClass(state.chord);
-    const tonicPos=sortedPos.find(p=>(FB_OPEN[p.s]+p.f)%12===rootClass)??sortedPos[0];
+    const tonicPos=sorted.find(p=>(FB_OPEN[p.s]+p.f)%12===rootClass)??sorted[0];
     const tonicMidi=FB_OPEN[tonicPos.s]+tonicPos.f;
-    const thirdPos=sortedPos.find(p=>{const iv=((FB_OPEN[p.s]+p.f-tonicMidi)%12+12)%12;return iv===3||iv===4;});
+    const thirdPos=sorted.find(p=>{const iv=((FB_OPEN[p.s]+p.f-tonicMidi)%12+12)%12;return iv===3||iv===4;});
     return thirdPos?[tonicPos,thirdPos]:[tonicPos];
   }
   return sorted;                                     // todas (passo 4)

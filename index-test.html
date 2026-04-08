@@ -804,10 +804,10 @@ const STRINGS = {
     sala_s2_title:'Passo 2: Identifique a nota mais grave',
     sala_s2_body:'Quando ouvir um acorde, foque sua atenção na nota mais grave. Não é tão fácil ouvir quanto a mais aguda. Na maioria das vezes, a nota mais grave é a tônica do acorde.',
     sala_s3_title:'Passo 3: Identifique o tipo de acorde',
-    sala_s3_intro:'Classifique o acorde analisando a terça e a quinta:',
-    sala_s3_maior:'Maior → terça maior + quinta justa',
-    sala_s3_menor:'Menor → terça menor + quinta justa',
-    sala_s3_dim:'Diminuto → terça menor + quinta diminuta',
+    sala_s3_intro:'Ouça a tônica e a terça. Descubra se o acorde é maior ou menor:',
+    sala_s3_maior:'Terça maior → acorde Maior',
+    sala_s3_menor:'Terça menor → acorde Menor',
+    sala_s3_dim:'Acordes diminutos também têm terça menor',
     sala_s3_aug:'Aumentado → terça maior + quinta aumentada',
     sala_s4_title:'Passo 4: Descubra o acorde',
     sala_monte:'Monte o acorde que você ouviu no braço do instrumento.',
@@ -815,7 +815,7 @@ const STRINGS = {
     sala_intro:'Tente identificar qual é o acorde apenas ouvindo. Se não conseguir, siga os passos abaixo — eles vão te guiar até a resposta.',
     sala_focus_high:'Focar nota aguda',
     sala_focus_low:'Focar nota grave',
-    sala_focus_mid:'Focar terça e quinta',
+    sala_focus_mid:'Focar tônica e terça',
     sala_next:'Próximo',
     focused_promo_title:'Quer evoluir mais rápido?', focused_promo_body:'Treine exatamente os acordes que você erra.', focused_promo_btn:'Ir para Treino Focado',
     locked:'Bloqueado', unlock:'Desbloquear', free:'Grátis',
@@ -1024,10 +1024,10 @@ const STRINGS = {
     sala_s2_title:'Step 2: Identify the lowest note',
     sala_s2_body:'When you hear a chord, focus on the lowest note. It is not as easy to hear as the highest. Most of the time, the lowest note is the chord root.',
     sala_s3_title:'Step 3: Identify the chord type',
-    sala_s3_intro:'Classify the chord by analyzing the third and fifth:',
-    sala_s3_maior:'Major → major third + perfect fifth',
-    sala_s3_menor:'Minor → minor third + perfect fifth',
-    sala_s3_dim:'Diminished → minor third + diminished fifth',
+    sala_s3_intro:'Listen to the root and the third. Find out if the chord is major or minor:',
+    sala_s3_maior:'Major third → Major chord',
+    sala_s3_menor:'Minor third → Minor chord',
+    sala_s3_dim:'Diminished chords also have a minor third',
     sala_s3_aug:'Augmented → major third + augmented fifth',
     sala_s4_title:'Step 4: Discover the chord',
     sala_monte:'Build the chord you heard on the instrument.',
@@ -1035,7 +1035,7 @@ const STRINGS = {
     sala_intro:'Try to identify the chord just by listening. If you can\'t, follow the steps below — they will guide you to the answer.',
     sala_focus_high:'Focus on highest note',
     sala_focus_low:'Focus on lowest note',
-    sala_focus_mid:'Focus on third and fifth',
+    sala_focus_mid:'Focus on root and third',
     sala_next:'Next',
     focused_promo_title:'Want to improve faster?', focused_promo_body:'Train exactly the chords you get wrong.', focused_promo_btn:'Go to Focused Training',
     locked:'Locked', unlock:'Unlock', free:'Free',
@@ -1244,10 +1244,10 @@ const STRINGS = {
     sala_s2_title:'Paso 2: Identifica la nota más grave',
     sala_s2_body:'Cuando escuches un acorde, enfoca tu atención en la nota más grave. No es tan fácil de escuchar como la más aguda. La mayoría de las veces, la nota más grave es la tónica del acorde.',
     sala_s3_title:'Paso 3: Identifica el tipo de acorde',
-    sala_s3_intro:'Clasifica el acorde analizando la tercera y la quinta:',
-    sala_s3_maior:'Mayor → tercera mayor + quinta justa',
-    sala_s3_menor:'Menor → tercera menor + quinta justa',
-    sala_s3_dim:'Disminuido → tercera menor + quinta disminuida',
+    sala_s3_intro:'Escucha la tónica y la tercera. Descubre si el acorde es mayor o menor:',
+    sala_s3_maior:'Tercera mayor → acorde Mayor',
+    sala_s3_menor:'Tercera menor → acorde Menor',
+    sala_s3_dim:'Los acordes disminuidos también tienen tercera menor',
     sala_s3_aug:'Aumentado → tercera mayor + quinta aumentada',
     sala_s4_title:'Paso 4: Descubre el acorde',
     sala_monte:'Construye el acorde que escuchaste en el mástil del instrumento.',
@@ -1255,7 +1255,7 @@ const STRINGS = {
     sala_intro:'Intenta identificar cuál es el acorde solo escuchando. Si no puedes, sigue los pasos a continuación — te guiarán hasta la respuesta.',
     sala_focus_high:'Enfocar nota aguda',
     sala_focus_low:'Enfocar nota grave',
-    sala_focus_mid:'Enfocar tercera y quinta',
+    sala_focus_mid:'Enfocar tónica y tercera',
     sala_next:'Siguiente',
     focused_promo_title:'¿Quieres mejorar más rápido?', focused_promo_body:'Entrena exactamente los acordes que fallas.', focused_promo_btn:'Ir al Entrenamiento Enfocado',
     locked:'Bloqueado', unlock:'Desbloquear', free:'Gratis',
@@ -1811,7 +1811,8 @@ SAMPLE_NOTES.forEach(n => {
 // +10%: demais notas do range médio-grave (MIDI 48–52, 57–63)
 const _BOOST_MIDI_20 = new Set([43,44,45,46,47,53,54,55,56]);
 const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
-function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
+// Notas graves (MIDI < 52) recebem leve atenuação para evitar distorção em volume alto
+function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.05:_BOOST_MIDI_10.has(midi)?1.0:1; }
 
 // Compressor dinâmico — evita distorção quando várias notas somam volume
 let _compressorInit = false;
@@ -1820,9 +1821,9 @@ function initCompressor() {
   _compressorInit = true;
   const ctx = Howler.ctx;
   const comp = ctx.createDynamicsCompressor();
-  comp.threshold.value = -24;  // começa a comprimir a partir de -24dB
+  comp.threshold.value = -28;  // começa a comprimir a partir de -28dB (mais proteção para graves)
   comp.knee.value = 4;         // transição suave
-  comp.ratio.value = 12;       // compressão 12:1 (quase limiter)
+  comp.ratio.value = 14;       // compressão 14:1 — limiter mais firme para frequências graves
   comp.attack.value = 0.001;   // reage em 1ms — pega transientes graves
   comp.release.value = 0.20;   // solta gradual
   Howler.masterGain.disconnect();
@@ -2581,10 +2582,9 @@ function _salaHighlightMidis(step){
   if(step===1)return[sorted[sorted.length-1]];
   if(step===2)return[rootMidi];
   if(step===3){
-    const seen=new Set();
-    const result=[];
-    sorted.forEach(m=>{const iv=((m-rootMidi)%12+12)%12;if(iv>=3&&iv<=8&&!seen.has(iv)){seen.add(iv);result.push(m);}});
-    return result;
+    // Destaca tônica + terça (3 ou 4 semitons)
+    const third=sorted.find(m=>{const iv=((m-rootMidi)%12+12)%12;return iv===3||iv===4;});
+    return third?[rootMidi,third]:[rootMidi];
   }
   return[];
 }
@@ -2863,8 +2863,7 @@ function renderSalaDeAula(){
     <ul>
       <li>${t('sala_s3_maior')}</li>
       <li>${t('sala_s3_menor')}</li>
-      <li>${t('sala_s3_dim')}</li>
-      <li>${t('sala_s3_aug')}</li>
+      <li style="color:#aaa;font-style:italic">${t('sala_s3_dim')}</li>
     </ul>
     ${twoBtns(t('sala_focus_mid'),3)}`;
   const _selCount=Object.keys(state.salaFbSel).length;
@@ -3674,7 +3673,7 @@ function isQualitySwitch(key){ return key in FOCUSED_QUALITY_PAIRS; }
 // UX TEST: setar true para reexibir o botão "Jornada pelas Cordas" na tela inicial
 const SHOW_CORDAS_JOURNEY = false;
 
-const FOCUSED_FREE_SWITCHES = new Set(['maior_menor','menor_diminuto','triades_maiores','tetrades_menores']);
+const FOCUSED_FREE_SWITCHES = new Set(['maior_menor','triades_maiores','tetrades_menores']);
 function isSwitchUnlocked(key){ return state.fullAccess || FOCUSED_FREE_SWITCHES.has(key); }
 const FRETBOARD_FREE_SWITCHES = new Set(['fb_triades']);
 function isFretboardSwitchUnlocked(key){ return state.fullAccess || FRETBOARD_FREE_SWITCHES.has(key); }
@@ -4150,7 +4149,7 @@ function renderTreinoFocadoMenu(){
         <div style="flex:1;min-width:0">
           <div style="font-size:.88rem;color:#e0e0e0;font-weight:900;text-transform:uppercase;letter-spacing:.08em;margin-bottom:.3rem">${t('training_suggestion')}</div>
           <div style="font-size:.75rem;color:#f87171;font-weight:900;text-transform:uppercase;letter-spacing:.06em;margin-top:.2rem;margin-bottom:.2rem">${state.lang==='en'?'THESE ARE THE CHORDS YOU MISS THE MOST':state.lang==='es'?'ESTOS SON LOS ACORDES QUE MÁS FALLAS':'ESTES SÃO OS ACORDES QUE VOCÊ MAIS ERRA'}</div>
-          <div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-top:.3rem">${state.lang==='en'?'Find out which chords you miss the most and train exactly your weak points.':state.lang==='es'?'Entrena exactamente tus puntos débiles.':'Treine exatamente seus pontos fracos.'}</div>
+          <div style="font-size:.8rem;color:#888;font-weight:500;line-height:1.45;margin-top:.3rem">${state.lang==='en'?'Train exactly your weak points to improve faster.':state.lang==='es'?'Entrena exactamente tus puntos débiles para mejorar más rápido.':'treine exatamente seus pontos fracos para evoluir mais rápido'}</div>
         </div>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:.5rem;margin-bottom:.75rem">

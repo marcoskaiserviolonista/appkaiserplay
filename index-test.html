@@ -4591,6 +4591,13 @@ function _metroStartSilentLoop(ctx){
   _metro.silentNode=src;
 }
 
+function _metroSetupMediaSession(){
+  if(!('mediaSession' in navigator))return;
+  navigator.mediaSession.metadata=new MediaMetadata({title:'Metrônomo',artist:'KaiserPlay'});
+  navigator.mediaSession.setActionHandler('play',()=>{if(!_metro.running)_metroStart();});
+  navigator.mediaSession.setActionHandler('pause',()=>{if(_metro.running)_metroStop();});
+}
+
 function _metroStart(){
   if(_metro.running)return;
   _metroEnsureAudioTag();
@@ -4605,8 +4612,11 @@ function _metroStart(){
     _metroStartSilentLoop(_metro.ctx);
   }
   if(_metro.ctx.state==='suspended')_metro.ctx.resume();
-  // <audio> HTML mantém sessão de áudio ativa no iOS com tela bloqueada
+  // <audio> + Media Session API: registra no iOS como mídia ativa,
+  // aparece no player da tela de bloqueio e mantém áudio em background
   _metro.audioTag.play().catch(()=>{});
+  _metroSetupMediaSession();
+  if('mediaSession' in navigator)navigator.mediaSession.playbackState='playing';
   // Elimina qualquer timerID órfão para evitar dupla batida
   if(_metro.timerID){clearTimeout(_metro.timerID);_metro.timerID=null;}
   _metro.running=true;
@@ -4624,6 +4634,7 @@ function _metroStop(){
   _metro.pendingSrc=[];
   if(_metro.ctx&&_metro.ctx.state==='running')_metro.ctx.suspend();
   if(_metro.audioTag)_metro.audioTag.pause();
+  if('mediaSession' in navigator)navigator.mediaSession.playbackState='paused';
   _metroUpdateUI();
 }
 

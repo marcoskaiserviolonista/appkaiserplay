@@ -858,7 +858,7 @@ const STRINGS = {
     equipment_section:'Equipamento', equipped_guitar_label:'Violão Equipado',
     swap_in_shop:'Trocar na Loja', available_guitars:'Violões disponíveis',
     no_other_guitars:'Nenhum outro violão adquirido.', no_items_yet:'Nenhum item adquirido ainda.',
-    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ Ver Oferta',
+    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'Saiba mais',
     coupon_toast_title:'Código copiado!', coupon_toast_body:'Cole esse código ao finalizar a compra.',
     coupon_modal_subtitle:'Use este código ao finalizar sua compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'Copiado!', coupon_modal_visit:'Aprenda violão no', coupon_modal_click:'Clique para saber mais',
     bought_modal_title:'Item adicionado ao inventário', bought_modal_equipped:'Seu item foi automaticamente equipado', bought_modal_go_shop:'Continuar na loja', bought_modal_later:'Ir ao inventário',
@@ -1078,7 +1078,7 @@ const STRINGS = {
     equipment_section:'Equipment', equipped_guitar_label:'Equipped Guitar',
     swap_in_shop:'Swap in Shop', available_guitars:'Available Guitars',
     no_other_guitars:'No other guitars owned.', no_items_yet:'No items purchased yet.',
-    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'🏷️ View Offer',
+    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Download', coupon_btn:'Learn more',
     coupon_toast_title:'Code copied!', coupon_toast_body:'Paste this code when checking out.',
     coupon_modal_subtitle:'Use this code when checking out:', coupon_modal_copy:'Copy', coupon_modal_copied:'Copied!', coupon_modal_visit:'Learn guitar at', coupon_modal_click:'Click to learn more',
     bought_modal_title:'Item added to inventory', bought_modal_equipped:'Your item was automatically equipped', bought_modal_go_shop:'Continue shopping', bought_modal_later:'Go to inventory',
@@ -1298,7 +1298,7 @@ const STRINGS = {
     equipment_section:'Equipamiento', equipped_guitar_label:'Guitarra Equipada',
     swap_in_shop:'Cambiar en la Tienda', available_guitars:'Guitarras disponibles',
     no_other_guitars:'Ninguna otra guitarra adquirida.', no_items_yet:'Ningún artículo adquirido aún.',
-    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Descargar', coupon_btn:'🏷️ Ver Oferta',
+    download_btn:'<img src="seta-para-cima.png" style="width:16px;height:16px;transform:rotate(180deg);vertical-align:middle;flex-shrink:0"> Descargar', coupon_btn:'Saber más',
     coupon_toast_title:'¡Código copiado!', coupon_toast_body:'Pega este código al finalizar la compra.',
     coupon_modal_subtitle:'Usa este código al finalizar tu compra:', coupon_modal_copy:'Copiar', coupon_modal_copied:'¡Copiado!', coupon_modal_visit:'Aprende guitarra en', coupon_modal_click:'Haz clic para saber más',
     bought_modal_title:'Artículo añadido al inventario', bought_modal_equipped:'Tu artículo fue equipado automáticamente', bought_modal_go_shop:'Continuar en la tienda', bought_modal_later:'Ir al inventario',
@@ -5950,10 +5950,15 @@ function renderInventario(){
       : eduItems.map(id=>{
           const item=LOJA_ITEMS.find(x=>x.id===id);
           const isCupom=!!item.cupom;
+          if(isCupom) return `<div class="loja-item" style="flex-direction:column;align-items:center;text-align:center;padding:1.25rem 1.1rem;gap:.75rem">
+            <img src="logo-kaiserplay-transp.png" style="width:65%;max-width:190px;object-fit:contain" onerror="this.outerHTML='<span style=\'font-size:2rem\'>🎓</span>'">
+            <div><div class="item-name">${itemName(item)}</div><div class="item-desc">${itemDesc(item)}</div></div>
+            <button class="item-buy" style="background:#1a2a1a;border-color:#22c55e;color:#4ade80;width:100%;box-sizing:border-box" onclick="downloadMaterial(${item.id})">${t('coupon_btn')}</button>
+          </div>`;
           return `<div class="loja-item">
             <div class="item-icon"><img src="${item.img}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.outerHTML='<span>${item.icon}</span>'"></div>
             <div class="item-info"><div class="item-name">${itemName(item)}</div><div class="item-desc">${itemDesc(item)}</div></div>
-            <button class="item-buy" style="background:#1a2a1a;border-color:#22c55e;color:#4ade80" onclick="downloadMaterial(${item.id})">${isCupom?t('coupon_btn'):t('download_btn')}</button>
+            <button class="item-buy" style="background:#1a2a1a;border-color:#22c55e;color:#4ade80" onclick="downloadMaterial(${item.id})">${t('download_btn')}</button>
           </div>`;
         }).join('')}
   `;

@@ -914,9 +914,6 @@ const STRINGS = {
     unlock_popup_b3:'Compra única, acesso para sempre',
     unlock_popup_cta:'Desbloquear tudo',
     unlock_popup_dismiss:'Agora não',
-    streak_days:'dias seguidos',
-    streak_congrats_pre:'Parabéns, você está há',
-    streak_congrats_pos:'dias ativos!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
     tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'o melhor afinador do mundo',
     tuner_free:'Afinação livre',tuner_guitar:'Afinação do violão',
@@ -1137,9 +1134,6 @@ const STRINGS = {
     unlock_popup_b3:'One-time purchase, access forever',
     unlock_popup_cta:'Unlock everything',
     unlock_popup_dismiss:'Not now',
-    streak_days:'days in a row',
-    streak_congrats_pre:'Congrats, you\'ve been active for',
-    streak_congrats_pos:'days!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
     tuner_title:'High Precision Tuner',tuner_subtitle:'the best tuner in the world',
     tuner_free:'Free tuning',tuner_guitar:'Guitar tuning',
@@ -1360,9 +1354,6 @@ const STRINGS = {
     unlock_popup_b3:'Compra única, acceso para siempre',
     unlock_popup_cta:'Desbloquear todo',
     unlock_popup_dismiss:'Ahora no',
-    streak_days:'días seguidos',
-    streak_congrats_pre:'¡Felicidades, llevas',
-    streak_congrats_pos:'días activos!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
     tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'el mejor afinador del mundo',
     tuner_free:'Afinación libre',tuner_guitar:'Afinación de guitarra',
@@ -2241,8 +2232,6 @@ const state={
   rankingData:[], rankingLoading:false,
   ratingDone:false,
   ratingSkippedAt:0,
-  dailyStreak:0,
-  lastPlayedDate:'',
   unlockPopupDismissed:false,
 };
 
@@ -5416,7 +5405,7 @@ function renderLogin(){
           style="width:100%;padding:.75rem;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:3px solid #60dcff88;border-radius:14px;box-shadow:4px 4px 0 #0a1520;color:#60dcff;font-size:.9rem;font-weight:800;font-family:var(--font-body);cursor:pointer;text-shadow:0 0 10px #60dcff44">
           ${t('create_account')}
         </button>
-        <button onclick="state.isGuest=true;state.guestExerciseCount=0;state.guestNextPrompt=1;checkDailyStreak();state.phase='start';render()"
+        <button onclick="state.isGuest=true;state.guestExerciseCount=0;state.guestNextPrompt=1;state.phase='start';render()"
           style="width:100%;padding:.5rem;background:transparent;border:none;color:#555;font-size:.78rem;font-weight:600;font-family:var(--font-body);cursor:pointer;margin-top:.25rem;text-decoration:underline">
           ${t('play_as_guest')}
         </button>
@@ -6957,29 +6946,6 @@ function showRatingPrompt(){
 }
 
 // ── Streak diário ─────────────────────────────────────────────
-function _todayStr(){
-  const d=new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-}
-function checkDailyStreak(){
-  // Carrega do localStorage se for guest e ainda não carregou
-  if(!state.user&&!state.lastPlayedDate){
-    state.dailyStreak=parseInt(localStorage.getItem('kp_dailyStreak')||'0');
-    state.lastPlayedDate=localStorage.getItem('kp_lastPlayedDate')||'';
-  }
-  const today=_todayStr();
-  if(state.lastPlayedDate===today)return; // já contou hoje
-  const prev=new Date(Date.now()-86400000);
-  const yStr=`${prev.getFullYear()}-${String(prev.getMonth()+1).padStart(2,'0')}-${String(prev.getDate()).padStart(2,'0')}`;
-  state.dailyStreak=(state.lastPlayedDate===yStr)?state.dailyStreak+1:1;
-  state.lastPlayedDate=today;
-  if(state.user){
-    saveProgress();
-  } else {
-    localStorage.setItem('kp_dailyStreak',String(state.dailyStreak));
-    localStorage.setItem('kp_lastPlayedDate',today);
-  }
-}
 
 // ── Firestore: salvar e carregar progresso ────────────────────
 function saveProgress(){
@@ -7001,8 +6967,6 @@ function saveProgress(){
     firstCardSeen:state.firstCardSeen,
     ratingDone:state.ratingDone,
     ratingSkippedAt:state.ratingSkippedAt,
-    dailyStreak:state.dailyStreak,
-    lastPlayedDate:state.lastPlayedDate,
   },{merge:true}).catch(e=>console.error('saveProgress error:',e));
 }
 async function loadProgress(uid){
@@ -7023,11 +6987,8 @@ async function loadProgress(uid){
       if(d.firstCardSeen!=null)state.firstCardSeen=d.firstCardSeen;
       if(d.ratingDone!=null)state.ratingDone=d.ratingDone;
       if(d.ratingSkippedAt!=null)state.ratingSkippedAt=d.ratingSkippedAt;
-      if(d.dailyStreak!=null)state.dailyStreak=d.dailyStreak;
-      if(d.lastPlayedDate)state.lastPlayedDate=d.lastPlayedDate;
       state.xpDisplay=state.xp;
     }
-    checkDailyStreak();
   }catch(e){console.error('loadProgress error:',e);}
 }
 

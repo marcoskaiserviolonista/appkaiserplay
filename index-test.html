@@ -843,7 +843,7 @@ const STRINGS = {
     start_desc:'Identifique acordes pelo som, acumule pontos e desbloqueie conteúdos para evoluir no violão.',
     your_stats:'Suas Estatísticas', total_xp:'XP Total', hit_rate:'Taxa de Acerto',
     best_seq:'Melhor Sequência', placement:'Colocação',
-    inventory:'Inventário', levels:'Níveis', combo:'Combo',
+    inventory:'Inventário', levels:'Níveis', combo:'Combo', levels_card_desc:'colecione cartas que representam o nível da sua percepção auditiva',
     // Shop / purchase
     confirm_purchase:'Confirmar compra', purchase_value:'Valor da compra',
     are_you_sure:'Tem certeza que deseja comprar este item?',
@@ -1063,7 +1063,7 @@ const STRINGS = {
     start_desc:'Identify chords by ear, accumulate points and unlock content to evolve on guitar.',
     your_stats:'Your Statistics', total_xp:'Total XP', hit_rate:'Accuracy',
     best_seq:'Best Streak', placement:'Rank',
-    inventory:'Inventory', levels:'Levels', combo:'Combo',
+    inventory:'Inventory', levels:'Levels', combo:'Combo', levels_card_desc:'collect cards that represent the level of your auditory perception',
     // Shop / purchase
     confirm_purchase:'Confirm purchase', purchase_value:'Purchase value',
     are_you_sure:'Are you sure you want to buy this item?',
@@ -1283,7 +1283,7 @@ const STRINGS = {
     start_desc:'Identifica acordes por su sonido, acumula puntos y desbloquea contenidos para mejorar en la guitarra.',
     your_stats:'Tus Estadísticas', total_xp:'XP Total', hit_rate:'Tasa de Acierto',
     best_seq:'Mejor Secuencia', placement:'Clasificación',
-    inventory:'Inventario', levels:'Niveles', combo:'Combo',
+    inventory:'Inventario', levels:'Niveles', combo:'Combo', levels_card_desc:'colecciona cartas que representan el nivel de tu percepción auditiva',
     // Shop / purchase
     confirm_purchase:'Confirmar compra', purchase_value:'Valor de la compra',
     are_you_sure:'¿Estás seguro de que quieres comprar este artículo?',
@@ -5355,9 +5355,18 @@ function renderStart(){
       <button id="ob-loja" class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
       <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
-    <div class="nav-grid" style="margin-bottom:.75rem">
-      <button id="ob-niveis" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
-    </div>
+    <button id="ob-niveis" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"
+      style="width:100%;max-width:520px;background:linear-gradient(135deg,#1a1200 0%,#2a1e00 50%,#1a1200 100%);border:2.5px solid #F5A62366;border-radius:18px;box-shadow:4px 4px 0 #0a0700,0 0 20px #F5A62322;cursor:pointer;padding:0;display:flex;align-items:stretch;overflow:hidden;margin-bottom:.75rem;transition:all .12s;text-align:left">
+      <div style="width:28%;flex-shrink:0;background:#0a0800;display:flex;align-items:center;justify-content:center;padding:.75rem .5rem">
+        <img src="mago_do_som.png" style="width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:10px;border:2px solid #F5A62355;box-shadow:2px 2px 8px rgba(0,0,0,.8)">
+      </div>
+      <div style="flex:1;padding:.9rem 1rem;display:flex;flex-direction:column;justify-content:center;gap:.4rem">
+        <div style="font-size:.58rem;font-weight:800;color:#F5A623;text-transform:uppercase;letter-spacing:.14em;opacity:.8">${t('levels')}</div>
+        <div style="font-size:1.05rem;font-weight:900;color:#e8e8e8;font-family:var(--font-body);line-height:1.2">Grimório de Cartas</div>
+        <div style="font-size:.72rem;font-weight:500;color:#bbb;line-height:1.45">${t('levels_card_desc')}</div>
+      </div>
+      <div style="display:flex;align-items:center;padding-right:.85rem;color:#F5A62388;font-size:1.1rem">›</div>
+    </button>
     <div class="section-title">${t('your_stats')}</div>
     <div class="user-stats">
       <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>

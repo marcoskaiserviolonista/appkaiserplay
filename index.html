@@ -5366,17 +5366,9 @@ function renderStart(){
       <button id="ob-loja" class="nav-btn gold" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='loja';render()"><img src='moeda.png'><span class="nav-btn-label">${t('shop')}</span></button>
       <button id="ob-inventario" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='inventario';render()"><img src='inventario.png'><span class="nav-btn-label">${t('inventory')}</span></button>
     </div>
-    <button id="ob-niveis" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"
-      style="width:100%;max-width:520px;background:linear-gradient(180deg,#2e2e2e,#1e1e1e);border:none;border-radius:14px;box-shadow:3px 3px 0 #0a0a0a;cursor:pointer;padding:0;display:flex;align-items:center;overflow:visible;margin-bottom:.75rem;text-align:left;min-height:80px">
-      <div style="flex-shrink:0;width:72px;margin:.65rem 0 .65rem .75rem;display:flex;align-items:center;justify-content:center">
-        <img src="mago_do_som.png" style="width:72px;height:96px;object-fit:contain;border-radius:6px;display:block">
-      </div>
-      <div style="flex:1;padding:.75rem .5rem .75rem .85rem;display:flex;flex-direction:column;justify-content:center;gap:.35rem">
-        <span style="font-size:.9rem;font-weight:700;color:#e8e8e8;font-family:var(--font-body)">${t('levels')}</span>
-        <div style="font-size:.75rem;font-weight:500;color:#aaa;line-height:1.5">${t('levels_card_desc')}</div>
-      </div>
-      <div style="padding-right:.9rem;color:#666;font-size:1.1rem;flex-shrink:0">›</div>
-    </button>
+    <div class="nav-grid" style="margin-bottom:.75rem">
+      <button id="ob-niveis" class="nav-btn muted" onclick="playClickSfx('nav');if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}state.phase='niveis';render()"><span class="nav-btn-label">${t('levels')}</span></button>
+    </div>
     <div class="section-title">${t('your_stats')}</div>
     <div class="user-stats">
       <div class="user-stat-card"><span class="us-icon"><span style="color:#e03030;font-weight:900;font-family:'Poppins',sans-serif;font-size:1rem;letter-spacing:.04em">XP</span></span><div><div class="us-val">${state.xp}</div><div class="us-lbl">${t('total_xp')}</div></div></div>
@@ -6387,10 +6379,11 @@ function _showJourneyOb(){
   const okLabel=okLabels[lang]||okLabels.pt;
   root.innerHTML=`
     <div style="position:fixed;inset:0;z-index:8999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:1.5rem;animation:obFadeIn .28s ease">
-      <div style="background:#181818;border:2.5px solid #F5A623;border-radius:22px;padding:2rem 1.6rem 1.5rem;max-width:290px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.9);text-align:center">
-        <div style="font-family:var(--font-title);font-size:1.6rem;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:.6rem">${title}</div>
-        <div style="width:40px;height:3px;background:#F5A623;border-radius:2px;margin:0 auto .9rem"></div>
-        <p style="font-size:.92rem;color:#ddd;font-weight:500;line-height:1.65;margin:0 0 1.5rem;text-align:left">${body}</p>
+      <div style="background:#181818;border:2.5px solid #F5A623;border-radius:22px;padding:1.5rem 1.6rem;max-width:290px;width:100%;box-shadow:0 12px 48px rgba(0,0,0,.9);text-align:center">
+        <img src="mago_jornada.png" style="width:110px;height:110px;object-fit:contain;margin-bottom:.6rem">
+        <div style="font-family:var(--font-title);font-size:1.6rem;font-weight:700;color:#F5A623;letter-spacing:.04em;margin-bottom:.5rem">${title}</div>
+        <div style="width:40px;height:3px;background:#F5A623;border-radius:2px;margin:0 auto .85rem"></div>
+        <p style="font-size:.88rem;color:#ddd;font-weight:500;line-height:1.7;margin:0 0 1.4rem;text-align:center">${body}</p>
         <button onclick="_obSetFlag('journey_ob_done');document.getElementById('ob-root').innerHTML='';_startJourneyReal()" style="background:linear-gradient(180deg,#F5A623,#d48a10);border:2px solid #111;border-radius:12px;padding:.6rem 2.4rem;font-family:var(--font-body);font-size:.95rem;font-weight:900;color:#111;cursor:pointer;text-shadow:none;display:inline-block">${okLabel}</button>
       </div>
     </div>`;

@@ -4516,19 +4516,10 @@ const _metro={ctx:null,compressor:null,noiseBuf:null,silentNode:null,audioTag:nu
 // Web Audio API pura é suspensa ao bloquear a tela; <audio> não é.
 function _metroEnsureAudioTag(){
   if(_metro.audioTag)return;
-  // WAV silencioso de 1 segundo — necessário para iOS registrar sessão de áudio em background
-  const sr=8000,ns=sr;
-  const buf=new ArrayBuffer(44+ns);const v=new DataView(buf);
-  const ws=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i));};
-  ws(0,'RIFF');v.setUint32(4,36+ns,true);ws(8,'WAVEfmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
-  v.setUint32(24,sr,true);v.setUint32(28,sr,true);
-  v.setUint16(32,1,true);v.setUint16(34,8,true);
-  ws(36,'data');v.setUint32(40,ns,true);
-  for(let i=0;i<ns;i++)v.setUint8(44+i,128); // silêncio em PCM 8-bit unsigned
+  // <audio> sem src: receberá srcObject do MediaStreamDestination do AudioContext.
+  // Assim o iOS não pode suspender o AudioContext sem silenciar o próprio player da tela de bloqueio.
   const tag=document.createElement('audio');
-  tag.src=URL.createObjectURL(new Blob([buf],{type:'audio/wav'}));
-  tag.loop=true;tag.volume=0.001;
+  tag.loop=true;
   _metro.audioTag=tag;
 }
 
@@ -4600,10 +4591,19 @@ function _metroStart(){
     const comp=_metro.ctx.createDynamicsCompressor();
     comp.threshold.value=-20;comp.knee.value=1;comp.ratio.value=20;
     comp.attack.value=0.001;comp.release.value=0.05;
-    comp.connect(_metro.ctx.destination);
     _metro.compressor=comp;
     _metro.noiseBuf=_metroBuildNoise(_metro.ctx);
-    _metroStartSilentLoop(_metro.ctx);
+    // Roteia saída do AudioContext para o <audio> via MediaStreamDestination.
+    // O iOS não suspende um AudioContext que alimenta um <audio> ativo no player da tela de bloqueio.
+    if(_metro.ctx.createMediaStreamDestination){
+      const msDest=_metro.ctx.createMediaStreamDestination();
+      comp.connect(msDest);
+      _metro.audioTag.srcObject=msDest.stream;
+    } else {
+      // Fallback para browsers sem MediaStreamDestination
+      comp.connect(_metro.ctx.destination);
+      _metroStartSilentLoop(_metro.ctx);
+    }
   }
   if(_metro.ctx.state==='suspended')_metro.ctx.resume();
   // <audio> + Media Session API: registra no iOS como mídia ativa,

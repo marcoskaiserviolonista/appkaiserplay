@@ -4791,7 +4791,7 @@ const _tuner={
   // Perfect-tune text animation state
   perfectShownAt:0,
   // Confirmation bar (enche/esvazia progressivamente)
-  inTuneBarPct:0,inTuneBarFull:false,lastBarUpdateTime:0,
+  inTuneBarPct:0,inTuneBarFull:false,lastBarUpdateTime:0,lastBarMidi:-1,
 };
 
 function _tunerNote2Midi(name){
@@ -4884,6 +4884,7 @@ function _tunerProcess(result){
   }
 
   const targetMidi=(_tuner.guitarMode&&_tuner.selectedString>=0)?_tunerNote2Midi(_tuner.tuning[_tuner.selectedString]):Math.round(rawMidi);
+  _tuner.currentTargetMidi=targetMidi;
   const rawCents=Math.max(-50,Math.min(50,(rawMidi-targetMidi)*100));
   // Median filter: acumula últimas N leituras, usa mediana para eliminar outliers/spikes
   _tuner.centsBuf.push(rawCents);
@@ -4976,6 +4977,12 @@ function _tunerUpdateDOM(){
     const nowBar=performance.now();
     const dt=_tuner.lastBarUpdateTime?Math.min(0.08,(nowBar-_tuner.lastBarUpdateTime)/1000):0;
     _tuner.lastBarUpdateTime=nowBar;
+    // Reset se a nota detectada mudou
+    const curMidi=_tuner.currentTargetMidi||_tuner.lastBarMidi;
+    if(!_tuner.noSignal&&curMidi!==_tuner.lastBarMidi){
+      _tuner.inTuneBarPct=0;_tuner.inTuneBarFull=false;
+      _tuner.lastBarMidi=curMidi;
+    }
     if(barInTune){
       _tuner.inTuneBarPct=Math.min(100,_tuner.inTuneBarPct+dt*100);
     } else {

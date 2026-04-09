@@ -811,7 +811,7 @@ const STRINGS = {
     sala_s4_title:'Passo 4: Descubra o acorde',
     sala_monte:'Clique no braço do violão e monte o acorde que você ouviu.',
     sala_retry:'Tentar novamente',
-    sala_intro:'Treine seu ouvido seguindo as dicas da metodologia abaixo.',
+    sala_intro:'Treine seu ouvido seguindo as dicas da metodologia abaixo',
     sala_focus_high:'Mostrar nota mais aguda',
     sala_focus_low:'Mostrar nota mais grave',
     sala_focus_mid:'Mostrar o intervalo de terça',
@@ -1031,7 +1031,7 @@ const STRINGS = {
     sala_s4_title:'Step 4: Discover the chord',
     sala_monte:'Click on the guitar neck and build the chord you heard.',
     sala_retry:'Try again',
-    sala_intro:'Train your ear by following the methodology tips below.',
+    sala_intro:'Train your ear by following the methodology tips below',
     sala_focus_high:'Show highest note',
     sala_focus_low:'Show lowest note',
     sala_focus_mid:'Show the third interval',
@@ -1251,7 +1251,7 @@ const STRINGS = {
     sala_s4_title:'Paso 4: Descubre el acorde',
     sala_monte:'Haz clic en el mástil y construye el acorde que escuchaste.',
     sala_retry:'Intentar de nuevo',
-    sala_intro:'Entrena tu oído siguiendo las pistas de la metodología abajo.',
+    sala_intro:'Entrena tu oído siguiendo las pistas de la metodología abajo',
     sala_focus_high:'Mostrar nota más aguda',
     sala_focus_low:'Mostrar nota más grave',
     sala_focus_mid:'Mostrar el intervalo de tercera',
@@ -2964,7 +2964,7 @@ function renderSalaDeAula(){
     <button class="back-btn" onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
     <span style="font-size:1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body)">${t('sala_de_aula')}</span>
   </div>
-  <div style="font-size:1.05rem;font-weight:700;line-height:1.5;padding:.1rem 0 .6rem;text-align:center;color:#7cdd7c;animation:salaGlow 4s ease-in-out infinite">${t('sala_intro')}</div>
+  <div style="font-size:1.05rem;font-weight:700;line-height:1.5;padding:.1rem 0 .6rem;text-align:center;color:#7cdd7c">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
   <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
   <div style="width:100%;max-width:520px;margin-top:.4rem">${stepArea}</div>
@@ -5848,11 +5848,7 @@ function renderLoja(){
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
-      <span class="page-title"><img src='moeda.png' style='width:22px;height:22px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> ${t('shop_title')}</span>
-      <div style="display:flex;align-items:center;gap:.35rem;background:#1a1a1a;border:2px solid #2a2a2a;border-radius:20px;padding:.3rem .7rem">
-        <img src='moeda.png' style='width:18px;height:18px;object-fit:contain'>
-        <span style="font-size:.9rem;font-weight:900;color:#F5A623">${state.moedas.toLocaleString()}</span>
-      </div>
+      <span class="page-title">${t('shop_title')}</span>
     </div>
 
     <div style="display:flex;gap:.5rem;width:100%;max-width:520px;margin-bottom:.75rem">
@@ -5887,7 +5883,7 @@ function renderLoja(){
         const canBuy=state.moedas>=item.preco;
         return `<div style="width:100%;max-width:520px;box-sizing:border-box;background:linear-gradient(160deg,#1a1400,#1a1000);border:2.5px solid #F5A62388;border-radius:18px;padding:1.3rem 1.1rem 1.1rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;margin-bottom:.6rem;box-shadow:0 0 24px #F5A62322">
           <img src="logo-kaiserplay-transp.png" style="width:60%;max-width:180px;object-fit:contain" onerror="this.style.display='none'">
-          <img src="${item.img}" style="width:72%;max-width:220px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 4px 14px #F5A62366)" onerror="this.outerHTML='<span style=\'font-size:3rem\'>🏷️</span>'">
+          <img src="${item.img}" style="width:36%;max-width:110px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 4px 14px #F5A62366)" onerror="this.outerHTML='<span style=\'font-size:3rem\'>🏷️</span>'">
           <div style="text-align:center">
             <div style="font-size:1rem;font-weight:900;color:#F5A623;letter-spacing:.01em">${itemName(item)}</div>
             <div style="font-size:.8rem;color:#aaa;margin-top:.2rem">${itemDesc(item)}</div>
@@ -5965,7 +5961,7 @@ function renderInventario(){
   return `
     <div class="back-row">
       <button class="back-btn" onclick="playClickSfx('back');state.phase='start';render()">${t('back_btn')}</button>
-      <span class="page-title"><img src='inventario.png' style='width:24px;height:24px;vertical-align:middle;margin-right:.3rem;object-fit:contain'> ${t('inventory')}</span>
+      <span class="page-title">${t('inventory')}</span>
     </div>
 
     <div class="section-title">${t('equipment_section')}</div>

@@ -612,6 +612,7 @@ cursor:pointer;border:2.5px solid;transition:all .15s;
 .tuner-mic-btn:active{filter:brightness(.88);transform:scale(.98)}
 /* ── Afinador v2 — Círculo + LEDs + Régua ── */
 @keyframes tnPlayGlow{0%,100%{text-shadow:0 0 6px #60dcff44,0 0 14px #60dcff22;opacity:.6}50%{text-shadow:0 0 16px #60dcff,0 0 32px #60dcff88;opacity:1}}
+@keyframes salaGlow{0%,100%{text-shadow:0 0 6px #7cdd7c44,0 0 14px #7cdd7c22;opacity:.6}50%{text-shadow:0 0 18px #7cdd7c,0 0 36px #7cdd7c88;opacity:1}}
 @keyframes tnPulse{0%{opacity:.65;transform:translate(-50%,-50%) scale(1)}100%{opacity:0;transform:translate(-50%,-50%) scale(1.38)}}
 @keyframes tnStrFlash{0%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 14px #7cdd7c88,2px 2px 0 #111;border-color:#7cdd7c}65%{background:linear-gradient(180deg,#3dbd3d,#2a8a2a);box-shadow:0 0 22px #7cdd7c,2px 2px 0 #111;border-color:#7cdd7c}100%{background:linear-gradient(180deg,#2a2a2a,#1a1a1a);box-shadow:2px 2px 0 #111;border-color:#333}}
 .tn-circle-outer{position:relative;width:190px;height:190px;margin:1.4rem auto .1rem}
@@ -2163,7 +2164,16 @@ function spawnSalaFeedback(ok){
   const floats=document.getElementById('floats');
   if(!floats)return;
   const el=document.createElement('div');
-  el.style.cssText=`position:absolute;top:38%;left:50%;transform:translateX(-50%);font-size:2.2rem;font-weight:900;font-family:var(--font-body);color:${ok?'#4ade80':'#f87171'};text-shadow:0 0 24px ${ok?'#22c55eaa':'#ef4444aa'};animation:floatUp 1.2s ease forwards;white-space:nowrap;pointer-events:none;letter-spacing:-.01em`;
+  // Calcula y na altura da 4ª casa do violão
+  let topVal='42%';
+  const fbWrap=document.querySelector('.fb-wrap');
+  if(fbWrap){
+    const svgEl=fbWrap.querySelector('svg');
+    const rect=(svgEl||fbWrap).getBoundingClientRect();
+    const fret4Y=rect.top+(FB_NUT_Y+FB_FRET_Y[4])*(rect.height/FB_SVG_H);
+    topVal=Math.round(fret4Y)+'px';
+  }
+  el.style.cssText=`position:fixed;top:${topVal};left:0;right:0;text-align:center;font-size:2.2rem;font-weight:900;font-family:var(--font-body);color:${ok?'#4ade80':'#f87171'};text-shadow:0 0 24px ${ok?'#22c55eaa':'#ef4444aa'};animation:floatUp 1.2s ease forwards;white-space:nowrap;pointer-events:none;letter-spacing:-.01em`;
   el.textContent=ok?t('correct'):t('wrong');
   floats.appendChild(el);
   setTimeout(()=>el.remove(),1300);
@@ -2773,6 +2783,7 @@ function doSalaVerify(){
   state.salaVerified=true;
   state.salaVerifyOk=ok;
   render();
+  playSfx(ok?'correct':'wrong');
   spawnSalaFeedback(ok);
 }
 function playSalaAssembly(){
@@ -2953,7 +2964,7 @@ function renderSalaDeAula(){
     <button class="back-btn" onclick="playClickSfx('nav');if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}state.phase='start';render()">${t('back_btn')}</button>
     <span style="font-size:1rem;font-weight:900;color:#7cdd7c;font-family:var(--font-body)">${t('sala_de_aula')}</span>
   </div>
-  <div style="font-size:.88rem;font-weight:700;line-height:1.5;padding:.1rem 0 .6rem;text-align:center;background:linear-gradient(90deg,#4ade80,#60dcff,#4ade80);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;filter:drop-shadow(0 0 6px #4ade8066)">${t('sala_intro')}</div>
+  <div style="font-size:1.05rem;font-weight:700;line-height:1.5;padding:.1rem 0 .6rem;text-align:center;color:#7cdd7c;animation:salaGlow 2.2s ease-in-out infinite">${t('sala_intro')}</div>
   <button class="play-btn${state.playing?' playing':''}" onclick="playClickSfx('soft');playChord(state.chord)" style="width:100%;max-width:520px">${state.playing?t('listening'):t('listen_chord')}</button>
   <div class="fb-wrap" style="margin-top:.5rem">${state.salaActiveStep===4?buildSalaFbInteractive():buildSalaFbSVGLimited()}</div>
   <div style="width:100%;max-width:520px;margin-top:.4rem">${stepArea}</div>

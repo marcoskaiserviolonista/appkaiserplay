@@ -6332,8 +6332,6 @@ async function downloadNivelCard(imgSrc, titulo, categoria){
 }
 
 // ── Ranking: leitura pontual (sem listener em tempo real) ─────
-function startRankingListener(){} // mantido para compatibilidade
-function stopRankingListener(){}
 async function loadRankingData(){
   if(!state.user)return;
   try{
@@ -6782,8 +6780,8 @@ function goToPerfil(){
 }
 function renderPerfil(){
   const user=state.user;
-  const displayName=user?.displayName||'';
-  const email=user?.email||'';
+  const displayName=esc(user?.displayName||'');
+  const email=esc(user?.email||'');
   function field(label,id,type,placeholder,val){
     return `
       <div style="margin-bottom:1rem">
@@ -7078,7 +7076,7 @@ function forgotPassword(){
     .then(()=>{errEl.style.color='#4ade80';errEl.textContent=t('reset_email_sent');})
     .catch(e=>{errEl.textContent=_authError(e.code);});
 }
-function signupUser(){
+async function signupUser(){
   const email=document.getElementById('signup-email').value.trim();
   const password=document.getElementById('signup-password').value;
   const passwordConfirm=document.getElementById('signup-password-confirm').value;
@@ -7088,14 +7086,14 @@ function signupUser(){
   if(!email||!password||!passwordConfirm||!name){errEl.textContent=t('fill_all_fields');return;}
   if(password.length<6){errEl.textContent=t('password_too_short');return;}
   if(password!==passwordConfirm){errEl.textContent=t('passwords_dont_match');return;}
-  auth.createUserWithEmailAndPassword(email,password)
-    .then(cred=>cred.user.updateProfile({displayName:name}))
-    .then(()=>{state.isGuest=false;state.user=auth.currentUser;state.phase='start';render();})
-    .catch(e=>{errEl.textContent=_authError(e.code);});
+  try{
+    const cred=await auth.createUserWithEmailAndPassword(email,password);
+    await cred.user.updateProfile({displayName:name});
+    state.isGuest=false;state.user=auth.currentUser;state.phase='start';render();
+  }catch(e){errEl.textContent=_authError(e.code);}
 }
 function logoutUser(){
   if(autoTimer){clearTimeout(autoTimer);autoTimer=null;}
-  stopRankingListener();
   auth.signOut();
 }
 function _authError(code){
@@ -7119,13 +7117,11 @@ auth.onAuthStateChanged(async user=>{
   if(user){
     state.isGuest=false;
     await loadProgress(user.uid);
-    startRankingListener();
     if(state.phase==='login'||state.phase==='set_display_name'){
       if(state._pendingDisplayName){state.phase='set_display_name';state._pendingDisplayName=false;}
       else{state.phase='start';}
     }
   } else {
-    stopRankingListener();
     state.rankingData=[];
     // Only redirect to login if not in guest mode
     if(!state.isGuest){state.phase='login';}

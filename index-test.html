@@ -2170,7 +2170,7 @@ function spawnSalaFeedback(ok){
   if(fbWrap){
     const svgEl=fbWrap.querySelector('svg');
     const rect=(svgEl||fbWrap).getBoundingClientRect();
-    const fret4Y=rect.top+(FB_NUT_Y+FB_FRET_Y[4])*(rect.height/FB_SVG_H)+60;
+    const fret4Y=rect.top+(FB_NUT_Y+FB_FRET_Y[4])*(rect.height/FB_SVG_H)+140;
     topVal=Math.round(fret4Y)+'px';
   }
   el.style.cssText=`position:fixed;top:${topVal};left:0;right:0;text-align:center;font-size:2.2rem;font-weight:900;font-family:var(--font-body);color:${ok?'#4ade80':'#f87171'};text-shadow:0 0 24px ${ok?'#22c55eaa':'#ef4444aa'};animation:floatUp 1.2s ease forwards;white-space:nowrap;pointer-events:none;letter-spacing:-.01em`;

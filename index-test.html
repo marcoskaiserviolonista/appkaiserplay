@@ -5882,8 +5882,22 @@ function renderLoja(){
     ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).length>0?`
     <div class="section-title">${t('educational_materials')}</div>
     <div class="loja-tip">${state.lang==='en'?'After purchase, the material will be available in your inventory for download.':state.lang==='es'?'Tras la compra, el material estará disponible en tu inventario para descargar.':'Após a compra, o material ficará disponível no seu inventário para download.'}</div>
-    ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).map(item=>`
-      <div class="loja-item">
+    ${LOJA_ITEMS.filter(item=>!state.inventario.includes(item.id)).map(item=>{
+      if(item.cupom){
+        const canBuy=state.moedas>=item.preco;
+        return `<div style="width:100%;max-width:520px;box-sizing:border-box;background:linear-gradient(160deg,#1a1400,#1a1000);border:2.5px solid #F5A62388;border-radius:18px;padding:1.3rem 1.1rem 1.1rem;display:flex;flex-direction:column;align-items:center;gap:.7rem;margin-bottom:.6rem;box-shadow:0 0 24px #F5A62322">
+          <img src="logo-kaiserplay-transp.png" style="width:60%;max-width:180px;object-fit:contain" onerror="this.style.display='none'">
+          <img src="${item.img}" style="width:72%;max-width:220px;object-fit:contain;border-radius:10px;filter:drop-shadow(0 4px 14px #F5A62366)" onerror="this.outerHTML='<span style=\'font-size:3rem\'>🏷️</span>'">
+          <div style="text-align:center">
+            <div style="font-size:1rem;font-weight:900;color:#F5A623;letter-spacing:.01em">${itemName(item)}</div>
+            <div style="font-size:.8rem;color:#aaa;margin-top:.2rem">${itemDesc(item)}</div>
+          </div>
+          <button class="item-buy" onclick="comprarItem(${item.id})" ${canBuy?'':'disabled'} style="width:100%;box-sizing:border-box;padding:.7rem;font-size:.9rem;${canBuy?'':'background:#1a1a1a;color:#444;border-color:#2a2a2a;box-shadow:none;cursor:not-allowed'}">
+            <img src='moeda.png' style='width:14px;height:14px;vertical-align:middle;object-fit:contain'> ${item.preco.toLocaleString()}
+          </button>
+        </div>`;
+      }
+      return `<div class="loja-item">
         <div class="item-icon"><img src="${item.img}" style="width:100%;height:100%;object-fit:contain;border-radius:8px" onerror="this.outerHTML='<span>${item.icon}</span>'"></div>
         <div class="item-info">
           <div class="item-name">${itemName(item)}</div>
@@ -5892,8 +5906,8 @@ function renderLoja(){
         <button class="item-buy" onclick="comprarItem(${item.id})" ${state.moedas<item.preco?'disabled':''} style="${state.moedas<item.preco?'background:#1a1a1a;color:#444;border-color:#2a2a2a;box-shadow:none;cursor:not-allowed':''}">
           <img src='moeda.png' style='width:13px;height:13px;vertical-align:middle;object-fit:contain'> ${item.preco}
         </button>
-      </div>
-    `).join('')}`:''
+      </div>`;
+    }).join('')}`:''
     }
 
     <div class="section-title" style="margin-top:1rem">${t('guitars')}</div>

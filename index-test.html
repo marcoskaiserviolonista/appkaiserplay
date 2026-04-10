@@ -3595,7 +3595,11 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS.filter(c=>c.id>=14&&c.id<=20),
     ...CHORDS.filter(c=>[159,164].includes(c.id)),
   ],
-  tetrades_menores:       ()=>[...CHORDS.filter(c=>[27,28,29,30,31,32,43,52,161].includes(c.id))],
+  tetrades_menores:       ()=>[
+    ...CHORDS.filter(c=>[27,28,29,30,31,32,43,52,161].includes(c.id)),
+    // Xm7M puros (tônica + terça menor + quinta + sétima maior)
+    ...CHORDS_DIAMOND.filter(c=>[46,47,48,49,181,182,183,184].includes(c.id)),
+  ],
   inversoes:              ()=>[...CHORDS_DIAMOND.filter(c=>[36,38,115,140,141,146,147,148,153,154,166,167,168,169,170,171,172].includes(c.id))],
   dissonantes:            ()=>[
     // Dominantes com tensão/extensão
@@ -3608,8 +3612,8 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS_DIAMOND.filter(c=>[121,122,123,124,144,150,152].includes(c.id)),
     // Meio-diminutos
     ...CHORDS_DIAMOND.filter(c=>[125,126,127,128,145].includes(c.id)),
-    // Xm7M
-    ...CHORDS_DIAMOND.filter(c=>[46,47,48,49,181,182,183,184,185,186,189].includes(c.id)),
+    // Xm7M com extensão
+    ...CHORDS_DIAMOND.filter(c=>[185,186,189].includes(c.id)),
     // Dominantes novos
     ...CHORDS_DIAMOND.filter(c=>[160,165].includes(c.id)),
   ],
@@ -3645,8 +3649,6 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS_DIAMOND.filter(c=>[178,179].includes(c.id)),
     // Inversões
     ...CHORDS_DIAMOND.filter(c=>[36,38,115,140,141,146,147,148,153,154,166,167,168,169,170,171,172].includes(c.id)),
-    // Voicings dom7/m7
-    ...CHORDS.filter(c=>[161,164].includes(c.id)),
     ...CHORDS_DIAMOND.filter(c=>[165].includes(c.id)),
     // Xm7M(9) e X6(9) novos
     ...CHORDS_DIAMOND.filter(c=>[184,185,186,187,188,189,190,191].includes(c.id)),
@@ -4162,7 +4164,7 @@ function renderTreinoFocadoMenu(){
   const paywall=!state.fullAccess;
   const fbSwitchLabels={
     fb_triades: state.lang==='en'?'Triads':state.lang==='es'?'Tríadas':'Tríades',
-    fb_tetrades:state.lang==='en'?'Simple Tetrads':state.lang==='es'?'Tétradas Simples':'Tétrades Simples',
+    fb_tetrades:state.lang==='en'?'Tetrads':state.lang==='es'?'Tétradas':'Tétrades',
     fb_complexos:state.lang==='en'?'Complex Chords':state.lang==='es'?'Acordes Complejos':'Acordes Complexos',
   };
   const fbSwitchesHtml=['fb_triades','fb_tetrades','fb_complexos'].map(key=>{

@@ -3659,10 +3659,11 @@ const FOCUSED_SWITCH_POOLS = {
 
 const FB_TRIAD_IDS=new Set([0,1,2,3,4,5,6,7,8,9,10,11,12,13,56,57,58,59,60,156,163]);
 const FB_TETRAD_IDS=new Set([14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,43,44,52,157,159,161,164]);
+const FB_XM7M_IDS=new Set([46,47,48,49,181,182,183,184]);
 const FRETBOARD_SWITCH_POOLS={
   fb_triades:  ()=>CHORDS.filter(c=>FB_TRIAD_IDS.has(c.id)),
-  fb_tetrades: ()=>CHORDS.filter(c=>FB_TETRAD_IDS.has(c.id)),
-  fb_complexos:()=>[...CHORDS_DIAMOND,...CHORDS.filter(c=>!FB_TRIAD_IDS.has(c.id)&&!FB_TETRAD_IDS.has(c.id))],
+  fb_tetrades: ()=>[...CHORDS.filter(c=>FB_TETRAD_IDS.has(c.id)),...CHORDS_DIAMOND.filter(c=>FB_XM7M_IDS.has(c.id))],
+  fb_complexos:()=>[...CHORDS_DIAMOND.filter(c=>!FB_XM7M_IDS.has(c.id)),...CHORDS.filter(c=>!FB_TRIAD_IDS.has(c.id)&&!FB_TETRAD_IDS.has(c.id))],
 };
 
 // Switch labels are now resolved via t() at render time

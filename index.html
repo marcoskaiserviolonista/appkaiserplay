@@ -46,6 +46,7 @@
 @keyframes lvlupBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-8px) scale(1.03)}60%{transform:translateY(-3px) scale(1.01)}}
 @keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 16px #F5A62388) brightness(1)}50%{filter:drop-shadow(0 0 32px #F5A623ff) brightness(1.14)}}
 @keyframes neonPulse{0%,100%{box-shadow:0 0 4px #F5A62344,0 0 8px #F5A62322}50%{box-shadow:0 0 10px #F5A62399,0 0 20px #F5A62344}}
+@keyframes neonPulseBlue{0%,100%{box-shadow:0 0 4px #60dcff44,0 0 8px #60dcff22}50%{box-shadow:0 0 10px #60dcff99,0 0 20px #60dcff44}}
 @keyframes arrowUp{0%{transform:translateY(0);opacity:1}33%{transform:translateY(-5px);opacity:1}66%{transform:translateY(-10px);opacity:0}67%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
 @keyframes sparkOn{0%,100%{opacity:1;transform:scale(1) rotate(0deg)}25%{opacity:0;transform:scale(.4) rotate(45deg)}50%{opacity:1;transform:scale(1.2) rotate(0deg)}75%{opacity:.3;transform:scale(.7) rotate(-30deg)}}
 button{transition:transform .1s,filter .1s;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.75)}
@@ -4168,7 +4169,11 @@ function renderTreinoFocadoMenu(){
     const lbl=fbSwitchLabels[key];
     const locked=paywall&&!isFretboardSwitchUnlocked(key);
     const clickAct=locked?`playClickSfx('click');state.phase='comprar';render()`:`toggleFretboardSwitch('${key}')`;
-    return `<div class="tf-switch-row${on?' active':''}" style="border-color:${on?'#60dcff88':'#60dcff22'};background:${on?'#0e2030':'#0a1520'}" onclick="${clickAct}">
+    const isComplexo=key==='fb_complexos';
+    const rowStyle=isComplexo
+      ?`border-color:${on?'#60dcff88':'#60dcff22'};background:${on?'#0e2030':'#0a1520'};animation:neonPulseBlue 2.8s ease-in-out infinite;`
+      :`border-color:${on?'#60dcff88':'#60dcff22'};background:${on?'#0e2030':'#0a1520'}`;
+    return `<div class="tf-switch-row${on?' active':''}" style="${rowStyle}" onclick="${clickAct}">
       <span class="tf-switch-label" style="color:#60dcff">${lbl}</span>
       <span style="display:flex;align-items:center;flex-shrink:0">
         ${locked?`<span style="font-size:1.05rem;line-height:1">🔒</span>`:`<span class="tf-switch${on?' on':''}"></span>`}

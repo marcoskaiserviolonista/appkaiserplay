@@ -2354,15 +2354,17 @@ function genQ(){
   const chance=_qualityChance(lvlN);
   if(chance>0&&Math.random()<chance){
     const PAIRS=[
-      {opts:['maior','menor'],      labels:['Maior','Menor'],          ids:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,163]},
-      {opts:['menor','diminuto'],   labels:['Menor','Diminuto'],       ids:[7,8,9,10,11,12,13,163]},
-      {opts:['diminuto','aumentado'],labels:['Diminuto','Aumentado']},
+      {opts:['maior','menor'],         labels:['Maior','Menor'],          ids:[0,1,2,3,4,5,6,7,8,9,10,11,12,13,163]},
+      {opts:['menor','diminuto'],      labels:['Menor','Diminuto'],       ids:[7,8,9,10,11,12,13,163]},
+      {opts:['diminuto','meio-diminuto'],labels:['Diminuto','Meio Diminuto']},
+      {opts:['diminuto','aumentado'],  labels:['Diminuto','Aumentado']},
     ];
     const dimPool=[...CHORDS_DIAMOND.filter(c=>c.quality==='diminuto'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];
     const augPool=[...CHORDS.filter(c=>c.quality==='aumentado'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];
     const validPairs=PAIRS.filter(p=>{
       if(p.opts[0]==='maior'&&p.opts[1]==='menor') return true;
       if(lvlN<5) return false;
+      if(p.opts[1]==='meio-diminuto') return lvlN>6;
       if(p.opts[0]==='diminuto'&&p.opts[1]==='aumentado'){
         return dimPool.some(c=>c.quality==='diminuto')&&augPool.some(c=>c.quality==='aumentado');
       }
@@ -2372,6 +2374,8 @@ function genQ(){
     let pool;
     if(pair.opts[0]==='diminuto'&&pair.opts[1]==='aumentado'){
       pool=[...CHORDS_DIAMOND.filter(c=>c.quality==='diminuto'),...CHORDS.filter(c=>c.quality==='aumentado'),...CHORDS_DIAMOND.filter(c=>c.quality==='aumentado')];
+    }else if(pair.opts[1]==='meio-diminuto'){
+      pool=[...CHORDS_DIAMOND.filter(c=>c.quality==='diminuto'),...CHORDS_DIAMOND.filter(c=>[125,126,127,128,145].includes(c.id))];
     }else if(pair.opts[1]==='diminuto'){
       const menores=pair.ids.map(id=>CHORDS.find(c=>c.id===id)).filter(Boolean);
       const dims=CHORDS_DIAMOND.filter(c=>c.quality==='diminuto');
@@ -2384,7 +2388,7 @@ function genQ(){
     if(pool.length>1&&_prevId!=null&&chord.id===_prevId){const _alt=pool.filter(c=>c.id!==_prevId);if(_alt.length>0)chord=_alt[Math.floor(Math.random()*_alt.length)];}
     state.chord=chord;
     state.isQuality=true;
-    state.qualityAnswer=chord.quality;
+    state.qualityAnswer=chord.quality??([125,126,127,128,145].includes(chord.id)?'meio-diminuto':null);
     state.qualityPair=pair;
     state.selected=null;state.result=null;
     return;

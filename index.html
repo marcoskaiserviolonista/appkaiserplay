@@ -3628,7 +3628,7 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS_DIAMOND.filter(c=>[187,188,190,191].includes(c.id)),
   ],
   xm7M:                   ()=>[
-    ...CHORDS_DIAMOND.filter(c=>[46,47,48,49,181,182,183,184,185,186,189].includes(c.id)),
+    ...CHORDS_DIAMOND.filter(c=>[46,47,48,49,181,182,183,184].includes(c.id)),
   ],
   bossa_jazz:             ()=>[
     // X6 e X6(9)
@@ -3651,7 +3651,7 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS_DIAMOND.filter(c=>[36,38,115,140,141,146,147,148,153,154,166,167,168,169,170,171,172].includes(c.id)),
     ...CHORDS_DIAMOND.filter(c=>[165].includes(c.id)),
     // Xm7M(9) e X6(9) novos
-    ...CHORDS_DIAMOND.filter(c=>[184,185,186,187,188,189,190,191].includes(c.id)),
+    ...CHORDS_DIAMOND.filter(c=>[185,186,187,188,189,190,191].includes(c.id)),
   ],
   acordes_complexos:      ()=>{const seen=new Set();return[...FOCUSED_SWITCH_POOLS.dissonantes(),...FOCUSED_SWITCH_POOLS.extensoes(),...FOCUSED_SWITCH_POOLS.bossa_jazz()].filter(c=>{if(seen.has(c.id))return false;seen.add(c.id);return true;});},
   construcao_acorde:      ()=>[...CHORDS,...CHORDS_DIAMOND],

@@ -2250,7 +2250,7 @@ const state={
   journeyMode:'harmonic',
   firstCardSeen:false,
   lvlUpIsNewGroup:false,
-  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false,acordes_complexos:false},
+  focusedSwitches:{maior_menor:false,menor_diminuto:false,diminuto_meio_diminuto:false,diminuto_aumentado:false,triades_maiores:false,triades_menores:false,tetrades_maiores:false,tetrades_menores:false,tetrades_dominantes:false,inversoes:false,dissonantes:false,extensoes:false,xm7M:false,bossa_jazz:false,acordes_complexos:false},
   fretboardSwitches:{fb_triades:false,fb_tetrades:false,fb_complexos:false},
   fretboardExercise:false,
   salaStep:0, salaActiveStep:0, salaOpenStep:0, salaFbSel:{}, salaVerified:false, salaVerifyOk:false, salaCorrectCount:0, salaP4Review:null,
@@ -3593,11 +3593,12 @@ const FOCUSED_SWITCH_POOLS = {
     ...CHORDS_DIAMOND.filter(c=>[155].includes(c.id)),
   ],
   tetrades_menores:       ()=>[...CHORDS.filter(c=>[27,28,29,30,31,32,43,52,161].includes(c.id))],
-  inversoes:              ()=>[...CHORDS_DIAMOND.filter(c=>[36,38,115,140,141,146,147,148,153,154,166,167,168,169,170,171,172].includes(c.id))],
-  dissonantes:            ()=>[
-    // Dominantes básicos
+  tetrades_dominantes:    ()=>[
     ...CHORDS.filter(c=>c.id>=14&&c.id<=20),
     ...CHORDS.filter(c=>[159,164].includes(c.id)),
+  ],
+  inversoes:              ()=>[...CHORDS_DIAMOND.filter(c=>[36,38,115,140,141,146,147,148,153,154,166,167,168,169,170,171,172].includes(c.id))],
+  dissonantes:            ()=>[
     // Dominantes com tensão/extensão
     ...CHORDS_DIAMOND.filter(c=>[101,108,109,110,111,113,133,136,138,139,143].includes(c.id)),
     // Dominantes alterados
@@ -3669,6 +3670,7 @@ function getFocusedSwitchLabel(key){
     diminuto_meio_diminuto:'Diminuto ou Meio Diminuto', diminuto_aumentado:'Diminuto ou Aumentado',
     triades_maiores:'Tríades Maiores', triades_menores:'Tríades Menores',
     tetrades_maiores:'Tétrades Maiores', tetrades_menores:'Tétrades Menores',
+    tetrades_dominantes:'Tétrades Dominantes',
     inversoes:'Inversões', dissonantes:'Dissonantes', extensoes:'Extensões',
     bossa_jazz:'Bossa Nova & Jazz', acordes_complexos:'Acordes Complexos',
   };
@@ -3677,6 +3679,7 @@ function getFocusedSwitchLabel(key){
     diminuto_meio_diminuto:'Diminished / Half-Dim.', diminuto_aumentado:'Diminished / Augmented',
     triades_maiores:'Major Triads', triades_menores:'Minor Triads',
     tetrades_maiores:'Major Tetrads', tetrades_menores:'Minor Tetrads',
+    tetrades_dominantes:'Dominant Tetrads',
     inversoes:'Inversions', dissonantes:'Dissonant Chords', extensoes:'Extensions',
     bossa_jazz:'Bossa Nova & Jazz', acordes_complexos:'Complex Chords',
   };
@@ -3685,6 +3688,7 @@ function getFocusedSwitchLabel(key){
     diminuto_meio_diminuto:'Disminuido / Semidisminuido', diminuto_aumentado:'Disminuido / Aumentado',
     triades_maiores:'Tríadas Mayores', triades_menores:'Tríadas Menores',
     tetrades_maiores:'Tétradas Mayores', tetrades_menores:'Tétradas Menores',
+    tetrades_dominantes:'Tétradas Dominantes',
     inversoes:'Inversiones', dissonantes:'Acordes Disonantes', extensoes:'Extensiones',
     bossa_jazz:'Bossa Nova & Jazz', acordes_complexos:'Acordes Complejos',
   };
@@ -3699,6 +3703,7 @@ const FOCUSED_SWITCH_LABELS = {
   triades_menores:'Tríades Menores',
   tetrades_maiores:'Tétrades Maiores',
   tetrades_menores:'Tétrades Menores',
+  tetrades_dominantes:'Tétrades Dominantes',
   inversoes:'Inversões',
   dissonantes:'Dissonantes',
   extensoes:'Extensões',
@@ -4137,6 +4142,7 @@ function renderTreinoFocadoMenu(){
     {key:'triades_menores'},
     {key:'tetrades_maiores'},
     {key:'tetrades_menores'},
+    {key:'tetrades_dominantes'},
     {key:'acordes_complexos'},
   ];
   const makeSwitch=({key})=>{

@@ -3694,21 +3694,6 @@ function getFocusedSwitchLabel(key){
   };
   return (state.lang==='en'?en:state.lang==='es'?es:pt)[key]||key;
 }
-const FOCUSED_SWITCH_LABELS = {
-  maior_menor:'Maior ou Menor',
-  menor_diminuto:'Menor ou Diminuto',
-  diminuto_meio_diminuto:'Diminuto ou Meio Diminuto',
-  diminuto_aumentado:'Diminuto ou Aumentado',
-  triades_maiores:'Tríades Maiores',
-  triades_menores:'Tríades Menores',
-  tetrades_maiores:'Tétrades Maiores',
-  tetrades_menores:'Tétrades Menores',
-  inversoes:'Inversões',
-  dissonantes:'Dissonantes',
-  extensoes:'Extensões',
-  bossa_jazz:'Bossa Nova & Jazz',
-};
-
 // Switches que geram perguntas de qualidade (2 botões) em vez de 4 choices
 const FOCUSED_QUALITY_PAIRS = {
   maior_menor:            {opts:['maior','menor'],          labels:['Maior','Menor']},

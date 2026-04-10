@@ -3009,7 +3009,7 @@ function doFocusedFretboardConfirm(){
     const pontosTxt=bonus===0?`+5 ${t('points')}`:`5 + ${bonus} ${t('points')}`;
     const xpPopup=document.createElement('div');
     xpPopup.textContent=pontosTxt;
-    xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy}px;transform:translate(-50%,-100%);font-size:1.25rem;font-weight:900;color:${color};text-shadow:0 0 18px ${color};pointer-events:none;white-space:nowrap;`;
+    xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy-32}px;transform:translate(-50%,-100%);font-size:1.25rem;font-weight:900;color:${color};text-shadow:0 0 18px ${color};pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(xpPopup);
     xpPopup.animate([{opacity:0,transform:'translate(-50%,-60%) scale(.5)'},{opacity:1,transform:'translate(-50%,-130%) scale(1)',offset:.15},{opacity:0,transform:'translate(-50%,-160%) scale(.9)'}],{duration:1400,easing:'ease-out'}).onfinish=()=>xpPopup.remove();
     setTimeout(()=>animateXPGain(xpBefore,state.xp),100);
@@ -3027,7 +3027,7 @@ function doFocusedFretboardConfirm(){
     if(pa){pa.classList.add('shake');setTimeout(()=>pa.classList.remove('shake'),400);}
     const wrongPop=document.createElement('div');
     wrongPop.textContent='-5 XP';
-    wrongPop.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy}px;transform:translate(-50%,-100%);font-size:1.1rem;font-weight:900;color:#ff9999;text-shadow:0 0 14px #ff999966;pointer-events:none;white-space:nowrap;`;
+    wrongPop.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${cy-32}px;transform:translate(-50%,-100%);font-size:1.1rem;font-weight:900;color:#ff9999;text-shadow:0 0 14px #ff999966;pointer-events:none;white-space:nowrap;`;
     document.body.appendChild(wrongPop);
     wrongPop.animate([{opacity:1,transform:'translate(-50%,-100%) translateY(0)'},{opacity:0,transform:'translate(-50%,-100%) translateY(-24px)'}],{duration:900,easing:'ease-out'}).onfinish=()=>wrongPop.remove();
     setTimeout(()=>animateXPGain(xpBefore,state.xp),100);
@@ -3106,7 +3106,7 @@ function doFretboardConfirm(){
       const color=comboColor(newMult);
       const xpPopup=document.createElement('div');
       xpPopup.textContent=`+${gain} ${t('points')}`;
-      xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${_fbRect.top}px;transform:translate(-50%,-100%);font-size:${isBig?'1.6rem':'1.25rem'};font-weight:900;color:${color};text-shadow:0 0 18px ${color},0 0 40px ${color}66;pointer-events:none;white-space:nowrap;`;
+      xpPopup.style.cssText=`position:fixed;z-index:9999;left:${cx}px;top:${_fbRect.top-32}px;transform:translate(-50%,-100%);font-size:${isBig?'1.6rem':'1.25rem'};font-weight:900;color:${color};text-shadow:0 0 18px ${color},0 0 40px ${color}66;pointer-events:none;white-space:nowrap;`;
       document.body.appendChild(xpPopup);
       xpPopup.animate([
         {opacity:0,transform:'translate(-50%,-60%) scale(.5)'},
@@ -3127,7 +3127,7 @@ function doFretboardConfirm(){
     if(_fbRect){
       const wrongXp=document.createElement('div');
       wrongXp.textContent=`-10 ${t('points')}`;
-      wrongXp.style.cssText=`position:fixed;z-index:9999;left:${_fbRect.left+_fbRect.width/2}px;top:${_fbRect.top}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
+      wrongXp.style.cssText=`position:fixed;z-index:9999;left:${_fbRect.left+_fbRect.width/2}px;top:${_fbRect.top-32}px;transform:translate(-50%,-100%);font-size:1.2rem;font-weight:900;color:#f87171;text-shadow:0 0 14px #f8717188;pointer-events:none;white-space:nowrap;`;
       document.body.appendChild(wrongXp);
       wrongXp.animate([
         {opacity:0,transform:'translate(-50%,-30%) scale(.6)'},

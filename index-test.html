@@ -1818,20 +1818,23 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 // Notas graves (MIDI < 52) recebem leve atenuação para evitar distorção em volume alto
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.05:_BOOST_MIDI_10.has(midi)?1.0:1; }
 
-// Limiter brick-wall: garante que nenhum pico ultrapassa -1dBFS, sem compressão nem makeup
+// Cadeia: high-pass (corta sub-grave) → high-shelf (corta ruído agudo) → limiter (teto)
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
+  const hp=ctx.createBiquadFilter();
+  hp.type='highpass';hp.frequency.value=80;hp.Q.value=0.7;
+  const shelf=ctx.createBiquadFilter();
+  shelf.type='highshelf';shelf.frequency.value=10000;shelf.gain.value=-8;
   const limiter=ctx.createDynamicsCompressor();
-  limiter.threshold.value=-1;   // teto a -1dBFS
-  limiter.knee.value=0;         // hard knee
-  limiter.ratio.value=20;       // 20:1 = limiter
-  limiter.attack.value=0.001;   // 1ms
-  limiter.release.value=0.1;    // 100ms
+  limiter.threshold.value=-1;limiter.knee.value=0;limiter.ratio.value=20;
+  limiter.attack.value=0.001;limiter.release.value=0.1;
   Howler.masterGain.disconnect();
-  Howler.masterGain.connect(limiter);
+  Howler.masterGain.connect(hp);
+  hp.connect(shelf);
+  shelf.connect(limiter);
   limiter.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
@@ -1892,7 +1895,7 @@ function playSfx(type){
       });
 
     }else if(type==='correct2'){
-      [[523,.00,'square',.04],[659,.08,'square',.03],[784,.16,'sine',.06],[1047,.22,'sine',.04]].forEach(([f,d,tp,v])=>{
+      [[523,.00,'square',.02],[659,.08,'square',.02],[784,.16,'sine',.03],[1047,.22,'sine',.02]].forEach(([f,d,tp,v])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type=tp;o.frequency.value=f;
         g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.01);
@@ -1903,12 +1906,12 @@ function playSfx(type){
     }else if(type==='combo3'){
       const nc=ctx.createOscillator(),gc=ctx.createGain();
       nc.type='square';nc.frequency.setValueAtTime(1800,t);nc.frequency.exponentialRampToValueAtTime(200,t+.025);
-      gc.gain.setValueAtTime(.05,t);gc.gain.exponentialRampToValueAtTime(.001,t+.03);
+      gc.gain.setValueAtTime(.03,t);gc.gain.exponentialRampToValueAtTime(.001,t+.03);
       nc.connect(gc);gc.connect(ctx.destination);nc.start(t);nc.stop(t+.03);
       [[523,.02],[659,.09],[784,.16],[1047,.23]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.09,t+d+.012);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.05,t+d+.012);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.38);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.44);
       });
@@ -1917,20 +1920,20 @@ function playSfx(type){
       [[523,.00],[659,.055],[880,.11],[1175,.165],[1568,.22]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.11,t+d+.01);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.06,t+d+.01);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.42);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.5);
       });
       const os=ctx.createOscillator(),gs=ctx.createGain();
       os.type='sine';os.frequency.setValueAtTime(2093,t+.25);os.frequency.exponentialRampToValueAtTime(2637,t+.42);
-      gs.gain.setValueAtTime(0,t+.25);gs.gain.linearRampToValueAtTime(.04,t+.3);gs.gain.exponentialRampToValueAtTime(.001,t+.48);
+      gs.gain.setValueAtTime(0,t+.25);gs.gain.linearRampToValueAtTime(.02,t+.3);gs.gain.exponentialRampToValueAtTime(.001,t+.48);
       os.connect(gs);gs.connect(ctx.destination);os.start(t+.25);os.stop(t+.5);
 
     }else if(type==='combo9'){
       [[392,.00],[523,.07],[659,.14],[784,.21],[1047,.28],[1319,.35],[1568,.42]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.13,t+d+.01);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.07,t+d+.01);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.50);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.6);
       });
@@ -1938,21 +1941,21 @@ function playSfx(type){
     }else if(type==='wrong'){
       const o1=ctx.createOscillator(),g1=ctx.createGain();
       o1.type='sawtooth';o1.frequency.setValueAtTime(280,t);o1.frequency.exponentialRampToValueAtTime(60,t+.35);
-      g1.gain.setValueAtTime(.12,t);g1.gain.exponentialRampToValueAtTime(.001,t+.4);
+      g1.gain.setValueAtTime(.06,t);g1.gain.exponentialRampToValueAtTime(.001,t+.4);
       o1.connect(g1);g1.connect(ctx.destination);o1.start(t);o1.stop(t+.45);
       const buf=ctx.createBuffer(1,ctx.sampleRate*.2,ctx.sampleRate);
       const data=buf.getChannelData(0);
-      for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.2;
+      for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*.1;
       const noise=ctx.createBufferSource(),gn=ctx.createGain();
-      noise.buffer=buf;gn.gain.setValueAtTime(.05,t);gn.gain.exponentialRampToValueAtTime(.001,t+.2);
+      noise.buffer=buf;gn.gain.setValueAtTime(.03,t);gn.gain.exponentialRampToValueAtTime(.001,t+.2);
       noise.connect(gn);gn.connect(ctx.destination);noise.start(t);
       const o2=ctx.createOscillator(),g2=ctx.createGain();
       o2.type='sine';o2.frequency.value=80;
-      g2.gain.setValueAtTime(.10,t);g2.gain.exponentialRampToValueAtTime(.001,t+.3);
+      g2.gain.setValueAtTime(.05,t);g2.gain.exponentialRampToValueAtTime(.001,t+.3);
       o2.connect(g2);g2.connect(ctx.destination);o2.start(t);o2.stop(t+.35);
 
     }else if(type==='levelup'){
-      [[392,.00,.10],[494,.00,.08],[587,.00,.08],[784,.00,.09],[988,.00,.06]].forEach(([f,d,v])=>{
+      [[392,.00,.05],[494,.00,.04],[587,.00,.04],[784,.00,.05],[988,.00,.03]].forEach(([f,d,v])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='sine';o.frequency.value=f;
         g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.02);
@@ -1960,7 +1963,7 @@ function playSfx(type){
         g.gain.exponentialRampToValueAtTime(.001,t+d+.85);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.9);
       });
-      [[1568,.05,.06],[1976,.18,.05],[2637,.32,.04],[3136,.44,.03]].forEach(([f,d,v])=>{
+      [[1568,.05,.03],[1976,.18,.03],[2637,.32,.02],[3136,.44,.02]].forEach(([f,d,v])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='sine';o.frequency.setValueAtTime(f*.7,t+d);o.frequency.exponentialRampToValueAtTime(f,t+d+.08);
         g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.04);
@@ -1974,13 +1977,13 @@ function playSfx(type){
         const d=i*.075;
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='square';o.frequency.value=f;
-        g.gain.setValueAtTime(.05+i*.003,t+d);
+        g.gain.setValueAtTime(.03+i*.002,t+d);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.18);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.2);
       });
       const o=ctx.createOscillator(),g=ctx.createGain();
       o.type='sine';o.frequency.value=1047;
-      g.gain.setValueAtTime(.12,t+.6);g.gain.exponentialRampToValueAtTime(.001,t+1.1);
+      g.gain.setValueAtTime(.06,t+.6);g.gain.exponentialRampToValueAtTime(.001,t+1.1);
       o.connect(g);g.connect(ctx.destination);o.start(t+.6);o.stop(t+1.2);
 
     }else if(type==='whoosh'){
@@ -1988,7 +1991,7 @@ function playSfx(type){
       const data=buf.getChannelData(0);
       for(let i=0;i<data.length;i++)data[i]=(Math.random()*2-1)*Math.pow(1-i/data.length,2)*.4;
       const noise=ctx.createBufferSource(),g=ctx.createGain();
-      noise.buffer=buf;g.gain.value=.32;
+      noise.buffer=buf;g.gain.value=.16;
       noise.connect(g);g.connect(ctx.destination);noise.start(t);
 
     }else if(type==='xpbar'){

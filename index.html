@@ -1839,8 +1839,8 @@ function playChord(chord){
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=110;
-  // Volume por nota: 1/N garante que a soma de N notas nunca ultrapasse 1.0
-  const noteVol=Math.min(0.9, 1/chord.midi.length);
+  // Volume por nota: 0.7/sqrt(N) — sinais musicais não somam em fase, sqrt(N) é o crescimento real
+  const noteVol=Math.min(0.9, 0.7/Math.sqrt(chord.midi.length));
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2475,7 +2475,7 @@ function playFbSelChord(){
   initCompressor();
   // ordenar do grave para o agudo (igual ao playChord)
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return{k,midi:FB_OPEN[p[0]]+p[1]};}).sort((a,b)=>a.midi-b.midi);
-  const noteVol=Math.min(0.9,1/keys.length);
+  const noteVol=Math.min(0.9,0.7/Math.sqrt(keys.length));
   notes.forEach(({midi},i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2568,7 +2568,7 @@ function playSalaFocus(midiArray){
   state.playing=true;
   render();
   const noteDelay=110;
-  const noteVol=Math.min(0.9,1/midiArray.length);
+  const noteVol=Math.min(0.9,0.7/Math.sqrt(midiArray.length));
   midiArray.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2780,7 +2780,7 @@ function playSalaAssembly(){
   if(!keys.length)return;
   initCompressor();
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return FB_OPEN[p[0]]+p[1];}).sort((a,b)=>a-b);
-  const noteVol=Math.min(0.9,1/keys.length);
+  const noteVol=Math.min(0.9,0.7/Math.sqrt(keys.length));
   notes.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);

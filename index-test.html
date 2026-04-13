@@ -1818,53 +1818,8 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 // Notas graves (MIDI < 52) recebem leve atenuação para evitar distorção em volume alto
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.05:_BOOST_MIDI_10.has(midi)?1.0:1; }
 
-// Cadeia de áudio: compressor (dinâmicas) → makeup gain → limiter (brick wall)
-// Princípio equivalente ao pipeline LUFS + true peak usado em mixagem profissional:
-//   1. Compressor suave controla as dinâmicas e "cola" o som
-//   2. Makeup gain compensa a atenuação do compressor, mantendo volume alto
-//   3. Limiter (ratio 20:1, hard knee, threshold -1dB) garante que nenhum pico
-//      ultrapasse 0dBFS — elimina clipping mesmo em acordes graves com muitas notas
-let _compressorInit = false;
-function initCompressor() {
-  if (_compressorInit || !Howler.ctx) return;
-  _compressorInit = true;
-  const ctx = Howler.ctx;
-
-  // 1. Compressor suave — controla dinâmicas, não distorce
-  const comp = ctx.createDynamicsCompressor();
-  comp.threshold.value = -18; // começa a comprimir a -18dB
-  comp.knee.value = 10;       // joelho largo: transição gradual e musical
-  comp.ratio.value = 4;       // 4:1 — compressão leve, preserva naturalidade
-  comp.attack.value = 0.003;  // 3ms — pega transientes sem artefatos
-  comp.release.value = 0.25;  // 250ms — solta suave
-
-  // 2. Makeup gain — recompensa o volume perdido na compressão (~+1.6dB ≈ ×1.2)
-  // Valor reduzido de 1.6 para 1.2: menos headroom consumido, evita distorção física do falante em volume máximo
-  const makeup = ctx.createGain();
-  makeup.gain.value = 1.2;
-
-  // 3. Limiter brick wall — impede qualquer pico de chegar a 0dBFS
-  const limiter = ctx.createDynamicsCompressor();
-  limiter.threshold.value = -2;    // teto a -2dBFS
-  limiter.knee.value = 0;          // hard knee: corte imediato no teto
-  limiter.ratio.value = 20;        // 20:1 — comportamento de limiter
-  limiter.attack.value = 0.0005;   // 0,5ms — reage antes do pico chegar ao speaker
-  limiter.release.value = 0.1;     // 100ms
-
-  // 4. Filtro high-shelf: atenuação suave de ruído de gravação acima de 10kHz
-  const shelf = ctx.createBiquadFilter();
-  shelf.type = 'highshelf';
-  shelf.frequency.value = 10000;
-  shelf.gain.value = -6; // corte moderado (era -14, agressivo demais)
-
-  // Cadeia: masterGain → compressor → makeup → limiter → shelf → destination
-  Howler.masterGain.disconnect();
-  Howler.masterGain.connect(comp);
-  comp.connect(makeup);
-  makeup.connect(limiter);
-  limiter.connect(shelf);
-  shelf.connect(ctx.destination);
-}
+// Volume por nota: 1/N garante que a soma de N notas nunca ultrapasse 1.0 (teto digital)
+function initCompressor(){} // removido — fórmula 1/N já garante o teto sem processamento extra
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}
 

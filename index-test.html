@@ -1818,8 +1818,22 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 // Notas graves (MIDI < 52) recebem leve atenuação para evitar distorção em volume alto
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.05:_BOOST_MIDI_10.has(midi)?1.0:1; }
 
-// Volume por nota: 1/N garante que a soma de N notas nunca ultrapasse 1.0 (teto digital)
-function initCompressor(){} // removido — fórmula 1/N já garante o teto sem processamento extra
+// Limiter brick-wall: garante que nenhum pico ultrapassa -1dBFS, sem compressão nem makeup
+let _compressorInit=false;
+function initCompressor(){
+  if(_compressorInit||!Howler.ctx)return;
+  _compressorInit=true;
+  const ctx=Howler.ctx;
+  const limiter=ctx.createDynamicsCompressor();
+  limiter.threshold.value=-1;   // teto a -1dBFS
+  limiter.knee.value=0;         // hard knee
+  limiter.ratio.value=20;       // 20:1 = limiter
+  limiter.attack.value=0.001;   // 1ms
+  limiter.release.value=0.1;    // 100ms
+  Howler.masterGain.disconnect();
+  Howler.masterGain.connect(limiter);
+  limiter.connect(ctx.destination);
+}
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}
 

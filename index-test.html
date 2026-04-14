@@ -1817,25 +1817,46 @@ const _BOOST_MIDI_20 = new Set([43,44,45,46,47,53,54,55,56]);
 const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
-// Cadeia: high-pass (sub-sônicos) → limiter brick-wall
-// - HP a 60Hz: remove sub-sônicos sem cortar o Mi grave do violão (82Hz)
-// - noteVol usa 0.85/N (não sqrt): notas sustentadas somam linearmente,
-//   então N × (0.85/N) × boost_max × samplePeak = 0.85 × 1.2 × 0.944 = 0.963 < 1.0
-// - Limiter brick-wall: teto de segurança para o último 0.04dBFS
+// Cadeia: HP → compressor → makeup → limiter
+//
+// Problema: 5 notas individuais somadas chegam a -1.4dBFS no pico.
+// Isso satura o amplificador físico do celular em volume alto (mesma razão
+// pela qual apps de streaming usam mastering a -14 LUFS com picos a ~-7dBFS).
+//
+// Solução: compressor reduz o crest factor (diferença pico/média), igual ao
+// mastering profissional. Picos saem a ~-5dBFS; média sobe ~+3dB.
+// O celular recebe um sinal mais "cheio" e com menos stress no amp.
+//
+// noteVol = 0.85/N garante que a soma nunca ultrapassa 0.853 (-1.4dBFS)
+// antes da cadeia — sem clipping digital interno.
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
+  // HP a 60Hz: remove sub-sônicos sem cortar o Mi grave (82Hz)
   const hp=ctx.createBiquadFilter();
   hp.type='highpass';hp.frequency.value=60;hp.Q.value=0.5;
-  const limiter=ctx.createDynamicsCompressor();
-  limiter.threshold.value=-1;limiter.knee.value=0;limiter.ratio.value=20;
-  limiter.attack.value=0.001;limiter.release.value=0.1;
+  // Compressor musical: reduz crest factor dos ataques do violão
+  const comp=ctx.createDynamicsCompressor();
+  comp.threshold.value=-8;  // começa a comprimir a -8dBFS
+  comp.knee.value=4;        // transição suave ±2dB
+  comp.ratio.value=4;       // 4:1 — natural, sem pumping
+  comp.attack.value=0.008;  // 8ms — deixa o ataque passar, comprime sustain
+  comp.release.value=0.15;  // 150ms — release musical
+  // Makeup gain: +2dB — sobe a média sem amplificar os picos limitados
+  const makeup=ctx.createGain();
+  makeup.gain.value=1.26; // +2dB
+  // Limiter brick-wall: teto de segurança final
+  const lim=ctx.createDynamicsCompressor();
+  lim.threshold.value=-0.5;lim.knee.value=0;lim.ratio.value=20;
+  lim.attack.value=0.001;lim.release.value=0.05;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
-  hp.connect(limiter);
-  limiter.connect(ctx.destination);
+  hp.connect(comp);
+  comp.connect(makeup);
+  makeup.connect(lim);
+  lim.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}

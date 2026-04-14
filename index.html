@@ -1811,30 +1811,37 @@ SAMPLE_NOTES.forEach(n => {
 });
 
 // Boost de volume para notas com gravação mais baixa
-// +20%: notas identificadas como ainda mais baixas (MIDI 43–47, 53–56)
+// +20%: notas identificadas como mais baixas na gravação (MIDI 43–47, 53–56)
 // +10%: demais notas do range médio-grave (MIDI 48–52, 57–63)
 const _BOOST_MIDI_20 = new Set([43,44,45,46,47,53,54,55,56]);
 const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
-// Notas graves (MIDI < 52) recebem leve atenuação para evitar distorção em volume alto
-function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.05:_BOOST_MIDI_10.has(midi)?1.0:1; }
+function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
-// Cadeia: high-pass (corta sub-grave) → high-shelf (corta ruído agudo) → limiter (teto)
+// Cadeia: high-pass (sub-sônicos) → compressor suave → makeup gain → limiter brick-wall
+// - HP a 60Hz: remove ruído de fundo sem tocar nos graves do violão (Mi grave = 82Hz)
+// - Compressor 3:1 suave: controla dinâmica entre notas sem matar ataques
+// - Makeup gain +4dB: compensa a redução do compressor
+// - Limiter brick-wall: teto absoluto contra clipping
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
   const hp=ctx.createBiquadFilter();
-  hp.type='highpass';hp.frequency.value=80;hp.Q.value=0.7;
-  const shelf=ctx.createBiquadFilter();
-  shelf.type='highshelf';shelf.frequency.value=10000;shelf.gain.value=-8;
+  hp.type='highpass';hp.frequency.value=60;hp.Q.value=0.5;
+  const comp=ctx.createDynamicsCompressor();
+  comp.threshold.value=-14;comp.knee.value=8;comp.ratio.value=3;
+  comp.attack.value=0.008;comp.release.value=0.2;
+  const makeup=ctx.createGain();
+  makeup.gain.value=1.58; // +4dB
   const limiter=ctx.createDynamicsCompressor();
   limiter.threshold.value=-1;limiter.knee.value=0;limiter.ratio.value=20;
   limiter.attack.value=0.001;limiter.release.value=0.1;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
-  hp.connect(shelf);
-  shelf.connect(limiter);
+  hp.connect(comp);
+  comp.connect(makeup);
+  makeup.connect(limiter);
   limiter.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
@@ -1856,8 +1863,8 @@ function playChord(chord){
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=110;
-  // Volume por nota: 0.7/sqrt(N) — sinais musicais não somam em fase, sqrt(N) é o crescimento real
-  const noteVol=Math.min(0.9, 0.7/Math.sqrt(chord.midi.length));
+  // Volume por nota: 1.0/sqrt(N) — sinais musicais não somam em fase, sqrt(N) é o crescimento real
+  const noteVol=Math.min(0.95, 1.0/Math.sqrt(chord.midi.length));
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2492,7 +2499,7 @@ function playFbSelChord(){
   initCompressor();
   // ordenar do grave para o agudo (igual ao playChord)
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return{k,midi:FB_OPEN[p[0]]+p[1]};}).sort((a,b)=>a.midi-b.midi);
-  const noteVol=Math.min(0.9,0.7/Math.sqrt(keys.length));
+  const noteVol=Math.min(0.95,1.0/Math.sqrt(keys.length));
   notes.forEach(({midi},i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2585,7 +2592,7 @@ function playSalaFocus(midiArray){
   state.playing=true;
   render();
   const noteDelay=110;
-  const noteVol=Math.min(0.9,0.7/Math.sqrt(midiArray.length));
+  const noteVol=Math.min(0.95,1.0/Math.sqrt(midiArray.length));
   midiArray.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2797,7 +2804,7 @@ function playSalaAssembly(){
   if(!keys.length)return;
   initCompressor();
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return FB_OPEN[p[0]]+p[1];}).sort((a,b)=>a-b);
-  const noteVol=Math.min(0.9,0.7/Math.sqrt(keys.length));
+  const noteVol=Math.min(0.95,1.0/Math.sqrt(keys.length));
   notes.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);

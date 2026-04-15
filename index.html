@@ -1818,7 +1818,7 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ otimizada para alto-falante de celular:
-// HP(120Hz)×2 → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
+// HP(150Hz)×2 → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
 //
 // Racional:
 // 1. DynamicsCompressor removido como compressor — usado apenas como limiter brick-wall.
@@ -1838,12 +1838,12 @@ function initCompressor(){
   _compressorInit=true;
   const ctx=Howler.ctx;
   // 1. HP a 120Hz em cascata (4ª ordem) — corte mais íngreme que o celular não reproduz
-  //    Dois filtros de 2ª ordem em série: atenuação ~-6dB a 110Hz (Lá aberto)
-  //    vs. ~-1.5dB com um único filtro. Reduz distorção mecânica do alto-falante.
+  //    Dois filtros de 2ª ordem em série: atenuação ~-9dB a 110Hz (Lá aberto),
+  //    ~-20dB a 82Hz (Mi grave). Reduz distorção mecânica do alto-falante.
   const hp=ctx.createBiquadFilter();
-  hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
+  hp.type='highpass';hp.frequency.value=150;hp.Q.value=0.7;
   const hp2=ctx.createBiquadFilter();
-  hp2.type='highpass';hp2.frequency.value=120;hp2.Q.value=0.7;
+  hp2.type='highpass';hp2.frequency.value=150;hp2.Q.value=0.7;
   // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
   const ls=ctx.createBiquadFilter();
   ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;

@@ -1818,7 +1818,7 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ otimizada para alto-falante de celular:
-// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
+// HP(120Hz)×2 → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
 //
 // Racional:
 // 1. DynamicsCompressor removido como compressor — usado apenas como limiter brick-wall.
@@ -1837,9 +1837,13 @@ function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
-  // 1. HP a 120Hz — remove sub-graves que o celular não reproduz
+  // 1. HP a 120Hz em cascata (4ª ordem) — corte mais íngreme que o celular não reproduz
+  //    Dois filtros de 2ª ordem em série: atenuação ~-6dB a 110Hz (Lá aberto)
+  //    vs. ~-1.5dB com um único filtro. Reduz distorção mecânica do alto-falante.
   const hp=ctx.createBiquadFilter();
   hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
+  const hp2=ctx.createBiquadFilter();
+  hp2.type='highpass';hp2.frequency.value=120;hp2.Q.value=0.7;
   // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
   const ls=ctx.createBiquadFilter();
   ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;
@@ -1855,7 +1859,8 @@ function initCompressor(){
   makeup.gain.value=1.8;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
-  hp.connect(ls);
+  hp.connect(hp2);
+  hp2.connect(ls);
   ls.connect(pk);
   pk.connect(lim);
   lim.connect(makeup);
@@ -1910,7 +1915,7 @@ function playSfx(type){
     const t=ctx.currentTime;
 
     if(type==='correct'){
-      [[523,.00,.08],[659,.09,.06]].forEach(([f,d,v])=>{
+      [[523,.00,.055],[659,.09,.04]].forEach(([f,d,v])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='sine';o.frequency.value=f;
         g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.012);
@@ -1919,7 +1924,7 @@ function playSfx(type){
       });
 
     }else if(type==='correct2'){
-      [[523,.00,'square',.02],[659,.08,'square',.02],[784,.16,'sine',.03],[1047,.22,'sine',.02]].forEach(([f,d,tp,v])=>{
+      [[523,.00,'square',.014],[659,.08,'square',.014],[784,.16,'sine',.02],[1047,.22,'sine',.014]].forEach(([f,d,tp,v])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type=tp;o.frequency.value=f;
         g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(v,t+d+.01);
@@ -1930,12 +1935,12 @@ function playSfx(type){
     }else if(type==='combo3'){
       const nc=ctx.createOscillator(),gc=ctx.createGain();
       nc.type='square';nc.frequency.setValueAtTime(1800,t);nc.frequency.exponentialRampToValueAtTime(200,t+.025);
-      gc.gain.setValueAtTime(.03,t);gc.gain.exponentialRampToValueAtTime(.001,t+.03);
+      gc.gain.setValueAtTime(.02,t);gc.gain.exponentialRampToValueAtTime(.001,t+.03);
       nc.connect(gc);gc.connect(ctx.destination);nc.start(t);nc.stop(t+.03);
       [[523,.02],[659,.09],[784,.16],[1047,.23]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.05,t+d+.012);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.035,t+d+.012);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.38);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.44);
       });
@@ -1944,20 +1949,20 @@ function playSfx(type){
       [[523,.00],[659,.055],[880,.11],[1175,.165],[1568,.22]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.06,t+d+.01);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.04,t+d+.01);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.42);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.5);
       });
       const os=ctx.createOscillator(),gs=ctx.createGain();
       os.type='sine';os.frequency.setValueAtTime(2093,t+.25);os.frequency.exponentialRampToValueAtTime(2637,t+.42);
-      gs.gain.setValueAtTime(0,t+.25);gs.gain.linearRampToValueAtTime(.02,t+.3);gs.gain.exponentialRampToValueAtTime(.001,t+.48);
+      gs.gain.setValueAtTime(0,t+.25);gs.gain.linearRampToValueAtTime(.014,t+.3);gs.gain.exponentialRampToValueAtTime(.001,t+.48);
       os.connect(gs);gs.connect(ctx.destination);os.start(t+.25);os.stop(t+.5);
 
     }else if(type==='combo9'){
       [[392,.00],[523,.07],[659,.14],[784,.21],[1047,.28],[1319,.35],[1568,.42]].forEach(([f,d])=>{
         const o=ctx.createOscillator(),g=ctx.createGain();
         o.type='triangle';o.frequency.value=f;
-        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.07,t+d+.01);
+        g.gain.setValueAtTime(0,t+d);g.gain.linearRampToValueAtTime(.05,t+d+.01);
         g.gain.exponentialRampToValueAtTime(.001,t+d+.50);
         o.connect(g);g.connect(ctx.destination);o.start(t+d);o.stop(t+d+.6);
       });

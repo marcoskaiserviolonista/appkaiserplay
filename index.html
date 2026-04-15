@@ -1818,7 +1818,7 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ otimizada para alto-falante de celular:
-// HP(120Hz) → lowShelf(350Hz,-10dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×2.2)
+// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
 //
 // Racional:
 // 1. DynamicsCompressor removido como compressor — usado apenas como limiter brick-wall.
@@ -1840,10 +1840,9 @@ function initCompressor(){
   // 1. HP a 120Hz — remove sub-graves que o celular não reproduz
   const hp=ctx.createBiquadFilter();
   hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
-  // 2. Low-shelf -10dB a 350Hz — corte agressivo de graves para evitar
-  //    saturação mecânica do alto-falante de celular; muda o timbre mas elimina distorção
+  // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
   const ls=ctx.createBiquadFilter();
-  ls.type='lowshelf';ls.frequency.value=350;ls.gain.value=-10;
+  ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;
   // 3. Peaking +2dB a 2.5kHz — presença e clareza no celular
   const pk=ctx.createBiquadFilter();
   pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
@@ -1853,7 +1852,7 @@ function initCompressor(){
   lim.attack.value=0.001;lim.release.value=0.05;
   // 5. Makeup gain — compensa threshold mais baixo, sobe volume médio
   const makeup=ctx.createGain();
-  makeup.gain.value=2.2;
+  makeup.gain.value=1.8;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
   hp.connect(ls);

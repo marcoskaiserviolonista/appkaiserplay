@@ -1831,10 +1831,10 @@ function initCompressor(){
   const pk=ctx.createBiquadFilter();
   pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
   const lim=ctx.createDynamicsCompressor();
-  lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;
+  lim.threshold.value=-12;lim.knee.value=0;lim.ratio.value=20;
   lim.attack.value=0.001;lim.release.value=0.05;
   const makeup=ctx.createGain();
-  makeup.gain.value=1.8;
+  makeup.gain.value=2.5;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
   hp.connect(ls);

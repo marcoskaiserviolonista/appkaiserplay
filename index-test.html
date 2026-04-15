@@ -1818,47 +1818,24 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ para violão em celular:
-// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → highShelf(12kHz,-6dB) → limiter(-6dBFS) → makeup(×1.8)
+// limiter(-6dBFS) → makeup(×1.8)
 //
-// Racional:
-// 1. HP a 120Hz: remove sub-graves que o celular não reproduz.
-// 2. Low-shelf -3dB a 250Hz: alivia baixas-médias emboladas.
-// 3. Peaking +2dB a 2.5kHz: presença e clareza no alto-falante de celular.
-// 4. High-shelf -6dB a 12kHz: corta hiss, chiado e artefatos digitais extremos
-//    sem afetar o timbre do violão (que fica em 1–4kHz).
-// 5. Limiter threshold -6dB, ratio 20:1, attack 1ms: age antes do clipping.
-// 6. Makeup gain ×1.8: compensa threshold mais baixo, mantém volume alto.
-// 7. noteVol = 1.2/N: mais volume por nota; o limiter controla os picos.
+// Sem EQ — samples tocam puros. Apenas limiter para evitar clipping
+// e makeup gain para manter volume alto.
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
-  // 1. HP a 120Hz — remove sub-graves que o celular não reproduz
-  const hp=ctx.createBiquadFilter();
-  hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
-  // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
-  const ls=ctx.createBiquadFilter();
-  ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;
-  // 3. Peaking +2dB a 2.5kHz — presença e clareza no celular
-  const pk=ctx.createBiquadFilter();
-  pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
-  // 4. High-shelf -6dB a 12kHz — corta hiss e artefatos digitais extremos
-  const hs=ctx.createBiquadFilter();
-  hs.type='highshelf';hs.frequency.value=12000;hs.gain.value=-6;
-  // 5. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
+  // Limiter brick-wall — threshold -6dB para agir antes do clipping digital
   const lim=ctx.createDynamicsCompressor();
   lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;
   lim.attack.value=0.001;lim.release.value=0.05;
-  // 6. Makeup gain — compensa threshold mais baixo, sobe volume médio
+  // Makeup gain — compensa threshold mais baixo, sobe volume médio
   const makeup=ctx.createGain();
   makeup.gain.value=1.8;
   Howler.masterGain.disconnect();
-  Howler.masterGain.connect(hp);
-  hp.connect(ls);
-  ls.connect(pk);
-  pk.connect(hs);
-  hs.connect(lim);
+  Howler.masterGain.connect(lim);
   lim.connect(makeup);
   makeup.connect(ctx.destination);
 }

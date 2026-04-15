@@ -1817,49 +1817,49 @@ const _BOOST_MIDI_20 = new Set([43,44,45,46,47,53,54,55,56]);
 const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
-// Cadeia de EQ otimizada para alto-falante de celular:
-// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
+// Cadeia de EQ para violão em celular:
+// HP(80Hz) → peak(300Hz,+2dB) → limiter(-6dBFS) → makeup(×1.8) → hard clipper(±0.99)
 //
 // Racional:
-// 1. DynamicsCompressor removido como compressor — usado apenas como limiter brick-wall.
-// 2. HP a 120Hz: remove sub-graves que o celular não reproduz e que causam
-//    excursão excessiva do cone (distorção por intermodulação).
-// 3. Low-shelf -3dB a 250Hz: alivia baixas-médias emboladas.
-// 4. Peaking +2dB a 2.5kHz Q=1.0: presença e clareza no alto-falante de celular.
-// 5. Limiter threshold -6dB: age antes do clipping digital (0dBFS).
-//    Com 4–6 notas se sobrepondo, o sinal ultrapassava 0dBFS antes do
-//    threshold anterior (-1dB), causando clipping nas notas graves.
-// 6. Makeup gain ×1.8 após o limiter: compensa a perda de volume do threshold
-//    mais baixo — o limiter controla os picos, o gain sobe o nível médio.
-// 7. noteVol = 1.2/N: mais volume por nota; o limiter controla os picos.
+// 1. HP a 80Hz: corta sub-graves inaudíveis sem matar o corpo do violão.
+// 2. Peaking +2dB a 300Hz Q=1.5: realça o corpo do violão — região onde
+//    o instrumento soa melhor no alto-falante de celular.
+// 3. Limiter threshold -6dB, ratio 20:1, attack 1ms: age 6dB antes do
+//    clipping digital; segura picos de acordes com 4–6 notas sobrepostas.
+// 4. Makeup gain ×1.8: compensa o threshold mais baixo, mantém volume alto.
+// 5. Hard clipper (WaveShaperNode ±0.99): trava instantaneamente qualquer
+//    transiente que escoe pelo attack de 1ms do limiter — latência zero.
+// 6. noteVol = 1.2/N: mais volume por nota; limiter + clipper controlam picos.
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
-  // 1. HP a 120Hz — remove sub-graves que o celular não reproduz
+  // 1. HP a 80Hz — limpa sub-graves inaudíveis
   const hp=ctx.createBiquadFilter();
-  hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
-  // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
-  const ls=ctx.createBiquadFilter();
-  ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;
-  // 3. Peaking +2dB a 2.5kHz — presença e clareza no celular
+  hp.type='highpass';hp.frequency.value=80;hp.Q.value=0.7;
+  // 2. Peaking +2dB a 300Hz — realça corpo do violão no celular
   const pk=ctx.createBiquadFilter();
-  pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
-  // 4. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
+  pk.type='peaking';pk.frequency.value=300;pk.Q.value=1.5;pk.gain.value=2;
+  // 3. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
   const lim=ctx.createDynamicsCompressor();
   lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;
   lim.attack.value=0.001;lim.release.value=0.05;
-  // 5. Makeup gain — compensa threshold mais baixo, sobe volume médio
+  // 4. Makeup gain — compensa threshold mais baixo, sobe volume médio
   const makeup=ctx.createGain();
   makeup.gain.value=1.8;
+  // 5. Hard clipper — trava transientes residuais que escapam do attack do limiter
+  const clip=ctx.createWaveShaper();
+  const curve=new Float32Array(256);
+  for(let i=0;i<256;i++){const x=(i*2/255)-1;curve[i]=Math.max(-0.99,Math.min(0.99,x));}
+  clip.curve=curve;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
-  hp.connect(ls);
-  ls.connect(pk);
+  hp.connect(pk);
   pk.connect(lim);
   lim.connect(makeup);
-  makeup.connect(ctx.destination);
+  makeup.connect(clip);
+  clip.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}

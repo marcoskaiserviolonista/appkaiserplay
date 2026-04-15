@@ -1818,22 +1818,20 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ otimizada para alto-falante de celular:
-// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-1dBFS)
+// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → limiter(-6dBFS) → makeup gain(×1.8)
 //
 // Racional:
-// 1. DynamicsCompressor removido — o comportamento do compressor difere entre
-//    Chrome desktop e Android WebView/Chrome mobile, causando distorção
-//    audível apenas no celular (pumping assimétrico no mobile).
-// 2. HP a 120Hz: alto-falantes de celular não reproduzem abaixo de ~150Hz;
-//    o conteúdo sub-grave gera excursão excessiva do cone e distorção por
-//    intermodulação com as médias. Mi grave do violão (82Hz) fica atenuado,
-//    mas a fundamental audível no celular está nas harmônicas superiores.
-// 3. Low-shelf -3dB a 250Hz: reduz o "embolado" das baixas-médias,
-//    dando mais headroom ao limiter e clareza ao acorde.
-// 4. Peaking +2dB a 2.5kHz Q=1.0: janela onde alto-falantes de celular têm
-//    melhor resposta; sobe a presença e a definição dos ataques do violão.
-// 5. noteVol = 0.95/N: +12% vs 0.85/N — o corte de graves dá headroom
-//    suficiente para subir o volume sem estourar o limiter.
+// 1. DynamicsCompressor removido como compressor — usado apenas como limiter brick-wall.
+// 2. HP a 120Hz: remove sub-graves que o celular não reproduz e que causam
+//    excursão excessiva do cone (distorção por intermodulação).
+// 3. Low-shelf -3dB a 250Hz: alivia baixas-médias emboladas.
+// 4. Peaking +2dB a 2.5kHz Q=1.0: presença e clareza no alto-falante de celular.
+// 5. Limiter threshold -6dB: age antes do clipping digital (0dBFS).
+//    Com 4–6 notas se sobrepondo, o sinal ultrapassava 0dBFS antes do
+//    threshold anterior (-1dB), causando clipping nas notas graves.
+// 6. Makeup gain ×1.8 após o limiter: compensa a perda de volume do threshold
+//    mais baixo — o limiter controla os picos, o gain sobe o nível médio.
+// 7. noteVol = 1.2/N: mais volume por nota; o limiter controla os picos.
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
@@ -1848,16 +1846,20 @@ function initCompressor(){
   // 3. Peaking +2dB a 2.5kHz — presença e clareza no celular
   const pk=ctx.createBiquadFilter();
   pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
-  // 4. Limiter brick-wall — teto de segurança sem pumping
+  // 4. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
   const lim=ctx.createDynamicsCompressor();
-  lim.threshold.value=-1;lim.knee.value=0;lim.ratio.value=20;
+  lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;
   lim.attack.value=0.001;lim.release.value=0.05;
+  // 5. Makeup gain — compensa threshold mais baixo, sobe volume médio
+  const makeup=ctx.createGain();
+  makeup.gain.value=1.8;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
   hp.connect(ls);
   ls.connect(pk);
   pk.connect(lim);
-  lim.connect(ctx.destination);
+  lim.connect(makeup);
+  makeup.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}
@@ -1879,7 +1881,7 @@ function playChord(chord){
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=110;
   // Volume por nota: 0.95/N — corte de graves na cadeia EQ dá headroom suficiente
-  const noteVol=0.95/chord.midi.length;
+  const noteVol=1.2/chord.midi.length;
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2514,7 +2516,7 @@ function playFbSelChord(){
   initCompressor();
   // ordenar do grave para o agudo (igual ao playChord)
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return{k,midi:FB_OPEN[p[0]]+p[1]};}).sort((a,b)=>a.midi-b.midi);
-  const noteVol=0.95/keys.length;
+  const noteVol=1.2/keys.length;
   notes.forEach(({midi},i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2607,7 +2609,7 @@ function playSalaFocus(midiArray){
   state.playing=true;
   render();
   const noteDelay=110;
-  const noteVol=0.95/midiArray.length;
+  const noteVol=1.2/midiArray.length;
   midiArray.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
@@ -2819,7 +2821,7 @@ function playSalaAssembly(){
   if(!keys.length)return;
   initCompressor();
   const notes=keys.map(k=>{const p=k.split('-').map(Number);return FB_OPEN[p[0]]+p[1];}).sort((a,b)=>a-b);
-  const noteVol=0.95/keys.length;
+  const noteVol=1.2/keys.length;
   notes.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);

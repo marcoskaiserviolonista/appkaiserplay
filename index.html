@@ -1818,48 +1818,49 @@ const _BOOST_MIDI_10 = new Set([48,49,50,51,52,57,58,59,60,61,62,63]);
 function _noteBoost(midi){ return _BOOST_MIDI_20.has(midi)?1.2:_BOOST_MIDI_10.has(midi)?1.1:1; }
 
 // Cadeia de EQ para violão em celular:
-// HP(80Hz) → peak(300Hz,+2dB) → limiter(-6dBFS) → makeup(×1.8) → hard clipper(±0.99)
+// HP(120Hz) → lowShelf(250Hz,-3dB) → peak(2.5kHz,+2dB) → highShelf(12kHz,-6dB) → limiter(-6dBFS) → makeup(×1.8)
 //
 // Racional:
-// 1. HP a 80Hz: corta sub-graves inaudíveis sem matar o corpo do violão.
-// 2. Peaking +2dB a 300Hz Q=1.5: realça o corpo do violão — região onde
-//    o instrumento soa melhor no alto-falante de celular.
-// 3. Limiter threshold -6dB, ratio 20:1, attack 1ms: age 6dB antes do
-//    clipping digital; segura picos de acordes com 4–6 notas sobrepostas.
-// 4. Makeup gain ×1.8: compensa o threshold mais baixo, mantém volume alto.
-// 5. Hard clipper (WaveShaperNode ±0.99): trava instantaneamente qualquer
-//    transiente que escoe pelo attack de 1ms do limiter — latência zero.
-// 6. noteVol = 1.2/N: mais volume por nota; limiter + clipper controlam picos.
+// 1. HP a 120Hz: remove sub-graves que o celular não reproduz.
+// 2. Low-shelf -3dB a 250Hz: alivia baixas-médias emboladas.
+// 3. Peaking +2dB a 2.5kHz: presença e clareza no alto-falante de celular.
+// 4. High-shelf -6dB a 12kHz: corta hiss, chiado e artefatos digitais extremos
+//    sem afetar o timbre do violão (que fica em 1–4kHz).
+// 5. Limiter threshold -6dB, ratio 20:1, attack 1ms: age antes do clipping.
+// 6. Makeup gain ×1.8: compensa threshold mais baixo, mantém volume alto.
+// 7. noteVol = 1.2/N: mais volume por nota; o limiter controla os picos.
 let _compressorInit=false;
 function initCompressor(){
   if(_compressorInit||!Howler.ctx)return;
   _compressorInit=true;
   const ctx=Howler.ctx;
-  // 1. HP a 80Hz — limpa sub-graves inaudíveis
+  // 1. HP a 120Hz — remove sub-graves que o celular não reproduz
   const hp=ctx.createBiquadFilter();
-  hp.type='highpass';hp.frequency.value=80;hp.Q.value=0.7;
-  // 2. Peaking +2dB a 300Hz — realça corpo do violão no celular
+  hp.type='highpass';hp.frequency.value=120;hp.Q.value=0.7;
+  // 2. Low-shelf -3dB a 250Hz — alivia baixas-médias emboladas
+  const ls=ctx.createBiquadFilter();
+  ls.type='lowshelf';ls.frequency.value=250;ls.gain.value=-3;
+  // 3. Peaking +2dB a 2.5kHz — presença e clareza no celular
   const pk=ctx.createBiquadFilter();
-  pk.type='peaking';pk.frequency.value=300;pk.Q.value=1.5;pk.gain.value=2;
-  // 3. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
+  pk.type='peaking';pk.frequency.value=2500;pk.Q.value=1.0;pk.gain.value=2;
+  // 4. High-shelf -6dB a 12kHz — corta hiss e artefatos digitais extremos
+  const hs=ctx.createBiquadFilter();
+  hs.type='highshelf';hs.frequency.value=12000;hs.gain.value=-6;
+  // 5. Limiter brick-wall — threshold -6dB para agir antes do clipping digital
   const lim=ctx.createDynamicsCompressor();
   lim.threshold.value=-6;lim.knee.value=0;lim.ratio.value=20;
   lim.attack.value=0.001;lim.release.value=0.05;
-  // 4. Makeup gain — compensa threshold mais baixo, sobe volume médio
+  // 6. Makeup gain — compensa threshold mais baixo, sobe volume médio
   const makeup=ctx.createGain();
   makeup.gain.value=1.8;
-  // 5. Hard clipper — trava transientes residuais que escapam do attack do limiter
-  const clip=ctx.createWaveShaper();
-  const curve=new Float32Array(256);
-  for(let i=0;i<256;i++){const x=(i*2/255)-1;curve[i]=Math.max(-0.99,Math.min(0.99,x));}
-  clip.curve=curve;
   Howler.masterGain.disconnect();
   Howler.masterGain.connect(hp);
-  hp.connect(pk);
-  pk.connect(lim);
+  hp.connect(ls);
+  ls.connect(pk);
+  pk.connect(hs);
+  hs.connect(lim);
   lim.connect(makeup);
-  makeup.connect(clip);
-  clip.connect(ctx.destination);
+  makeup.connect(ctx.destination);
 }
 function midiToFreq(m){return 440*Math.pow(2,(m-69)/12);}
 function nearestSample(m){return SAMPLE_NOTES.reduce((a,b)=>Math.abs(b-m)<Math.abs(a-m)?b:a);}

@@ -1850,6 +1850,7 @@ let _playTimer=null;
 let _fadeTimer=null;
 let _playingIds=[];
 let _salaStartTimer=null;
+let _doSalaStepTs=0;
 const FADE_DURATION=1500;
 function playChord(chord){
   initCompressor();
@@ -2641,6 +2642,9 @@ function _salaHighlightMidis(step){
 }
 
 function doSalaStep(n){
+  const _now=Date.now();
+  if(_now-_doSalaStepTs<400)return;
+  _doSalaStepTs=_now;
   playClickSfx('soft');
   if(_salaStartTimer){clearTimeout(_salaStartTimer);_salaStartTimer=null;}
   state.salaStep=n;
@@ -6403,9 +6407,9 @@ function _showJourneyOb(){
   const lang=state.lang||'pt';
   const titles={pt:'Jornada Harmônica',en:'Harmonic Journey',es:'Jornada Armónica'};
   const bodies={
-    pt:'Suba de nível a cada resposta certa.<br>Quanto mais alto o nível, maior será a dificuldade.<br>Novos acordes irão surgir, cada vez mais complexos.<br>Pratique todos os dias e seu ouvido ficará cada vez mais treinado.',
-    en:'Level up with every correct answer.<br>The higher the level, the harder it gets.<br>New, increasingly complex chords will keep appearing.<br>Practice every day and your ear will keep growing stronger.',
-    es:'Sube de nivel con cada respuesta correcta.<br>Cuanto más alto el nivel, mayor será la dificultad.<br>Nuevos acordes irán surgiendo, cada vez más complejos.<br>Practica todos los días y tu oído estará cada vez más entrenado.'
+    pt:'Suba de nível a cada resposta certa.<br>Quanto mais alto o nível, maior <span style="color:#F5A623">será a dificuldade.</span><br><span style="color:#F5A623">Novos acordes irão surgir</span>, cada vez mais complexos.<br>Pratique todos os dias e seu ouvido ficará cada vez mais treinado.',
+    en:'Level up with every correct answer.<br>The higher the level, <span style="color:#F5A623">the harder it gets.</span><br><span style="color:#F5A623">New, increasingly complex chords</span> will keep appearing.<br>Practice every day and your ear will keep growing stronger.',
+    es:'Sube de nivel con cada respuesta correcta.<br>Cuanto más alto el nivel, <span style="color:#F5A623">mayor será la dificultad.</span><br><span style="color:#F5A623">Nuevos acordes irán surgiendo</span>, cada vez más complejos.<br>Practica todos los días y tu oído estará cada vez más entrenado.'
   };
   const okLabels={pt:'Vamos lá!',en:"Let's go!",es:'¡Vamos!'};
   const title=titles[lang]||titles.pt;

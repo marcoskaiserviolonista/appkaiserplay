@@ -1851,6 +1851,7 @@ let _fadeTimer=null;
 let _playingIds=[];
 let _salaStartTimer=null;
 let _doSalaStepTs=0;
+let _playNoteTimers=[];
 const FADE_DURATION=1500;
 function playChord(chord){
   initCompressor();
@@ -1858,6 +1859,7 @@ function playChord(chord){
   if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
 
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  _playNoteTimers.forEach(t=>clearTimeout(t));_playNoteTimers=[];
   _playingIds=[];
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
@@ -1868,13 +1870,13 @@ function playChord(chord){
   chord.midi.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
-    setTimeout(()=>{
+    _playNoteTimers.push(setTimeout(()=>{
       const id=howls[sn].play();
       const _vol=noteVol*_noteBoost(midi);
       howls[sn].volume(_vol,id);
       if(Math.abs(ratio-1)>0.001) howls[sn].rate(ratio,id);
       _playingIds.push({howl:howls[sn],id,vol:_vol});
-    },i*noteDelay);
+    },i*noteDelay));
   });
   const totalDur=(chord.midi.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
@@ -2557,6 +2559,7 @@ function playChordHighlighted(chord,highlightNoteClasses){
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
   if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
   chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  _playNoteTimers.forEach(t=>clearTimeout(t));_playNoteTimers=[];
   _playingIds=[];
   state.playing=true;
   render();
@@ -2567,12 +2570,12 @@ function playChordHighlighted(chord,highlightNoteClasses){
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     const isHl=hlSet.has(midi);
     const vol=isHl?0.82:0.08;
-    setTimeout(()=>{
+    _playNoteTimers.push(setTimeout(()=>{
       const id=howls[sn].play();
       howls[sn].volume(vol,id);
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
       _playingIds.push({howl:howls[sn],id,vol});
-    },i*noteDelay);
+    },i*noteDelay));
   });
   const totalDur=(chord.midi.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
@@ -2588,6 +2591,7 @@ function playSalaFocus(midiArray){
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
   if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
   state.chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  _playNoteTimers.forEach(t=>clearTimeout(t));_playNoteTimers=[];
   _playingIds=[];
   state.playing=true;
   render();
@@ -2596,13 +2600,13 @@ function playSalaFocus(midiArray){
   midiArray.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
-    setTimeout(()=>{
+    _playNoteTimers.push(setTimeout(()=>{
       const id=howls[sn].play();
       const _vol=noteVol*_noteBoost(midi);
       howls[sn].volume(_vol,id);
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
       _playingIds.push({howl:howls[sn],id,vol:_vol});
-    },i*noteDelay);
+    },i*noteDelay));
   });
   const totalDur=(midiArray.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
@@ -5360,7 +5364,7 @@ function renderStart(){
         <div class="profile-lvl-num">${lvl.n}</div>
         <div class="profile-lvl-lbl">${t('level_label')}</div>
       </div>
-      <div style="font-size:1.1rem;color:#555;flex-shrink:0;margin-left:.25rem">›</div>
+      <img src="setas-flechas.png" style="width:30px;height:30px;object-fit:contain;flex-shrink:0;margin-left:.3rem">
     </button>
     <div class="start-hero-d3">
       <div class="start-title">${t('train_ear').replace('Ouvido','<span>Ouvido</span>').replace('Ear','<span>Ear</span>')}</div>

@@ -2589,30 +2589,36 @@ function playSalaFocus(midiArray){
   initCompressor();
   if(_playTimer){clearTimeout(_playTimer);_playTimer=null;}
   if(_fadeTimer){clearTimeout(_fadeTimer);_fadeTimer=null;}
-  state.chord.midi.forEach(midi=>{try{howls[nearestSample(midi)].stop();}catch(e){}});
+  SAMPLE_NOTES.forEach(sn=>{try{howls[sn].stop();}catch(e){}});
   _playingIds=[];
   state.playing=true;
   const _pbtn=document.querySelector('.play-btn');
   if(_pbtn){_pbtn.textContent=t('listening');_pbtn.classList.add('playing');}
   const noteDelay=110;
-  const noteVol=1.2/midiArray.length;
+  const noteVol=Math.min(0.9/midiArray.length,1);
+  const played=[];
   midiArray.forEach((midi,i)=>{
     const sn=nearestSample(midi);
     const ratio=midiToFreq(midi)/midiToFreq(sn);
     setTimeout(()=>{
       const id=howls[sn].play();
-      const _vol=noteVol*_noteBoost(midi);
-      howls[sn].volume(_vol,id);
+      const vol=Math.min(noteVol*_noteBoost(midi),1);
+      howls[sn].volume(vol,id);
       if(Math.abs(ratio-1)>0.001)howls[sn].rate(ratio,id);
-      _playingIds.push({howl:howls[sn],id,vol:_vol});
+      played.push({howl:howls[sn],id,vol});
+      _playingIds=played;
     },i*noteDelay);
   });
   const totalDur=(midiArray.length-1)*noteDelay+3000;
   _fadeTimer=setTimeout(()=>{
-    _playingIds.forEach(({howl,id,vol})=>{try{howl.fade(vol,0,FADE_DURATION,id);}catch(e){}});
+    _fadeTimer=null;
+    played.forEach(({howl,id,vol})=>{try{if(howl.playing(id))howl.fade(vol,0,FADE_DURATION,id);}catch(e){}});
   },totalDur-FADE_DURATION);
   _playTimer=setTimeout(()=>{
-    _playTimer=null;state.playing=false;
+    _playTimer=null;
+    played.forEach(({howl,id})=>{try{howl.stop(id);}catch(e){}});
+    _playingIds=[];
+    state.playing=false;
     const _pbtn2=document.querySelector('.play-btn');
     if(_pbtn2){_pbtn2.textContent=t('listen_chord');_pbtn2.classList.remove('playing');}
   },totalDur);

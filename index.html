@@ -3781,9 +3781,9 @@ function buildQualityHintHtml(){
   if(!h)return'';
   const lang=state.lang||'pt';
   const d=h[lang]||h.pt;
-  return `<div style="margin-top:.75rem;text-align:center">
-    <button onclick="const p=document.getElementById('quality-hint-panel');p.style.display=p.style.display==='none'?'block':'none'" style="width:100%;max-width:420px;height:4.5rem;background:transparent;border:3px solid #F5A62366;border-radius:14px;box-shadow:3px 3px 0 #111;color:#F5A623;font-size:1rem;font-weight:800;font-family:var(--font-body);cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.6rem">
-      <img src="lampada.png" style="width:2rem;height:2rem;object-fit:contain"> ${t('hint_btn')}
+  return `<div style="width:100%;max-width:520px;margin-top:.75rem;background:#1e1e1e;border:2px solid #333;border-radius:14px;padding:.75rem 1rem">
+    <button onclick="const p=document.getElementById('quality-hint-panel');p.style.display=p.style.display==='none'?'block':'none'" style="background:#444;border:none;border-radius:8px;padding:.3rem .7rem;color:#fff;font-size:.8rem;font-weight:700;font-family:var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">
+      <img src="lampada.png" style="width:.9rem;height:.9rem;object-fit:contain"> ${t('hint_btn')}
     </button>
     <div id="quality-hint-panel" style="display:none;margin-top:.6rem;background:#1a1200;border:2px solid #F5A62333;border-radius:12px;padding:.85rem 1rem;text-align:left">
       <div style="font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4">${d.q}</div>

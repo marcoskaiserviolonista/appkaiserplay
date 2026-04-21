@@ -3781,7 +3781,7 @@ function buildQualityHintHtml(){
   if(!h)return'';
   const lang=state.lang||'pt';
   const d=h[lang]||h.pt;
-  return `<div style="width:100%;max-width:520px;margin-top:.75rem;background:#1e1e1e;border:2px solid #333;border-radius:14px;padding:.75rem 1rem">
+  return `<div class="play-area" style="margin-top:.75rem">
     <button onclick="const p=document.getElementById('quality-hint-panel');p.style.display=p.style.display==='none'?'block':'none'" style="background:#444;border:none;border-radius:8px;padding:.3rem .7rem;color:#fff;font-size:.8rem;font-weight:700;font-family:var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">
       <img src="lampada.png" style="width:.9rem;height:.9rem;object-fit:contain"> ${t('hint_btn')}
     </button>
@@ -4467,8 +4467,8 @@ function renderTreinoFocado(){
       </button>
       <div class="label-sm mt">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
       ${choicesHtml}
-      ${!answered?buildQualityHintHtml():''}
     </div>
+    ${!answered?buildQualityHintHtml():''}
     ${state.isFretboard?`<div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>`:''}
   `;
 }
@@ -5730,8 +5730,9 @@ function renderGame(){
           return `<button class="${cls}" style="${diamondStyle}height:4rem" onclick="handleAnswer(${ch.id},this)">
             <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang!=='pt'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
           </button>`;
-        }).join('')}</div>${state.phase==='question'?buildQualityHintHtml():''}`}
+        }).join('')}</div>`}
     </div>
+    ${state.phase==='question'?buildQualityHintHtml():''}
     ${state.phase==='answered'&&state.result?.multLevelUp?(()=>{const mc=comboColor(comboMultiplier(state.streak));return `<div class="play-area" style="border-color:${mc};background:#111;text-align:center;animation:feedbackPop .35s ease"><div style="font-size:1.5rem;font-weight:900;color:${mc};letter-spacing:-.02em;line-height:1;text-shadow:0 0 24px ${mc}66">${state.result.msg}</div></div>`;})():''}
     ${state.isFretboard ? `
       <div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>

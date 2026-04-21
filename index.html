@@ -917,7 +917,12 @@ const STRINGS = {
     unlock_popup_b2:'Exercícios para tríades, tétrades, dominantes e tensões',
     unlock_popup_b3:'Compra única, acesso para sempre',
     unlock_popup_cta:'Desbloquear tudo',
-    unlock_popup_dismiss:'Agora não',
+    unlock_popup_dismiss:'Continuar jogando',
+    loja_tutorial_title:'Bem-vindo à Loja!',
+    loja_tutorial_b1:'Troque seus Pontos por Moedas e use as Moedas para comprar itens.',
+    loja_tutorial_b2:'Violões — cada um dá um bônus de pontos por acerto.',
+    loja_tutorial_b3:'Materiais didáticos — conteúdo para acelerar seu aprendizado.',
+    loja_tutorial_cta:'Entendido!',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
     tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'o melhor afinador do mundo',
     tuner_free:'Afinação livre',tuner_guitar:'Afinação do violão',
@@ -1138,6 +1143,11 @@ const STRINGS = {
     unlock_popup_b3:'One-time purchase, access forever',
     unlock_popup_cta:'Unlock everything',
     unlock_popup_dismiss:'Not now',
+    loja_tutorial_title:'Welcome to the Shop!',
+    loja_tutorial_b1:'Exchange your Points for Coins and use Coins to buy items.',
+    loja_tutorial_b2:'Guitars — each one gives a points bonus per correct answer.',
+    loja_tutorial_b3:'Learning materials — content to accelerate your learning.',
+    loja_tutorial_cta:'Got it!',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
     tuner_title:'High Precision Tuner',tuner_subtitle:'the best tuner in the world',
     tuner_free:'Free tuning',tuner_guitar:'Guitar tuning',
@@ -1358,6 +1368,11 @@ const STRINGS = {
     unlock_popup_b3:'Compra única, acceso para siempre',
     unlock_popup_cta:'Desbloquear todo',
     unlock_popup_dismiss:'Ahora no',
+    loja_tutorial_title:'¡Bienvenido a la Tienda!',
+    loja_tutorial_b1:'Cambia tus Puntos por Monedas y usa las Monedas para comprar ítems.',
+    loja_tutorial_b2:'Guitarras — cada una da un bono de puntos por respuesta correcta.',
+    loja_tutorial_b3:'Materiales didácticos — contenido para acelerar tu aprendizaje.',
+    loja_tutorial_cta:'¡Entendido!',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
     tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'el mejor afinador del mundo',
     tuner_free:'Afinación libre',tuner_guitar:'Afinación de guitarra',
@@ -4493,7 +4508,41 @@ function render(){
   if(state.phase==='start'){c.innerHTML=renderStart();return;}
   if(state.phase==='levelup'){c.innerHTML=renderLevelUp();return;}
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
-  if(state.phase==='loja'){c.innerHTML=renderLoja();return;}
+  if(state.phase==='loja'){
+    c.innerHTML=renderLoja();
+    if(!state.lojaTutorialDismissed){
+      state.lojaTutorialDismissed=true;
+      const ov=document.createElement('div');
+      ov.id='loja-tutorial-overlay';
+      ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
+      ov.innerHTML=`
+        <div style="background:#1a1200;border:3px solid #F5A623;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+          <img src="afinador.png" style="width:64px;height:64px;object-fit:contain;margin-bottom:.75rem">
+          <div style="font-size:1.1rem;font-weight:900;color:#F5A623;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em;margin-bottom:.3rem">${t('loja_tutorial_title')}</div>
+          <div style="background:#111;border:2px solid #F5A62333;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
+            <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+              <img src="moeda.png" style="width:1.1rem;height:1.1rem;flex-shrink:0;margin-top:.1rem;object-fit:contain">
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('loja_tutorial_b1')}</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
+              <img src="afinador.png" style="width:1.1rem;height:1.1rem;flex-shrink:0;margin-top:.1rem;object-fit:contain">
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('loja_tutorial_b2')}</span>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:.65rem">
+              <img src="ebook.png" style="width:1.1rem;height:1.1rem;flex-shrink:0;margin-top:.1rem;object-fit:contain">
+              <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('loja_tutorial_b3')}</span>
+            </div>
+          </div>
+          <button onclick="document.getElementById('loja-tutorial-overlay').remove();playClickSfx('click')"
+            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#111;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.01em">
+            ${t('loja_tutorial_cta')}
+          </button>
+        </div>
+      `;
+      document.body.appendChild(ov);
+    }
+    return;
+  }
   if(state.phase==='inventario'){c.innerHTML=renderInventario();return;}
   if(state.phase==='niveis'){c.innerHTML=renderNiveis();nivelCarouselInit();return;}
   if(state.phase==='treino_focado_menu'){
@@ -4504,13 +4553,14 @@ function render(){
       overlay.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
       overlay.innerHTML=`
         <div style="background:#0e1a0e;border:3px solid #22c55e;border-radius:24px;padding:1.75rem 1.5rem 1.4rem;max-width:320px;width:100%;box-shadow:6px 6px 0 #000;text-align:center">
+          <img src="afinador.png" style="width:56px;height:56px;object-fit:contain;margin-bottom:.75rem">
           <div style="margin-bottom:1.2rem;line-height:1.25">
             <div style="font-size:1.05rem;font-weight:900;color:#4ade80;font-family:var(--font-title);text-transform:uppercase;letter-spacing:.04em">${t('unlock_popup_headline')}</div>
             <div style="font-size:.9rem;font-weight:700;color:#aaa;font-family:var(--font-body);margin-top:.25rem">${t('unlock_popup_sub')}</div>
           </div>
           <div style="background:#111;border:2px solid #22c55e22;border-radius:14px;padding:.9rem 1rem;margin-bottom:1.25rem;text-align:left">
             <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">
-              <span style="color:#4ade80;font-size:1rem;flex-shrink:0;margin-top:.05rem">🎸</span>
+              <img src="afinador.png" style="width:1.1rem;height:1.1rem;flex-shrink:0;margin-top:.05rem;object-fit:contain">
               <span style="font-size:.86rem;color:#ddd;font-weight:600;line-height:1.4">${t('unlock_popup_b1')}</span>
             </div>
             <div style="display:flex;align-items:flex-start;gap:.65rem;margin-bottom:.65rem">

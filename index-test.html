@@ -3781,18 +3781,20 @@ function buildQualityHintHtml(){
   if(!h)return'';
   const lang=state.lang||'pt';
   const d=h[lang]||h.pt;
-  return `<div class="play-area" style="margin-top:.75rem">
-    <button class="play-btn" style="background:linear-gradient(180deg,#555,#333);text-shadow:none" onclick="(function(){
-      if(document.getElementById('quality-hint-panel'))return;
-      const box=document.createElement('div');
-      box.id='quality-hint-panel';
-      box.style.cssText='margin-top:.75rem;background:#1a1a1a;border:2px solid #444;border-radius:14px;padding:.85rem 1rem;text-align:left;position:relative';
-      box.innerHTML='<button onclick=\\'this.parentElement.remove()\\' style=\\'position:absolute;top:.4rem;right:.6rem;background:transparent;border:none;color:#555;font-size:.9rem;cursor:pointer\\'>✕</button><div style=\\'font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4;padding-right:1.2rem\\'>${d.q.replace(/'/g,"\\\\\'")}</div><div style=\\'font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8\\'>${d.a.replace(/'/g,"\\\\\'")}<br>${d.b.replace(/'/g,"\\\\\'")}</div>';
-      this.closest('.play-area').after(box);
-    })()">
-      <img src="lampada.png" style="width:1.1rem;height:1.1rem;object-fit:contain;vertical-align:middle;margin-right:.4rem">${t('hint_btn')}
+  return `
+    <div id="quality-hint-panel" style="display:none;position:fixed;bottom:calc(1.5rem + 72px + .75rem);left:1rem;max-width:300px;background:#1a1a1a;border:2px solid #555;border-radius:16px;padding:.9rem 1rem;z-index:9998;box-shadow:4px 4px 0 #000">
+      <button onclick="document.getElementById('quality-hint-panel').style.display='none'" style="position:absolute;top:.4rem;right:.6rem;background:transparent;border:none;color:#666;font-size:.95rem;cursor:pointer">✕</button>
+      <div style="font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4;padding-right:1.2rem">${d.q}</div>
+      <div style="font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8">${d.a}<br>${d.b}</div>
+    </div>
+    <button onclick="const b=document.getElementById('quality-hint-panel');b.style.display=b.style.display==='none'?'block':'none'"
+      style="position:fixed;bottom:1.5rem;left:1rem;width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#555,#333);border:3px solid #666;box-shadow:3px 3px 0 #111;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9998;transition:transform .12s,box-shadow .12s"
+      onmouseenter="this.style.transform='translate(-2px,-2px)';this.style.boxShadow='5px 5px 0 #111'"
+      onmouseleave="this.style.transform='';this.style.boxShadow='3px 3px 0 #111'"
+      onmousedown="this.style.transform='scale(.95)'">
+      <img src="lampada.png" style="width:34px;height:34px;object-fit:contain">
     </button>
-  </div>`;
+  `;
 }
 
 // UX TEST: setar true para reexibir o botão "Jornada pelas Cordas" na tela inicial

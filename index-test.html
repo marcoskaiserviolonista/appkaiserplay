@@ -3782,13 +3782,16 @@ function buildQualityHintHtml(){
   const lang=state.lang||'pt';
   const d=h[lang]||h.pt;
   return `<div class="play-area" style="margin-top:.75rem">
-    <button onclick="const p=document.getElementById('quality-hint-panel');p.style.display=p.style.display==='none'?'block':'none'" style="background:#444;border:none;border-radius:8px;padding:.3rem .7rem;color:#fff;font-size:.8rem;font-weight:700;font-family:var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:.35rem">
-      <img src="lampada.png" style="width:.9rem;height:.9rem;object-fit:contain"> ${t('hint_btn')}
+    <button class="play-btn" style="background:linear-gradient(180deg,#555,#333);text-shadow:none" onclick="(function(){
+      if(document.getElementById('quality-hint-panel'))return;
+      const box=document.createElement('div');
+      box.id='quality-hint-panel';
+      box.style.cssText='margin-top:.75rem;background:#1a1a1a;border:2px solid #444;border-radius:14px;padding:.85rem 1rem;text-align:left;position:relative';
+      box.innerHTML='<button onclick=\\'this.parentElement.remove()\\' style=\\'position:absolute;top:.4rem;right:.6rem;background:transparent;border:none;color:#555;font-size:.9rem;cursor:pointer\\'>✕</button><div style=\\'font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4;padding-right:1.2rem\\'>${d.q.replace(/'/g,"\\\\\'")}</div><div style=\\'font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8\\'>${d.a.replace(/'/g,"\\\\\'")}<br>${d.b.replace(/'/g,"\\\\\'")}</div>';
+      this.closest('.play-area').after(box);
+    })()">
+      <img src="lampada.png" style="width:1.1rem;height:1.1rem;object-fit:contain;vertical-align:middle;margin-right:.4rem">${t('hint_btn')}
     </button>
-    <div id="quality-hint-panel" style="display:none;margin-top:.6rem;background:#1a1200;border:2px solid #F5A62333;border-radius:12px;padding:.85rem 1rem;text-align:left">
-      <div style="font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4">${d.q}</div>
-      <div style="font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8">${d.a}<br>${d.b}</div>
-    </div>
   </div>`;
 }
 

@@ -3783,10 +3783,10 @@ function buildQualityHintHtml(){
   const lang=state.lang||'pt';
   const d=h[lang]||h.pt;
   return `
-    <div id="quality-hint-panel" style="display:none;position:fixed;bottom:calc(1.5rem + 72px + .75rem);left:1rem;max-width:300px;background:#1a1a1a;border:2px solid #555;border-radius:16px;padding:.9rem 1rem;z-index:9998;box-shadow:4px 4px 0 #000">
-      <button onclick="document.getElementById('quality-hint-panel').style.display='none'" style="position:absolute;top:.4rem;right:.6rem;background:transparent;border:none;color:#666;font-size:.95rem;cursor:pointer">✕</button>
-      <div style="font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4;padding-right:1.2rem">${d.q}</div>
-      <div style="font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8">${d.a}<br>${d.b}</div>
+    <div id="quality-hint-panel" style="display:none;position:fixed;bottom:calc(1.5rem + 72px + .75rem);left:1rem;max-width:360px;background:#1a1a1a;border:2px solid #555;border-radius:18px;padding:1.1rem 1.2rem;z-index:9998;box-shadow:4px 4px 0 #000">
+      <button onclick="document.getElementById('quality-hint-panel').style.display='none'" style="position:absolute;top:.5rem;right:.7rem;background:transparent;border:none;color:#666;font-size:1.1rem;cursor:pointer">✕</button>
+      <div style="font-size:1rem;font-weight:700;color:#F5A623;margin-bottom:.65rem;line-height:1.4;padding-right:1.4rem">${d.q}</div>
+      <div style="font-size:.95rem;color:#ccc;font-weight:600;line-height:1.9">${d.a}<br>${d.b}</div>
     </div>
     <button onclick="const b=document.getElementById('quality-hint-panel');b.style.display=b.style.display==='none'?'block':'none'"
       style="position:fixed;bottom:1.5rem;left:1rem;width:64px;height:64px;border-radius:50%;background:linear-gradient(180deg,#555,#333);border:3px solid #aaa;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:9998;transition:transform .12s;animation:hintGlow 2s ease-in-out infinite"

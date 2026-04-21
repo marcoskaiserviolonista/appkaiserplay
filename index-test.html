@@ -923,6 +923,7 @@ const STRINGS = {
     loja_tutorial_b2:'Violões — cada um dá um bônus de pontos por acerto.',
     loja_tutorial_b3:'Materiais didáticos — conteúdo para acelerar seu aprendizado.',
     loja_tutorial_cta:'Entendido!',
+    hint_btn:'Dica',
     tuner_start:'Ativar Microfone',tuner_stop:'Desativar',
     tuner_title:'Afinador de Alta Precisão',tuner_subtitle:'o melhor afinador do mundo',
     tuner_free:'Afinação livre',tuner_guitar:'Afinação do violão',
@@ -1148,6 +1149,7 @@ const STRINGS = {
     loja_tutorial_b2:'Guitars — each one gives a points bonus per correct answer.',
     loja_tutorial_b3:'Learning materials — content to accelerate your learning.',
     loja_tutorial_cta:'Got it!',
+    hint_btn:'Hint',
     tuner_start:'Enable Microphone',tuner_stop:'Disable',
     tuner_title:'High Precision Tuner',tuner_subtitle:'the best tuner in the world',
     tuner_free:'Free tuning',tuner_guitar:'Guitar tuning',
@@ -1373,6 +1375,7 @@ const STRINGS = {
     loja_tutorial_b2:'Guitarras — cada una da un bono de puntos por respuesta correcta.',
     loja_tutorial_b3:'Materiales didácticos — contenido para acelerar tu aprendizaje.',
     loja_tutorial_cta:'¡Entendido!',
+    hint_btn:'Pista',
     tuner_start:'Activar Micrófono',tuner_stop:'Desactivar',
     tuner_title:'Afinador de Alta Precisión',tuner_subtitle:'el mejor afinador del mundo',
     tuner_free:'Afinación libre',tuner_guitar:'Afinación de guitarra',
@@ -3747,6 +3750,48 @@ function getFocusedQualityForChord(ch, switchKey){
 
 function isQualitySwitch(key){ return key in FOCUSED_QUALITY_PAIRS; }
 
+const QUALITY_HINTS={
+  maior_menor:{
+    pt:{q:'O acorde que você está ouvindo é feliz ou triste?',a:'Maior = sensação alegre',b:'Menor = sensação triste'},
+    en:{q:'Does the chord sound happy or sad?',a:'Major = happy feeling',b:'Minor = sad feeling'},
+    es:{q:'¿El acorde que escuchas suena feliz o triste?',a:'Mayor = sensación alegre',b:'Menor = sensación triste'}
+  },
+  menor_diminuto:{
+    pt:{q:'Qual acorde tem mais tensão?',a:'Menor = melancólico, triste',b:'Diminuto = sensação de terror'},
+    en:{q:'Which chord has more tension?',a:'Minor = melancholic, sad',b:'Diminished = feeling of terror'},
+    es:{q:'¿Cuál acorde tiene más tensión?',a:'Menor = melancólico, triste',b:'Disminuido = sensación de terror'}
+  },
+  diminuto_meio_diminuto:{
+    pt:{q:'Qual o nível de tensão que você está sentindo?',a:'Diminuto = terror intenso',b:'Meio Diminuto = terror, mas não tanto'},
+    en:{q:'How intense is the tension you hear?',a:'Diminished = intense terror',b:'Half Diminished = terror, but not as much'},
+    es:{q:'¿Cuál es el nivel de tensión que sientes?',a:'Disminuido = terror intenso',b:'Semidisminuido = terror, pero no tanto'}
+  },
+  diminuto_aumentado:{
+    pt:{q:'A tensão que você sente é sombria ou dramática?',a:'Diminuto = sensação de terror',b:'Aumentado = sensação dramática'},
+    en:{q:'Does the tension feel dark or dramatic?',a:'Diminished = feeling of terror',b:'Augmented = dramatic feeling'},
+    es:{q:'¿La tensión que sientes es sombría o dramática?',a:'Disminuido = sensación de terror',b:'Aumentado = sensación dramática'}
+  }
+};
+
+function buildQualityHintHtml(){
+  if(!state.isQuality||!state.qualityPair)return'';
+  const pair=state.qualityPair;
+  const hintKey=pair.opts[0]+'_'+pair.opts[1].replace('-','_');
+  const h=QUALITY_HINTS[hintKey];
+  if(!h)return'';
+  const lang=state.lang||'pt';
+  const d=h[lang]||h.pt;
+  return `<div style="margin-top:.75rem;text-align:center">
+    <button onclick="const p=document.getElementById('quality-hint-panel');p.style.display=p.style.display==='none'?'block':'none'" style="background:transparent;border:2px solid #F5A62355;border-radius:10px;padding:.35rem .85rem;color:#F5A623;font-size:.82rem;font-weight:700;font-family:var(--font-body);cursor:pointer;display:inline-flex;align-items:center;gap:.4rem">
+      💡 ${t('hint_btn')}
+    </button>
+    <div id="quality-hint-panel" style="display:none;margin-top:.6rem;background:#1a1200;border:2px solid #F5A62333;border-radius:12px;padding:.85rem 1rem;text-align:left">
+      <div style="font-size:.85rem;font-weight:700;color:#F5A623;margin-bottom:.55rem;line-height:1.4">${d.q}</div>
+      <div style="font-size:.82rem;color:#ccc;font-weight:600;line-height:1.8">${d.a}<br>${d.b}</div>
+    </div>
+  </div>`;
+}
+
 // UX TEST: setar true para reexibir o botão "Jornada pelas Cordas" na tela inicial
 const SHOW_CORDAS_JOURNEY = false;
 
@@ -4422,6 +4467,7 @@ function renderTreinoFocado(){
       </button>
       <div class="label-sm mt">${state.isFretboard?t('build_chord_fretboard'):state.isQuality?t('what_quality'):t('what_chord')}</div>
       ${choicesHtml}
+      ${!answered?buildQualityHintHtml():''}
     </div>
     ${state.isFretboard?`<div class="fb-wrap" id="fb-wrap">${buildFbSVG()}</div>`:''}
   `;
@@ -5684,7 +5730,7 @@ function renderGame(){
           return `<button class="${cls}" style="${diamondStyle}height:4rem" onclick="handleAnswer(${ch.id},this)">
             <span style="font-size:1.5rem;font-weight:900;letter-spacing:-.02em;line-height:1;display:block">${(state.lang!=='pt'&&ch.cifraEn)?ch.cifraEn:ch.cifra}</span>
           </button>`;
-        }).join('')}</div>`}
+        }).join('')}</div>${state.phase==='question'?buildQualityHintHtml():''}`}
     </div>
     ${state.phase==='answered'&&state.result?.multLevelUp?(()=>{const mc=comboColor(comboMultiplier(state.streak));return `<div class="play-area" style="border-color:${mc};background:#111;text-align:center;animation:feedbackPop .35s ease"><div style="font-size:1.5rem;font-weight:900;color:${mc};letter-spacing:-.02em;line-height:1;text-shadow:0 0 24px ${mc}66">${state.result.msg}</div></div>`;})():''}
     ${state.isFretboard ? `

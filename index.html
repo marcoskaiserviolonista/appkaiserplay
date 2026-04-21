@@ -4562,8 +4562,8 @@ function render(){
   if(state.phase==='desempenho'){c.innerHTML=renderDesempenho();return;}
   if(state.phase==='loja'){
     c.innerHTML=renderLoja();
-    if(!state.lojaTutorialDismissed){
-      state.lojaTutorialDismissed=true;
+    if(!_obFlag('kp_loja_tutorial_seen')){
+      _obSetFlag('kp_loja_tutorial_seen');
       const ov=document.createElement('div');
       ov.id='loja-tutorial-overlay';
       ov.style.cssText='position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.82);z-index:9999;display:flex;align-items:center;justify-content:center;padding:1.5rem';
@@ -4586,7 +4586,7 @@ function render(){
             </div>
           </div>
           <button onclick="document.getElementById('loja-tutorial-overlay').remove();playClickSfx('click')"
-            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#111;font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.01em">
+            style="width:100%;padding:.9rem;background:linear-gradient(180deg,#ffbe4f,#F5A623);border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.5);font-size:1rem;font-weight:900;font-family:var(--font-body);cursor:pointer;letter-spacing:.01em">
             ${t('loja_tutorial_cta')}
           </button>
         </div>

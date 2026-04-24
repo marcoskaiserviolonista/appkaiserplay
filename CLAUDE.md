@@ -7,14 +7,61 @@ Gamificado: XP, níveis, moedas, loja, ranking, modos de treino.
 Criado por Marcos Kaiser, professor de violão — kaiserplay.com.br
 
 ## Stack
-- Arquivo único: `index.html`
 - HTML + CSS + JavaScript vanilla, Howler.js para áudio
 - Hospedado no GitHub Pages: marcoskaiserviolonista.github.io/appkaiserplay
 - Sem build system, sem framework, sem dependências locais
 
-## Arquitetura
-Três seções em `index.html`: `<style>`, HTML estático mínimo, `<script>`.
-Render centralizado em `render()` que reconstrói innerHTML baseado em `state.phase`.
+## Arquitetura (multi-arquivo)
+`index.html` é um shell de 98 linhas que carrega CSS e JS externos via tags `<link>` e `<script>`.
+Render centralizado em `render()` (js/render.js) que reconstrói innerHTML baseado em `state.phase`.
+
+### Estrutura de arquivos
+```
+index.html              ← shell prod (fullAccess:false, saldo zerado)
+index-test.html         ← shell teste (fullAccess:true, saldo 500)
+styles/
+  animations.css        ← todos os @keyframes
+  base.css              ← :root, reset, body, .app
+  layout.css            ← .header, .logo-*, .tab, #tab-*
+  game.css              ← XP bar, combo, play area, choices, level-up, diamond
+  profile.css           ← profile card, níveis, user-stats, ranking
+  shop.css              ← loja, shop cards, modal, toast, .gc
+  tools.css             ← fretboard, sala de aula, metrônomo, afinador
+js/
+  config.js             ← GAME_CONFIG para prod
+  config.test.js        ← GAME_CONFIG para teste
+  i18n.js               ← STRINGS + t()
+  chords.js             ← CHORDS, CHORDS_DIAMOND, LEVELS, helpers
+  constants.js          ← LOJA_ITEMS, VIOLOES, FB_*, buildFbSVG
+  audio.js              ← getAudioCtx, howls, playChord, playSfx*
+  particles.js          ← canvas, makeParticles, showToast, spawnFloat
+  engine.js             ← state (usa GAME_CONFIG), genQ, combo, sala de aula
+  render.js             ← render() dispatcher central
+  persistence.js        ← saveStreak/loadStreak, saveProgress/loadProgress
+  onboarding.js         ← OB_STEPS, updateObOverlay, obNext/Skip/End
+  app.js                ← detecção de idioma, onAuthStateChanged, fretboard click
+  features/
+    auth.js             ← renderLogin, loginUser, signupUser, logoutUser
+    journey.js          ← renderStart, renderGame, renderLevelUp, startGame
+    focused.js          ← genFocusedQ, renderTreinoFocadoMenu, renderTreinoFocado
+    shop.js             ← renderLoja, renderInventario, confirmarCompra, shopModal
+    ranking.js          ← loadRankingData, renderRanking
+    profile.js          ← renderPerfil, goToPerfil
+    niveis.js           ← NIVEL_GROUPS, renderNiveis
+    tools.js            ← renderMetronomo, renderAfinador
+assets/
+  *.png                 ← todas as imagens do jogo (77 arquivos)
+sounds/
+  *.mp3, *.ogg          ← áudios dos acordes (não mover)
+```
+
+### Ordem de carregamento dos scripts (importante!)
+config → i18n → chords → constants → audio → particles → engine →
+features/focused → render → features/tools → features/auth → features/journey →
+features/shop → features/ranking → features/profile → features/niveis →
+persistence → onboarding → app
+
+Não usar ES Modules (import/export) — handlers onclick="..." precisam de globals.
 
 ## Design System
 - Fundo: `#111` | Principal: `#F5A623` (laranja) | Secundária: `#60dcff` (ciano — Treino Focado)
@@ -68,12 +115,17 @@ Render centralizado em `render()` que reconstrói innerHTML baseado em `state.ph
 
 - **Nunca implementar nada não solicitado explicitamente.** Não tocar no que não foi pedido.
 - **Sempre gerar `index.html` e `index-test.html` juntos** após qualquer mudança.
-  - `index.html`: fullAccess:false, notas:0, moedas:0, diamantes:0
-  - `index-test.html`: fullAccess:true, notas:500, moedas:500, diamantes:10
+  - `index.html`: carrega `js/config.js` → fullAccess:false, saldo zerado
+  - `index-test.html`: carrega `js/config.test.js` → fullAccess:true, saldo 500
+  - Diferença entre os dois: apenas a linha `<script src="js/config.js">` vs `<script src="js/config.test.js">`
 - **Sempre fazer push para o GitHub** após cada alteração aprovada.
-- **Verificar sintaxe do JS manualmente** após alterações — `node --check` não funciona em `.html`.
+- **Verificar sintaxe do JS manualmente** após alterações — `node --check` funciona em arquivos `.js`.
 - **Todo texto visível ao usuário** deve ter versão PT e EN via `t()`. Nunca string PT hardcoded sem equivalente EN.
 - **Botões em HTML estático** (fora de template literals) não aceitam `t()` diretamente — atualizar o `textContent` no `render()`.
+- **Imagens**: todas as imagens ficam em `assets/`. Ao referenciar: `src="assets/nome.png"` ou via `'assets/'+nome+'.png'`.
+- **Adicionar nova imagem**: colocar o arquivo em `assets/` e referenciar com `assets/` prefix.
+- **Novo arquivo JS**: adicionar `<script src="js/novo.js">` em AMBOS `index.html` e `index-test.html`, na ordem correta.
+- **Novo arquivo CSS**: adicionar `<link rel="stylesheet" href="styles/novo.css">` em AMBOS os arquivos HTML.
 - Explicar decisões técnicas em linguagem simples (Marcos é leigo em código).
 
 ## Regras de segurança

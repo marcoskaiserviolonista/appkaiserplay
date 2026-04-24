@@ -1,0 +1,46 @@
+/* ── Animations ── */
+
+@keyframes floatUp{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1;transform:translateY(-60px) scale(1.2)}100%{opacity:0;transform:translateY(-120px) scale(.9)}}
+@keyframes coinFloat{0%{opacity:1;transform:translateY(0) scale(1) rotate(0deg)}100%{opacity:0;transform:translateY(-100px) scale(1.4) rotate(20deg)}}
+@keyframes coinBurst{0%{transform:scale(1)}30%{transform:scale(1.15)}100%{transform:scale(1)}}
+@keyframes correctFlash{0%{background:#111}20%{background:#1a2e1a}100%{background:#111}}
+@keyframes wrongShake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+@keyframes bonusBurst{0%{transform:scale(1)}30%{transform:scale(1.08)}100%{transform:scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes promoFadeIn{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@keyframes comboSlideUp{from{opacity:0;transform:translateX(-50%) translateY(20px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+@keyframes xpPop{0%{transform:scale(0) rotate(-10deg);opacity:0}50%{transform:scale(1.3) rotate(3deg);opacity:1}100%{transform:scale(1) rotate(0deg);opacity:1}}
+@keyframes flamePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+@keyframes hintGlow{0%,100%{box-shadow:3px 3px 0 #111,0 0 8px 2px rgba(255,210,50,.3)}50%{box-shadow:3px 3px 0 #111,0 0 18px 6px rgba(255,210,50,.7)}}
+@keyframes autoProgress{from{width:100%}to{width:0%}}
+@keyframes lvlupEntrance{0%{opacity:0;transform:scale(.85) translateY(24px)}100%{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes lvlupBounce{0%,100%{transform:translateY(0) scale(1)}30%{transform:translateY(-8px) scale(1.03)}60%{transform:translateY(-3px) scale(1.01)}}
+@keyframes lvlupGlow{0%,100%{filter:drop-shadow(0 0 16px #F5A62388) brightness(1)}50%{filter:drop-shadow(0 0 32px #F5A623ff) brightness(1.14)}}
+@keyframes neonPulse{0%,100%{box-shadow:0 0 4px #F5A62344,0 0 8px #F5A62322}50%{box-shadow:0 0 10px #F5A62399,0 0 20px #F5A62344}}
+@keyframes neonPulseBlue{0%,100%{box-shadow:0 0 4px #60dcff44,0 0 8px #60dcff22}50%{box-shadow:0 0 10px #60dcff99,0 0 20px #60dcff44}}
+@keyframes arrowUp{0%{transform:translateY(0);opacity:1}33%{transform:translateY(-5px);opacity:1}66%{transform:translateY(-10px);opacity:0}67%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes sparkOn{0%,100%{opacity:1;transform:scale(1) rotate(0deg)}25%{opacity:0;transform:scale(.4) rotate(45deg)}50%{opacity:1;transform:scale(1.2) rotate(0deg)}75%{opacity:.3;transform:scale(.7) rotate(-30deg)}}
+button{transition:transform .1s,filter .1s;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.75)}
+button:active:not(:disabled){transform:scale(.97);filter:brightness(.88)}
+.lvlup-arrow{position:absolute;font-family:'VT323',monospace;font-size:2rem;color:#4ade80;text-shadow:0 0 6px #4ade80cc,2px 2px 0 #1a5c1a;animation:arrowUp .55s steps(4) infinite;pointer-events:none}
+.lvlup-spark{position:absolute;font-family:'VT323',monospace;color:#F5A623;text-shadow:0 0 6px #F5A623cc;animation:sparkOn .7s steps(3) infinite;pointer-events:none}
+.lvlup-frame{position:relative;height:187px;max-height:31dvh;display:flex;align-items:center;justify-content:center;margin-bottom:0}
+@keyframes scoreCount{0%{transform:scale(2);color:#F5A623}100%{transform:scale(1)}}
+@keyframes pulse{from{opacity:.8}to{opacity:1;text-shadow:0 0 18px rgba(245,166,35,.9)}}
+@keyframes walletPop{0%{transform:scale(1)}40%{transform:scale(1.2)}100%{transform:scale(1)}}
+@keyframes wrongFlash{0%{background:#111}15%{background:#3d0a0a}100%{background:#111}}
+@keyframes xpBarFlash{0%{filter:brightness(1)}40%{filter:brightness(2.2)}100%{filter:brightness(1)}}
+@keyframes xpFillGrow{0%{filter:brightness(1.4) saturate(1.5)}100%{filter:brightness(1) saturate(1)}}
+@keyframes xpGlow{0%,100%{box-shadow:0 0 0px rgba(255,190,79,0)}50%{box-shadow:0 0 14px 4px rgba(255,190,79,.55)}}
+@keyframes flyToBar{0%{opacity:1;transform:translateY(0) scale(1)}70%{opacity:1;transform:translateY(-120px) scale(.85)}100%{opacity:0;transform:translateY(-160px) scale(.6)}}
+@keyframes feedbackPop{0%{opacity:0;transform:scale(.5)}60%{transform:scale(1.08)}100%{opacity:1;transform:scale(1)}}
+@keyframes fadeOut{0%{opacity:1}100%{opacity:0}}
+@keyframes streakPop{0%{transform:scale(1)}30%{transform:scale(1.5)}60%{transform:scale(.9)}100%{transform:scale(1)}}
+@keyframes obFadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes correctExplode{0%{transform:scale(1)}25%{transform:scale(1.12)}60%{transform:scale(.96)}100%{transform:scale(1)}}
+@keyframes diamondEntrance{0%{opacity:0;transform:scale(.4) rotate(-15deg)}60%{transform:scale(1.15) rotate(4deg)}100%{opacity:1;transform:scale(1) rotate(0deg)}}
+@keyframes diamondPulse{0%,100%{box-shadow:0 0 0 0 rgba(96,220,255,.4)}50%{box-shadow:0 0 28px 6px rgba(96,220,255,.22)}}
+@keyframes whoosh{0%{opacity:0;transform:translateX(-30px)}100%{opacity:1;transform:translateX(0)}}
+@keyframes multiBurst{0%{transform:scale(1)}20%{transform:scale(1.35)}60%{transform:scale(.92)}100%{transform:scale(1)}}
+@keyframes multiGlow{0%,100%{filter:brightness(1)}50%{filter:brightness(2) saturate(2)}}
+@keyframes comboCount{0%{transform:scale(2.2) translateY(-6px);opacity:0}60%{transform:scale(1.08) translateY(0);opacity:1}100%{transform:scale(1)}}

@@ -1,0 +1,183 @@
+/* ── Loja ── */
+.back-row{display:flex;align-items:center;gap:.75rem;margin-bottom:1rem;width:100%;max-width:520px}
+.back-btn{background:linear-gradient(180deg,#333,#222);border:3px solid #444;color:#fff;border-radius:10px;padding:.4rem .8rem;cursor:pointer;font-size:.8rem;font-weight:700;font-family:var(--font-body);text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)}
+.page-title{font-size:1.1rem;font-weight:900}
+.coin-badge{margin-left:auto;background:#1e1e1e;border:3px solid #F5A623;border-radius:10px;padding:.35rem .8rem;display:flex;align-items:center;gap:.4rem}
+.coin-badge.pop{animation:walletPop .4s ease}
+
+.wallet-grid{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:1rem;width:100%;max-width:520px}
+.wallet-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:1rem;box-shadow:4px 4px 0 #151515;text-align:center}
+.wallet-lbl{font-size:.6rem;color:#e0e0e0;font-weight:700;text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem}
+.wallet-val{font-size:1.8rem;font-weight:900;line-height:1}
+.wallet-sub{font-size:.65rem;color:#bbb;margin-top:.2rem}
+
+.exchange-btn{width:100%;max-width:520px;background:linear-gradient(180deg,#f5aa2a 0%,#d4720a 100%);border:3px solid #1a1a1a;border-radius:16px;padding:1rem;margin-bottom:1rem;cursor:pointer;box-shadow:4px 4px 0 #1a1a1a;font-family:var(--font-body);transition:all .12s}
+.exchange-btn:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 #1a1a1a}
+.exchange-btn:active{transform:scale(.97);filter:brightness(.88)}
+.exchange-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.exchange-title{font-size:1rem;font-weight:900;color:#fff;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)}
+.exchange-sub{font-size:.72rem;color:#fff;margin-top:.2rem;font-weight:600;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)}
+
+.loja-tip{width:100%;max-width:520px;background:#1a1200;border:2px solid rgba(245,166,35,.3);border-radius:14px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.8rem;color:#F5A623;font-weight:600}
+
+/* ── Inventário: slot grande do violão ── */
+.inv-guitar-slot{
+width:100%;max-width:520px;
+background:#0e0e0e;
+border:2.5px solid #232323;
+border-radius:20px;
+overflow:hidden;
+padding:1rem 1rem .8rem;
+display:flex;
+flex-direction:column;
+align-items:center;
+margin-bottom:.75rem;
+}
+.inv-guitar-img-wrap{
+width:100%;
+height:68vw;
+max-height:360px;
+display:flex;
+align-items:center;
+justify-content:center;
+background:radial-gradient(ellipse at 50% 55%,#1e1e1e 0%,#080808 100%);
+border-radius:14px;
+padding:1rem;
+}
+.inv-guitar-img{
+height:100%;
+width:auto;
+max-width:100%;
+object-fit:contain;
+filter:drop-shadow(0 10px 28px rgba(0,0,0,.9));
+}
+
+/* ── Shop Cards ── */
+.shop-cards-grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:.75rem;
+width:100%;
+max-width:520px;
+margin-bottom:.5rem;
+overflow:hidden;
+}
+.shop-card{
+position:relative;
+background:#0e0e0e;
+border:2.5px solid #232323;
+border-radius:16px;
+overflow:hidden;
+display:flex;
+flex-direction:column;
+cursor:pointer;
+transition:border-color .2s, box-shadow .2s, transform .1s;
+active-transform:scale(.97);
+}
+.shop-card:active{transform:scale(.97);filter:brightness(.88)}
+.shop-card:hover{border-color:#232323;box-shadow:none;}
+.shop-card:focus,.shop-card:focus-visible{outline:none;border-color:#232323;box-shadow:none;}
+.shop-card--equipped{border-color:#232323;box-shadow:none;}
+.shop-card--locked{ opacity:1; }
+.shop-card-badge{
+position:absolute;top:.55rem;left:.55rem;
+font-size:.68rem;font-weight:900;
+padding:.22rem .55rem;border-radius:20px;
+z-index:3;letter-spacing:.03em;text-transform:uppercase;
+box-shadow:0 2px 8px rgba(0,0,0,.7);border:1.5px solid rgba(255,255,255,.12);
+}
+.shop-card-badge2{
+position:absolute;top:.55rem;right:.55rem;
+font-size:.62rem;font-weight:900;
+padding:.22rem .5rem;border-radius:20px;
+z-index:3;letter-spacing:.03em;
+background:linear-gradient(135deg,#1a0d2e,#2d1060);
+color:#c084fc;border:1.5px solid #7c3aed;
+box-shadow:0 2px 10px rgba(124,58,237,.5);
+}
+.shop-card-equipped-tag{
+position:absolute;top:.55rem;right:.55rem;
+font-size:.58rem;font-weight:900;color:#111;
+background:#22c55e;padding:.18rem .5rem;border-radius:20px;
+z-index:3;letter-spacing:.05em;box-shadow:0 2px 8px rgba(0,0,0,.5);
+}
+.shop-card-img-wrap{
+width:100%;display:flex;align-items:center;justify-content:center;
+background:radial-gradient(ellipse at 50% 60%,#1e1e1e 0%,#0a0a0a 100%);
+padding:.5rem .5rem 0;overflow:hidden;
+}
+.shop-card-img{
+width:auto;height:58vw;max-height:260px;max-width:100%;
+object-fit:contain;display:block;
+filter:drop-shadow(0 8px 24px rgba(0,0,0,.95));
+transition:transform .28s ease;
+}
+.shop-card:hover .shop-card-img{transform:scale(1.06) translateY(-3px);}
+.shop-card-img-wrap::after{
+content:'';position:absolute;bottom:0;left:0;right:0;
+height:50px;background:#0e0e0e;pointer-events:none;z-index:1;
+}
+.shop-card-info{padding:.5rem .7rem .3rem;position:relative;z-index:2;}
+.shop-card-name{font-size:.82rem;font-weight:900;line-height:1.2;margin-bottom:.2rem;letter-spacing:-.01em;}
+.shop-card-xp-mini{
+display:inline-flex;align-items:center;gap:.25rem;
+background:rgba(245,166,35,.13);border:1.5px solid rgba(245,166,35,.35);
+border-radius:8px;padding:.2rem .45rem;
+font-size:.72rem;font-weight:900;color:#F5A623;margin-top:.25rem;
+}
+.shop-card-price-mini{font-size:.75rem;font-weight:800;color:#F5A623;margin-top:.3rem;display:flex;align-items:center;gap:.25rem;}
+.shop-card-btn{
+margin:.35rem .7rem .7rem;padding:.5rem 0;border-radius:10px;
+font-size:.78rem;font-weight:900;letter-spacing:.03em;
+cursor:pointer;border:2px solid;transition:all .15s;position:relative;z-index:2;
+}
+.shop-card-btn.buy{background:linear-gradient(180deg,#f5aa2a,#d4720a);border-color:#1a1a1a;color:#fff;box-shadow:0 3px 0 #1a1a1a;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);}
+.shop-card-btn.buy:active{transform:scale(.97);filter:brightness(.88)}
+.shop-card-btn.buy:disabled{background:#1e1e1e;color:#444;border-color:#2a2a2a;box-shadow:none;cursor:not-allowed;opacity:.5;}
+.shop-card-btn.equip{background:linear-gradient(180deg,#60dcff,#3aaccc);border-color:#1a1a1a;color:#fff;box-shadow:0 3px 0 #1a1a1a;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);}
+.shop-card-btn.equip:active{transform:scale(.97);filter:brightness(.88)}
+.shop-card-btn.equipped{background:#1a2a1a;border-color:#22c55e;color:#4ade80;cursor:default;}
+.shop-card-btn.locked{background:#111;border-color:#333;color:#555;cursor:not-allowed;font-size:.8rem;}
+
+/* ── Nivel Cards ── */
+.nivel-card{position:relative;border-radius:14px;overflow:hidden;border:2.5px solid #252525;box-shadow:3px 3px 0 #0a0a0a;cursor:pointer;transition:transform .2s;background:#0e0e0e;display:flex;flex-direction:column;}
+.nivel-card:active{transform:scale(.97);filter:brightness(.88)}
+.nivel-card--locked{opacity:.6;}
+.nivel-card-img-area{width:100%;aspect-ratio:1/1;display:flex;align-items:center;justify-content:center;overflow:hidden;background:#0a0a0a;position:relative;}
+.nivel-card-img{width:78%;height:78%;object-fit:contain;display:block;transition:transform .3s ease;filter:drop-shadow(0 6px 20px rgba(0,0,0,.9));}
+#nivel-carousel::-webkit-scrollbar{display:none;}
+.nivel-card:hover .nivel-card-img{transform:scale(1.07);}
+.nivel-card-info{padding:.5rem .7rem .65rem;}
+.nivel-card-name{font-size:.8rem;font-weight:900;line-height:1.2;letter-spacing:-.01em;}
+.nivel-card-range{font-size:.62rem;color:#777;margin-top:.18rem;font-weight:600;}
+.nivel-card-tag{display:inline-flex;align-items:center;gap:.2rem;font-size:.58rem;font-weight:800;border-radius:20px;padding:.18rem .5rem;margin-top:.32rem;border:1.5px solid;}
+
+/* ── Modal Botões ── */
+.modal-btn{
+width:100%;padding:.7rem 0;border-radius:13px;
+font-size:.95rem;font-weight:900;letter-spacing:.03em;
+cursor:pointer;border:2.5px solid;transition:all .15s;
+}
+.modal-btn--buy{background:linear-gradient(180deg,#f5aa2a,#d4720a);border-color:#1a1a1a;color:#fff;box-shadow:0 4px 0 #1a1a1a;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);}
+.modal-btn--equip{background:linear-gradient(180deg,#60dcff,#3aaccc);border-color:#1a1a1a;color:#fff;box-shadow:0 4px 0 #1a1a1a;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);}
+.modal-btn--equipped{background:#1a2a1a;border-color:#22c55e;color:#4ade80;cursor:default;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8);}
+.modal-btn--locked{background:#1a1a1a;border-color:#333;color:#555;cursor:not-allowed;}
+
+.loja-item{width:100%;max-width:520px;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:18px;padding:1rem 1.1rem;margin-bottom:.65rem;box-shadow:4px 4px 0 #151515;display:flex;align-items:center;gap:1rem}
+.item-icon{font-size:2rem;width:48px;height:48px;background:transparent;border-radius:0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.item-info{flex:1}
+.item-name{font-size:.88rem;font-weight:800;color:#e8e8e8;margin-bottom:.2rem}
+.item-desc{font-size:.72rem;color:#bbb}
+.item-buy{background:linear-gradient(180deg,#f5aa2a 0%,#d4720a 100%);border:2px solid #1a1a1a;border-radius:10px;padding:.45rem .8rem;cursor:pointer;font-family:var(--font-body);font-weight:900;font-size:.78rem;color:#fff;box-shadow:2px 2px 0 #1a1a1a;white-space:nowrap;flex-shrink:0;transition:all .1s;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)}
+.item-buy:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 #1a1a1a}
+
+/* ── Toast ── */
+.toast{position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(80px);background:#1e1e1e;border:3px solid #22c55e;border-radius:16px;padding:.85rem 1.2rem;display:flex;align-items:center;gap:.75rem;box-shadow:0 8px 32px rgba(0,0,0,.5);z-index:9999;transition:transform .35s cubic-bezier(.34,1.56,.64,1),opacity .35s;opacity:0;pointer-events:none;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast-icon{font-size:1.4rem}
+.toast-msg{font-size:.88rem;font-weight:700;color:#e8e8e8}
+.toast-sub{font-size:.72rem;color:#bbb;margin-top:.1rem}
+
+/* ── Gold Coin ── */
+.gc{display:inline-flex;align-items:center;justify-content:center;width:1.2em;height:1.2em;background:radial-gradient(circle at 35% 35%,#ffe566,#F5A623 55%,#c47a00);border:2px solid #a36000;border-radius:50%;box-shadow:0 2px 0 #7a4500,inset 0 1px 2px rgba(255,255,255,.5);font-style:normal;font-size:.85em;vertical-align:middle;flex-shrink:0}
+.gc::after{content:'$';font-weight:900;color:#a36000;font-size:.6em;font-family:var(--font-body);line-height:1}

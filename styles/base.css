@@ -1,0 +1,16 @@
+/* ── Base / Reset ── */
+/* FONT MODE — para reverter ao visual clássico, troque:
+   retro  : --font-body:'VT323',monospace     | --font-title:'Press Start 2P',monospace
+   classic: --font-body:'Poppins',sans-serif  | --font-title:'Exo 2',sans-serif */
+:root{
+  --font-body: 'Poppins', sans-serif;
+  --font-title: 'Exo 2', sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+body{background:#111;color:#f0f0f0;font-family:var(--font-body);min-height:100vh;-webkit-tap-highlight-color:transparent}
+.has-combo{padding-bottom:80px!important}
+.app{display:flex;flex-direction:column;align-items:center;padding:0 1rem 2rem;min-height:100vh;background:#111}
+#content{width:100%;max-width:520px}
+.app.flash-correct{animation:correctFlash .5s ease}
+.app.flash-wrong{animation:wrongFlash .5s ease}

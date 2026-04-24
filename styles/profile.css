@@ -1,0 +1,80 @@
+/* ── Profile Card ── */
+.profile-card{width:100%;max-width:520px;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:20px;padding:1.1rem 1.2rem;margin-bottom:.75rem;box-shadow:4px 4px 0 #151515;display:flex;align-items:center;gap:1rem;cursor:pointer;font-family:inherit;text-align:left;transition:filter .12s}
+.profile-card:active{filter:brightness(.88);transform:scale(.98)}
+.profile-avatar{width:52px;height:52px;border-radius:14px;background:#F5A623;display:flex;align-items:center;justify-content:center;font-size:1.4rem;font-weight:900;color:#1a1a1a;flex-shrink:0;border:3px solid #1a1a1a;box-shadow:3px 3px 0 #1a1a1a}
+.profile-info{flex:1;min-width:0}
+.profile-name{font-size:1rem;font-weight:800;color:#f0f0f0;line-height:1.2}
+.profile-title{font-size:.75rem;color:#F5A623;font-weight:700;margin-top:.15rem}
+.profile-xp-track{height:8px;background:#111;border-radius:99px;overflow:hidden;border:2px solid #2a2a2a;margin-top:.55rem}
+.profile-xp-fill{height:100%;background:linear-gradient(90deg,#e8931a,#ffbe4f,#ffd166);border-radius:99px;transition:width .8s cubic-bezier(.4,0,.2,1)}
+.profile-xp-label{font-size:.6rem;color:#888;font-weight:600;margin-top:.3rem;text-align:right}
+.profile-lvl-badge{background:#252525;border:2px solid #F5A62344;border-radius:10px;padding:.3rem .65rem;text-align:center;flex-shrink:0}
+.profile-lvl-num{font-size:1.4rem;font-weight:900;color:#F5A623;line-height:1}
+.profile-lvl-lbl{font-size:.55rem;color:#888;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
+
+/* ── Tela Níveis ── */
+.nivel-list{width:100%;max-width:520px}
+.nivel-group{margin-bottom:1rem}
+.nivel-group-title{font-size:.62rem;font-weight:800;color:#bbb;text-transform:uppercase;letter-spacing:.12em;margin-bottom:.5rem;padding-left:.25rem}
+.nivel-row{display:flex;align-items:center;gap:.85rem;background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:.85rem 1rem;margin-bottom:.5rem;box-shadow:3px 3px 0 #151515;transition:all .12s}
+.nivel-row.current{border-color:#F5A623;background:#1f1800;box-shadow:3px 3px 0 #F5A62333}
+.nivel-row.done{opacity:.55}
+.nivel-row.locked{opacity:.35}
+.nivel-img{width:44px;height:44px;border-radius:0;background:transparent;border:none;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex-shrink:0;overflow:hidden}
+.nivel-img img{width:100%;height:100%;object-fit:contain}
+.nivel-info{flex:1}
+.nivel-name{font-size:.88rem;font-weight:800;color:#e8e8e8}
+.nivel-range{font-size:.68rem;color:#888;font-weight:600;margin-top:.1rem}
+.nivel-status{font-size:.72rem;font-weight:700;color:#555}
+.nivel-status.done{color:#4ade80}
+.nivel-status.current{color:#F5A623}
+
+/* ── Section Title ── */
+.section-title{
+display:flex;align-items:center;gap:.75rem;
+width:100%;max-width:520px;
+margin:.2rem 0 .9rem;
+font-size:1rem;font-weight:900;
+color:#fff;letter-spacing:.22em;text-transform:uppercase;
+}
+.section-title::before{
+content:'';flex:1;height:1.5px;
+background:linear-gradient(90deg,transparent,#F5A623);
+}
+.section-title::after{
+content:'';flex:1;height:1.5px;
+background:linear-gradient(90deg,#F5A623,transparent);
+}
+
+/* ── User Stats ── */
+.user-stats{display:grid;grid-template-columns:1fr 1fr;gap:.65rem;margin-bottom:.75rem;width:100%;max-width:520px}
+.user-stat-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:16px;padding:1rem;box-shadow:4px 4px 0 #151515;display:flex;align-items:center;gap:.75rem}
+.us-icon{font-size:1.4rem}
+.us-val{font-size:1.3rem;font-weight:900;color:#F5A623;line-height:1}
+.us-lbl{font-size:.58rem;color:#bbb;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
+
+/* ── Nav Buttons ── */
+.nav-grid{width:100%;max-width:520px;display:flex;flex-direction:column;gap:.5rem;margin-bottom:.75rem}
+.nav-btn{width:100%;background:linear-gradient(180deg,#2e2e2e,#1e1e1e);border:none;border-radius:14px;color:#e8e8e8;font-family:var(--font-body);font-size:.9rem;font-weight:700;padding:1rem 1.25rem;cursor:pointer;transition:background .12s;display:flex;align-items:center;justify-content:center;gap:.65rem;text-shadow:0 1px 0 rgba(0,0,0,.8),0 2px 6px rgba(0,0,0,.8)}
+.nav-btn:hover{background:linear-gradient(180deg,#383838,#282828)}
+.nav-btn:active{transform:scale(.97);filter:brightness(.88)}
+.nav-btn.gold{color:#e8e8e8}
+.nav-btn.muted{color:#e8e8e8}
+.nav-btn img{width:28px;height:28px;object-fit:contain;flex-shrink:0}
+.nav-btn-label{text-align:center}
+
+/* ── Ranking ── */
+.rank-card{background:#1e1e1e;border:3px solid #2a2a2a;border-radius:20px;overflow:hidden;margin-bottom:1rem;box-shadow:5px 5px 0 #151515;width:100%;max-width:520px}
+.rank-arcade-header{background:#161616;border-bottom:2px solid #2a2a2a;padding:.65rem 1rem;text-align:center}
+.rank-arcade-title{font-family:'VT323',monospace;font-size:2rem;color:#F5A623;letter-spacing:.2em;line-height:1}
+.rank-arcade-sub{font-size:.6rem;font-weight:800;color:#555;text-transform:uppercase;letter-spacing:.15em;margin-top:.2rem}
+.rank-row{display:flex;align-items:center;gap:.75rem;padding:.8rem 1rem;border-bottom:2px solid #252525}
+.rank-row:last-child{border-bottom:none}
+.rank-row.me{background:#1f1a00;border-left:4px solid #F5A623}
+.rank-pos{font-family:'VT323',monospace;font-size:1.4rem;color:#555;width:26px;text-align:center;flex-shrink:0}
+.rank-pos.top{color:#F5A623}
+.rank-info{flex:1;min-width:0}
+.rank-name{font-size:.88rem;font-weight:700;color:#e8e8e8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rank-meta{font-size:.62rem;color:#666;margin-top:.1rem}
+.rank-xp-col{text-align:right;flex-shrink:0}
+.rank-xp{font-size:.85rem;font-weight:800;color:#e03030}

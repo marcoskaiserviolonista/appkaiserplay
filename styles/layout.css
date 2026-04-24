@@ -1,0 +1,15 @@
+/* ── Header ── */
+.header{width:100%;max-width:520px;display:flex;align-items:center;justify-content:space-between;padding:1rem 0 .9rem;border-bottom:3px solid #222;margin-bottom:1rem}
+.logo-wrap{display:flex;align-items:center;gap:.5rem}
+.logo-icon{width:34px;height:34px;background:#F5A623;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#111;font-size:1rem;font-weight:900}
+.logo-text{font-size:1rem;font-weight:800;letter-spacing:-.02em}
+.logo-text .kaiser{color:#999}
+.logo-text .play{color:#F5A623}
+.header-tabs{display:flex;gap:.25rem;align-items:center}
+.tab{font-size:.8rem;font-weight:800;cursor:pointer;padding:.42rem 1rem;border-radius:20px;transition:all .18s;letter-spacing:.04em;text-transform:uppercase}
+#tab-ranking{color:#60dcff;background:linear-gradient(180deg,#1a2a3a,#0e1a2a);border:2.5px solid #60dcff88;box-shadow:3px 3px 0 #0a1520;text-shadow:0 0 10px #60dcff44}
+#tab-ranking:hover{filter:brightness(1.15)}
+#tab-login{color:#111;background:linear-gradient(180deg,#f5aa2a,#d4720a);border:2.5px solid #111;box-shadow:3px 3px 0 #111;text-shadow:none}
+#tab-login:hover{filter:brightness(1.1)}
+#tab-perfil{opacity:.75;transition:opacity .15s,filter .15s;cursor:pointer;display:block}
+#tab-perfil:hover,#tab-perfil.active{opacity:1;filter:brightness(1.15)}

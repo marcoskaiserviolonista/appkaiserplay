@@ -5,3 +5,6 @@ keystore.properties
 android/app/build/
 www/
 .claude/
+audit-results/
+retire-out.json
+index-monolith-backup.html

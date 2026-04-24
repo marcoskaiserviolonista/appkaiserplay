@@ -1,11 +1,14 @@
 # KaiserPlay — Auditoria de Segurança
 
 Kit de análise automatizada de segurança para o app KaiserPlay.
-Tudo roda via Docker — não precisa instalar nada além do Docker.
+
+## Por que Docker?
+
+As ferramentas usadas aqui (TruffleHog, Trivy, ZAP, Semgrep, Retire.js, Nuclei, Bearer, DefectDojo, MobSF) têm runtimes diferentes — Java, Python, Go, Node. Instalar tudo manualmente seria trabalhoso e dependente de versão. Docker empacota cada ferramenta pronta para uso: basta ter Docker instalado e tudo funciona.
 
 ## Pré-requisito
 
-Docker instalado e em execução. Verificar com:
+Docker instalado e em execução:
 
 ```bash
 docker --version
@@ -78,6 +81,16 @@ Após `make stack-up`:
 - **DefectDojo** → http://localhost:8080 — painel unificado com todos os achados  
   Login: `admin` / `kaiseraudit2026`
 - **MobSF** → http://localhost:8089 — análise do APK (arraste o `.apk` na tela)
+
+### Ver relatório ZAP no browser
+
+O ZAP gera um arquivo HTML estático em `../audit-results/zap-report.html`. Alguns browsers bloqueiam arquivos locais — sirva assim:
+
+```bash
+cd ../audit-results
+python3 -m http.server 9000
+# Abrir: http://localhost:9000/zap-report.html
+```
 
 ## Sobre os achados esperados
 

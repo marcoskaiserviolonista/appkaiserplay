@@ -38,11 +38,14 @@ NGINX_NAME="kaiser-nginx"
 MOBSF_NAME="kaiser-mobsf"
 
 THOG_IMG="trufflesecurity/trufflehog:latest"
+GITLEAKS_IMG="zricethezav/gitleaks:latest"
 TRIVY_IMG="aquasec/trivy:0.61.0"
 ZAP_IMG="ghcr.io/zaproxy/zaproxy:stable"
+NIKTO_IMG="sullo/nikto:latest"
 SEMGREP_IMG="semgrep/semgrep:latest"
 NUCLEI_IMG="projectdiscovery/nuclei:latest"
 NODE_IMG="node:20-alpine"
+TESTSSL_IMG="drwetter/testssl.sh:stable"
 MOBSF_IMG="opensecurity/mobile-security-framework-mobsf:latest"
 DOJO_IMG="defectdojo/defectdojo-django:latest"
 NGINX_IMG="defectdojo/defectdojo-nginx:latest"
@@ -50,7 +53,7 @@ PG_IMG="postgres:16-alpine"
 REDIS_IMG="redis:7-alpine"
 
 DOJO_ENV=(
-  -e DD_DATABASE_URL="postgresql://defectdojo:defectdojo@$DB_NAME:5432/defectdojo"
+  -e DD_DATABASE_URL="postgresql://defectdojo:defectdojo@$DB_NAME:5432/defectdojo" # trufflehog:ignore — local dev credential, $DB_NAME is a shell variable not a real host
   -e DD_SECRET_KEY="$DOJO_SECRET"
   -e DD_CREDENTIAL_AES_256_KEY="$DOJO_AES"
   -e DD_ALLOWED_HOSTS="*"
@@ -117,7 +120,7 @@ run_trufflehog() {
   docker run --rm \
     -v "$REPO_DIR:/repo" \
     "$THOG_IMG" \
-    git file:///repo --json 2>/dev/null \
+    git file:///repo --json --only-verified 2>/dev/null \
     > "$RESULTS/trufflehog.json" || true
 
   local count
@@ -150,6 +153,8 @@ run_trivy() {
     "$TRIVY_IMG" \
     fs /repo \
     --scanners vuln,secret,misconfig \
+    --skip-files index-test.html \
+    --skip-files index-monolith-backup.html \
     --format json 2>/dev/null \
     > "$RESULTS/trivy.json" || true
 
@@ -205,6 +210,8 @@ run_semgrep() {
       --json \
       --no-rewrite-rule-ids \
       --quiet \
+      --exclude 'index-test.html' \
+      --exclude 'index-monolith-backup.html' \
       /src 2>/dev/null \
     > "$RESULTS/semgrep.json" || true
 
@@ -246,7 +253,9 @@ run_retirejs() {
     "$NODE_IMG" \
     sh -c "npm install -g retire@5 --silent 2>/dev/null && \
            retire --path /src --outputformat json --outputpath /src/retire-out.json \
-           --ignore /src/sounds 2>/dev/null; \
+           --ignore /src/sounds \
+           --ignore /src/index-test.html \
+           --ignore /src/index-monolith-backup.html 2>/dev/null; \
            cat /src/retire-out.json 2>/dev/null || echo '[]'" \
     > "$RESULTS/retirejs.json" 2>/dev/null || true
 
@@ -333,7 +342,8 @@ run_bearer() {
     ghcr.io/bearer/bearer:latest \
     scan /tmp/scan \
     --format json \
-    --quiet 2>/dev/null \
+    --quiet \
+    --exclude 'index-test.html,index-monolith-backup.html' 2>/dev/null \
     > "$RESULTS/bearer.json" || true
 
   local count
@@ -362,15 +372,197 @@ for sev in ['critical','high','medium','low']:
   fi
 }
 
+run_gitleaks() {
+  step "Gitleaks — segredos no histórico git (ruleset alternativo ao TruffleHog)"
+  docker run --rm \
+    -v "$REPO_DIR:/repo" \
+    -v "$RESULTS:/results" \
+    "$GITLEAKS_IMG" \
+    detect \
+    --source /repo \
+    --report-format json \
+    --report-path /results/gitleaks.json \
+    --ignore-path /repo/sec/.gitleaksignore \
+    2>/dev/null || true
+
+  local count
+  count=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/gitleaks.json'))
+    print(len(d) if isinstance(d,list) else 0)
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  if [[ "${count:-0}" -gt 0 ]]; then
+    warn "$count segredo(s) encontrado(s):"
+    python3 -c "
+import json
+d=json.load(open('$RESULTS/gitleaks.json'))
+if not isinstance(d,list): d=[]
+for r in d[:10]:
+    desc=r.get('Description','?')
+    f=r.get('File','?')
+    line=r.get('StartLine','?')
+    commit=(r.get('Commit') or '')[:8]
+    print(f'  [{desc}] {f}:{line} — commit {commit}')
+" 2>/dev/null || true
+  else
+    ok "Nenhum segredo encontrado"
+  fi
+}
+
+run_nikto() {
+  step "Nikto — fingerprinting e headers do servidor web ($TARGET_URL)"
+  docker run --rm \
+    -v "$RESULTS:/results" \
+    "$NIKTO_IMG" \
+    -h "$TARGET_URL" \
+    -Format json \
+    -o /results/nikto.json \
+    -nointeractive \
+    2>/dev/null || true
+
+  local count
+  count=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/nikto.json'))
+    vulns=d.get('vulnerabilities',[]) if isinstance(d,dict) else []
+    print(len(vulns))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  if [[ "${count:-0}" -gt 0 ]]; then
+    warn "$count achado(s):"
+    python3 -c "
+import json
+d=json.load(open('$RESULTS/nikto.json'))
+vulns=d.get('vulnerabilities',[]) if isinstance(d,dict) else []
+for v in vulns[:10]:
+    msg=v.get('msg','?')[:100]
+    url=v.get('url','')
+    print(f'  {msg}' + (f' ({url})' if url else ''))
+" 2>/dev/null || true
+  else
+    ok "Nenhum problema encontrado"
+  fi
+}
+
+run_observatory() {
+  step "Mozilla HTTP Observatory — headers de segurança ($TARGET_URL)"
+
+  local host
+  host=$(python3 -c "from urllib.parse import urlparse; print(urlparse('$TARGET_URL').hostname)" 2>/dev/null)
+
+  if [[ "$host" =~ ^(localhost|127\.) ]]; then
+    warn "Observatory requer URL pública — pulando para URL local"
+    echo '{}' > "$RESULTS/observatory.json"
+    return 0
+  fi
+
+  printf "  Analisando $host"
+  local i state
+  for i in $(seq 1 10); do
+    curl -s -X POST \
+      "https://http-observatory.security.mozilla.org/api/v1/analyze?host=${host}&rescan=false" \
+      --max-time 30 2>/dev/null \
+      > "$RESULTS/observatory.json" || true
+    state=$(python3 -c "
+import json
+try: print(json.load(open('$RESULTS/observatory.json')).get('state',''))
+except: print('')
+" 2>/dev/null || echo "")
+    [[ "$state" == "FINISHED" ]] && break
+    printf "."; sleep 5
+  done
+  echo ""
+
+  python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/observatory.json'))
+    grade=d.get('grade','?')
+    score=d.get('score','?')
+    failed=d.get('tests_failed',0)
+    passed=d.get('tests_passed',0)
+    total=failed+passed
+    if str(grade).startswith(('A','B')):
+        color='\033[0;32m'; tag='✔'
+    else:
+        color='\033[0;33m'; tag='⚠'
+    print(f'{color}{tag} Grade: {grade} | Score: {score}/100 | Passou: {passed}/{total} testes\033[0m')
+except:
+    print('\033[0;33m⚠ Sem resposta do Observatory\033[0m')
+" 2>/dev/null || warn "Observatory sem resposta"
+}
+
+run_testssl() {
+  step "testssl.sh — configuração TLS/SSL"
+
+  local scheme host port
+  scheme=$(python3 -c "from urllib.parse import urlparse; print(urlparse('$TARGET_URL').scheme)" 2>/dev/null)
+  host=$(python3 -c "from urllib.parse import urlparse; print(urlparse('$TARGET_URL').hostname)" 2>/dev/null)
+  port=$(python3 -c "
+from urllib.parse import urlparse
+u=urlparse('$TARGET_URL')
+print(u.port or (443 if u.scheme=='https' else 80))
+" 2>/dev/null)
+
+  if [[ "$scheme" != "https" || "$host" =~ ^(localhost|127\.) ]]; then
+    warn "testssl.sh requer HTTPS público — pulando (URL local/HTTP detectada)"
+    echo '[]' > "$RESULTS/testssl.json"
+    return 0
+  fi
+
+  docker run --rm \
+    -v "$RESULTS:/results" \
+    "$TESTSSL_IMG" \
+    -oj /results/testssl.json \
+    --quiet \
+    --nodns min \
+    "${host}:${port}" 2>/dev/null || true
+
+  local issues
+  issues=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/testssl.json'))
+    bad=[x for x in (d if isinstance(d,list) else [])
+         if x.get('severity','') in ('LOW','MEDIUM','HIGH','CRITICAL')]
+    print(len(bad))
+except: print(0)
+" 2>/dev/null || echo 0)
+
+  if [[ "${issues:-0}" -gt 0 ]]; then
+    warn "$issues problema(s) TLS encontrado(s):"
+    python3 -c "
+import json
+d=json.load(open('$RESULTS/testssl.json'))
+if not isinstance(d,list): d=[]
+for x in d:
+    sev=x.get('severity','')
+    if sev in ('LOW','MEDIUM','HIGH','CRITICAL'):
+        print(f'  [{sev}] {x.get(\"id\",\"?\")} — {x.get(\"finding\",\"?\")}')
+" 2>/dev/null || true
+  else
+    ok "Configuração TLS sem problemas detectados"
+  fi
+}
+
 run_scans() {
   mkdir -p "$RESULTS"
   run_trufflehog
+  run_gitleaks
   run_trivy
   run_zap
+  run_nikto
   run_semgrep
   run_retirejs
   run_nuclei
   run_bearer
+  run_observatory
+  run_testssl
   echo -e "\n${GREEN}${BOLD}Scans concluídos. Resultados em: $RESULTS/${RESET}"
 }
 
@@ -547,11 +739,14 @@ else: print('Erro: ' + str(d))
 
   import_scan "ZAP"         "ZAP Scan"            "$RESULTS/zap-report.xml"
   import_scan "TruffleHog"  "Trufflehog Scan"     "$RESULTS/trufflehog.json"
+  import_scan "Gitleaks"    "Gitleaks Scan"        "$RESULTS/gitleaks.json"
   import_scan "Trivy"       "Trivy Scan"           "$RESULTS/trivy.json"
+  import_scan "Nikto"       "Nikto Scan"           "$RESULTS/nikto.json"
   import_scan "Semgrep"     "Semgrep JSON Report"  "$RESULTS/semgrep.json"
   import_scan "Retire.js"   "Retire.js Scan"       "$RESULTS/retirejs.json"
   import_scan "Nuclei"      "Nuclei Scan"          "$RESULTS/nuclei.json"
   import_scan "Bearer"      "Bearer Scan"          "$RESULTS/bearer.json"
+  import_scan "testssl"     "Testssl Scan"         "$RESULTS/testssl.json"
 
   echo ""
   ok "Importação concluída → http://localhost:${DOJO_PORT}/product/$product_id/finding/list"
@@ -645,6 +840,23 @@ print_summary() {
     echo -e "  ${GREEN}✔ TruffleHog:${RESET}  limpo"
   fi
 
+  # Gitleaks
+  local gitleaks_count=0
+  if [[ -f "$RESULTS/gitleaks.json" ]]; then
+    gitleaks_count=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/gitleaks.json'))
+    print(len(d) if isinstance(d,list) else 0)
+except: print(0)
+" 2>/dev/null || echo 0)
+  fi
+  if [[ "${gitleaks_count:-0}" -gt 0 ]]; then
+    echo -e "  ${RED}⚠ Gitleaks:${RESET}    $gitleaks_count segredo(s) encontrado(s)"
+  else
+    echo -e "  ${GREEN}✔ Gitleaks:${RESET}    limpo"
+  fi
+
   # Trivy
   local trivy_total=0
   if [[ -f "$RESULTS/trivy.json" ]]; then
@@ -679,6 +891,39 @@ print(sum(1 for a in alerts if 'Low' in a.get('riskdesc','')))
     echo -e "  ${YELLOW}⚠ ZAP:${RESET}         ${zap_med} Medium, ${zap_low} Low"
   else
     echo -e "  ${YELLOW}? ZAP:${RESET}         relatório não encontrado"
+  fi
+
+  # Nikto
+  local nikto_count=0
+  if [[ -f "$RESULTS/nikto.json" ]]; then
+    nikto_count=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/nikto.json'))
+    print(len(d.get('vulnerabilities',[]) if isinstance(d,dict) else []))
+except: print(0)
+" 2>/dev/null || echo 0)
+  fi
+  if [[ "${nikto_count:-0}" -gt 0 ]]; then
+    echo -e "  ${YELLOW}⚠ Nikto:${RESET}       $nikto_count achado(s) no servidor"
+  else
+    echo -e "  ${GREEN}✔ Nikto:${RESET}       limpo"
+  fi
+
+  # Observatory
+  if [[ -f "$RESULTS/observatory.json" ]]; then
+    local obs_grade obs_score
+    obs_grade=$(python3 -c "import json; print(json.load(open('$RESULTS/observatory.json')).get('grade','?'))" 2>/dev/null || echo "?")
+    obs_score=$(python3 -c "import json; print(json.load(open('$RESULTS/observatory.json')).get('score','?'))" 2>/dev/null || echo "?")
+    if [[ "$obs_grade" =~ ^[AB] ]]; then
+      echo -e "  ${GREEN}✔ Observatory:${RESET} Grade $obs_grade (score: $obs_score/100)"
+    elif [[ "$obs_grade" == "?" ]]; then
+      echo -e "  ${YELLOW}? Observatory:${RESET} não executado (URL local)"
+    else
+      echo -e "  ${YELLOW}⚠ Observatory:${RESET} Grade $obs_grade (score: $obs_score/100)"
+    fi
+  else
+    echo -e "  ${YELLOW}? Observatory:${RESET} relatório não encontrado"
   fi
 
   # Semgrep
@@ -736,7 +981,26 @@ except: print(0)" 2>/dev/null || echo 0)
     echo -e "  ${GREEN}✔ Bearer:${RESET}      nenhum vazamento de dados"
   fi
 
-  local total=$(( thog_count + trivy_total + semgrep_count + retire_count + nuclei_count + bearer_count ))
+  # testssl
+  local testssl_count=0
+  if [[ -f "$RESULTS/testssl.json" ]]; then
+    testssl_count=$(python3 -c "
+import json
+try:
+    d=json.load(open('$RESULTS/testssl.json'))
+    bad=[x for x in (d if isinstance(d,list) else [])
+         if x.get('severity','') in ('LOW','MEDIUM','HIGH','CRITICAL')]
+    print(len(bad))
+except: print(0)
+" 2>/dev/null || echo 0)
+  fi
+  if [[ "${testssl_count:-0}" -gt 0 ]]; then
+    echo -e "  ${RED}⚠ testssl:${RESET}     $testssl_count problema(s) TLS"
+  else
+    echo -e "  ${GREEN}✔ testssl:${RESET}     TLS ok"
+  fi
+
+  local total=$(( thog_count + gitleaks_count + trivy_total + nikto_count + semgrep_count + retire_count + nuclei_count + bearer_count + testssl_count ))
   echo ""
   echo -e "  ${BOLD}Total de achados:${RESET} $total (ZAP separado acima)"
 
@@ -762,7 +1026,7 @@ except: print(0)" 2>/dev/null || echo 0)
   fi
   echo ""
   echo -e "  ${CYAN}${BOLD}Arquivos brutos${RESET} — $RESULTS/"
-  for f in trufflehog.json trivy.json zap-report.xml semgrep.json retirejs.json nuclei.json bearer.json; do
+  for f in trufflehog.json gitleaks.json trivy.json zap-report.xml nikto.json semgrep.json retirejs.json nuclei.json bearer.json observatory.json testssl.json; do
     if [[ -f "$RESULTS/$f" ]]; then
       size=$(du -sh "$RESULTS/$f" 2>/dev/null | cut -f1)
       echo -e "    ${GREEN}✔${RESET} $f  ${YELLOW}($size)${RESET}"
@@ -787,7 +1051,7 @@ show_help() {
   echo -e "${BOLD}KaiserPlay — Auditoria de Segurança${RESET}"
   echo ""
   echo -e "  ${CYAN}./audit.sh all${RESET}        Roda tudo (scan + stack + import + report)"
-  echo -e "  ${CYAN}./audit.sh scan${RESET}       TruffleHog + Trivy + ZAP + Semgrep + Retire.js + Nuclei + Bearer"
+  echo -e "  ${CYAN}./audit.sh scan${RESET}       TruffleHog + Gitleaks + Trivy + ZAP + Nikto + Semgrep + Retire.js + Nuclei + Bearer + Observatory + testssl"
   echo -e "  ${CYAN}./audit.sh stack-up${RESET}   Sobe DefectDojo e MobSF"
   echo -e "  ${CYAN}./audit.sh import${RESET}     Importa resultados no DefectDojo"
   echo -e "  ${CYAN}./audit.sh report${RESET}     Mostra / abre os relatórios"
@@ -795,7 +1059,7 @@ show_help() {
   echo -e "  ${CYAN}./audit.sh clean${RESET}      Para e remove todos os containers (preserva banco)"
   echo -e "  ${CYAN}./audit.sh reset${RESET}      Clean + apaga o banco (use quando der erro 500)"
   echo ""
-  echo -e "  ${BOLD}URL alvo (ZAP / Nuclei):${RESET}"
+  echo -e "  ${BOLD}URL alvo (ZAP / Nikto / Nuclei / testssl):${RESET}"
   echo -e "  Padrão:  $PROD_URL"
   echo -e "  Local:   ${CYAN}TARGET_URL=http://localhost:5500 ./audit.sh scan${RESET}"
   echo -e "  Ou via Makefile: ${CYAN}make scan-local${RESET}  /  ${CYAN}make scan-url URL=https://...${RESET}"

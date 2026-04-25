@@ -4,7 +4,7 @@ Kit de análise automatizada de segurança para o app KaiserPlay.
 
 ## Por que Docker?
 
-As ferramentas usadas aqui (TruffleHog, Trivy, ZAP, Semgrep, Retire.js, Nuclei, Bearer, DefectDojo, MobSF) têm runtimes diferentes — Java, Python, Go, Node. Instalar tudo manualmente seria trabalhoso e dependente de versão. Docker empacota cada ferramenta pronta para uso: basta ter Docker instalado e tudo funciona.
+As ferramentas usadas aqui (TruffleHog, Gitleaks, Trivy, ZAP, Nikto, Semgrep, Retire.js, Nuclei, Bearer, Observatory, testssl.sh, DefectDojo, MobSF) têm runtimes diferentes — Java, Python, Go, Node. Instalar tudo manualmente seria trabalhoso e dependente de versão. Docker empacota cada ferramenta pronta para uso: basta ter Docker instalado e tudo funciona.
 
 ## Pré-requisito
 
@@ -19,6 +19,7 @@ docker --version
 ```bash
 cd sec/
 make all          # roda tudo contra produção: scan → sobe painel → importa → relatório
+make all-local    # roda tudo contra http://localhost:5500 (requer servidor local — veja abaixo)
 ```
 
 Ou passo a passo:
@@ -50,12 +51,16 @@ python3 -m http.server 5500
 | Ferramenta | O que analisa |
 |------------|---------------|
 | **TruffleHog** | Segredos e chaves expostas no código e histórico git |
+| **Gitleaks** | Segredos no histórico git (ruleset alternativo ao TruffleHog) |
 | **Trivy** | CVEs em dependências, segredos e misconfigurações |
 | **ZAP** | Scan passivo do site ao vivo (headers, CORS, etc.) |
+| **Nikto** | Fingerprinting do servidor web e headers de segurança ausentes |
 | **Semgrep** | Padrões inseguros no JavaScript (SAST) |
 | **Retire.js** | Bibliotecas JavaScript com CVEs conhecidos |
 | **Nuclei** | Templates Firebase, exposições e misconfigurações web |
 | **Bearer** | Rastreamento de fluxo de dados sensíveis no código |
+| **Observatory** | Grade de headers HTTP/CSP via Mozilla (só URL pública) |
+| **testssl.sh** | Configuração TLS/SSL (só URL pública com HTTPS) |
 
 ## Onde ficam os resultados
 
@@ -64,14 +69,18 @@ Os resultados são salvos em `../audit-results/` (fora do repositório, ignorado
 ```
 audit-results/
   trufflehog.json
+  gitleaks.json
   trivy.json
   zap-report.html    ← relatório visual do ZAP
   zap-report.xml
   zap-report.json
+  nikto.json
   semgrep.json
   retirejs.json
   nuclei.json
   bearer.json
+  observatory.json   ← pulado se URL for local
+  testssl.json       ← pulado se URL for local ou HTTP
 ```
 
 ## Painéis web

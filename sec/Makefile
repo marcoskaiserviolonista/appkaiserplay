@@ -7,6 +7,15 @@ LOCAL_URL ?= http://localhost:5500
 all:
 	@./audit.sh all
 
+## Roda tudo contra servidor local (padrão: http://localhost:5500)
+## Uso: make all-local  ou  make all-local LOCAL_URL=http://localhost:8080
+all-local:
+	@TARGET_URL=$(LOCAL_URL) ./audit.sh scan
+	@./audit.sh stack-up
+	@./audit.sh import
+	@./audit.sh report
+	@TARGET_URL=$(LOCAL_URL) ./audit.sh status
+
 ## Scan completo contra a URL de produção
 scan:
 	@./audit.sh scan
